@@ -33,6 +33,8 @@ public:
 
     int32_t GetCurrentAccountUserId();
 
+    bool IsOsAccountActive(int32_t userId);
+
     void HandleAccountsEvent(const std::string &type, const int &userId);
 
     void AddAccountEventsListener(const AccountSwitchListener& callback);

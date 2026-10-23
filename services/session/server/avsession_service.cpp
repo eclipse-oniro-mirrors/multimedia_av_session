@@ -41,6 +41,7 @@
 #include "system_ability_definition.h"
 #include "params_config_operator.h"
 #include "ability_connect_helper.h"
+#include "account_manager_adapter.h"
 #include "extension_connect_helper.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
@@ -1905,7 +1906,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 }
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
-                                                       const AppExecFwk::ElementName& elementName)
+                                                       const AppExecFwk::ElementName& elementName, int32_t userId)
 {
     HILOG_COMM_INFO("%{public}s %{public}d %{public}s %{public}s thirdPartyApp=%{public}d", tag.c_str(), type,
         elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str(), thirdPartyApp);
@@ -1915,7 +1916,9 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         SLOGE("alloc session id failed");
         return nullptr;
     }
-    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    if (userId <= 0) {
+        userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    }
     descriptor.userId_ = userId;
     descriptor.sessionTag_ = tag;
     descriptor.sessionType_ = type;
@@ -2116,6 +2119,10 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     auto pid = GetCallingPid();
     if (userId <= 0) {
         userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    } else if(!AccountManagerAdapter::GetInstance().IsOsAccountActive(userId)) {
+        SLOGW("CreateSessionInner userId:%{public}d from caller is not an active account, fallback to calling uid",
+            userId);
+        userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     }
     std::lock_guard lockGuard(sessionServiceLock_);
     if (AbilityHasSession(pid, userId)) {
@@ -2126,7 +2133,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         return ERR_SESSION_IS_EXIST;
     }
 
-    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, sessionElement);
+    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, sessionElement, userId);
     if (result == nullptr) {
         SLOGE("create new session failed");
         if (dumpHelper_ != nullptr) dumpHelper_->SetErrorInfo("CreateSessionInner create new session failed");

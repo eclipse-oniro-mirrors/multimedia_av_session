@@ -483,7 +483,7 @@ private:
     void ServiceCallback(sptr<AVSessionItem>& sessionItem);
 
     sptr<AVSessionItem> CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
-                                         const AppExecFwk::ElementName& elementName);
+                                         const AppExecFwk::ElementName& elementName, int32_t userId);
 
     sptr<AVControllerItem> CreateNewControllerForSession(pid_t pid, sptr<AVSessionItem>& session);
 

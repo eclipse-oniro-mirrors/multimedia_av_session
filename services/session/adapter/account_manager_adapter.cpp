@@ -14,10 +14,12 @@
  */
 
 #include <chrono>
+#include <algorithm>
 
 #include "avsession_log.h"
 #include "avsession_errors.h"
 #include "account_manager_adapter.h"
+#include "os_account_manager.h"
 
 namespace OHOS::AVSession {
 AccountManagerAdapter::AccountManagerAdapter()
@@ -30,6 +32,18 @@ AccountManagerAdapter::~AccountManagerAdapter()
     SLOGI("AccountManagerAdapter destroy");
     std::lock_guard<std::mutex> listLockGuard(listenerListMutex_);
     accountEventsListenerList_.clear();
+}
+
+bool AccountManagerAdapter::IsOsAccountActive(int32_t userId)
+{
+    std::vector<int32_t> activeIds;
+    auto result = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeIds);
+    if (result != 0 || activeIds.empty()) {
+        // fail-open: keep legacy behaviour when the account service is unavailable
+        SLOGW("query active os accounts failed, result:%{public}d, accept userId:%{public}d", result, userId);
+        return true;
+    }
+    return std::find(activeIds.begin(), activeIds.end(), userId) != activeIds.end();
 }
 
 AccountManagerAdapter& AccountManagerAdapter::GetInstance()

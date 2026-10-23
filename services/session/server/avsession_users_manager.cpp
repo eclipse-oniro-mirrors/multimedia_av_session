@@ -287,6 +287,14 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(const std::st
     result = GetContainerFromAll().RemoveSession(sessionId);
     CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "remove session from all get nullptr");
     int32_t userId = result->GetUserId();
+    // The session may exist in a user container whose id differs from the item's userId (e.g. caller-specified
+    // user), remove it from every user container to avoid residual sessions blocking later creation.
+    for (auto& [containerUserId, sessionStack] : sessionStackMapByUserId_) {
+        if (sessionStack == nullptr) {
+            continue;
+        }
+        sessionStack->RemoveSession(pid, abilityName);
+    }
     GetContainerFromUser(userId).RemoveSession(sessionId);
     STORAGE_EVENT_REMOVE_SESSION(sessionId);
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
@@ -352,6 +360,17 @@ void AVSessionUsersManager::RemoveSessionListener(pid_t pid)
         }
     }
     sessionListenersMap_.erase(pid);
+#ifdef CAR_FEATURE_ENABLE
+    for (auto& listenersMapByUserIdPair : sessionListenersMapByUserIdForAudioZone_) {
+        int32_t userId = listenersMapByUserIdPair.first;
+        auto iterForListenersMapByUserId = (listenersMapByUserIdPair.second).find(pid);
+        if (iterForListenersMapByUserId != (listenersMapByUserIdPair.second).end()) {
+            SLOGI("remove audiozone sessionListener for pid:%{public}d, targetUser:%{public}d",
+                static_cast<int>(pid), userId);
+            (listenersMapByUserIdPair.second).erase(iterForListenersMapByUserId);
+        }
+    }
+#endif
     SLOGI("remove sessionListener for pid %{public}d, curUser %{public}d", static_cast<int>(pid), curUserId_);
 }
 
