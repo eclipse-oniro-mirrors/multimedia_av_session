@@ -74,8 +74,7 @@ int32_t AVSessionServiceProxy::GetSessionInner(const AppExecFwk::ElementName& el
 }
 
 std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t type,
-                                                                 const AppExecFwk::ElementName& elementName,
-                                                                 int32_t userId)
+    const AppExecFwk::ElementName& elementName, int32_t userId)
 {
     auto object = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName, userId);
     if (object == nullptr) {
@@ -91,9 +90,7 @@ std::shared_ptr<AVSession> AVSessionServiceProxy::CreateSession(const std::strin
 }
 
 int32_t AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t type,
-                                            const AppExecFwk::ElementName& elementName,
-                                            std::shared_ptr<AVSession>& session,
-                                            int32_t userId)
+    const AppExecFwk::ElementName& elementName, std::shared_ptr<AVSession>& session, int32_t userId)
 {
     sptr<IRemoteObject> object;
     auto ret = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName, object, userId);
@@ -107,8 +104,7 @@ int32_t AVSessionServiceProxy::CreateSession(const std::string& tag, int32_t typ
 }
 
 sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string& tag, int32_t type,
-                                                            const AppExecFwk::ElementName& elementName,
-                                                            int32_t userId)
+    const AppExecFwk::ElementName& elementName, int32_t userId)
 {
     sptr<IRemoteObject> object;
     auto ret = AVSessionServiceProxy::CreateSessionInner(tag, type, elementName, object, userId);
@@ -117,9 +113,7 @@ sptr<IRemoteObject> AVSessionServiceProxy::CreateSessionInner(const std::string&
 }
 
 int32_t AVSessionServiceProxy::CreateSessionInner(const std::string& tag, int32_t type,
-                                                  const AppExecFwk::ElementName& elementName,
-                                                  sptr<IRemoteObject>& object,
-                                                  int32_t userId)
+    const AppExecFwk::ElementName& elementName, sptr<IRemoteObject>& object, int32_t userId)
 {
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
