@@ -267,7 +267,14 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(pid_t pid, co
     CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "remove session from all get nullptr");
     std::string sessionId = result->GetSessionId();
     int32_t userId = result->GetUserId();
-    GetContainerFromUser(userId).RemoveSession(pid, abilityName);
+    // The session may exist in a user container whose id differs from the item's userId (e.g. caller-specified
+    // user), remove it from every user container to avoid residual sessions blocking later creation.
+    for (auto& [containerUserId, sessionStack] : sessionStackMapByUserId_) {
+        if (sessionStack == nullptr) {
+            continue;
+        }
+        sessionStack->RemoveSession(pid, abilityName);
+    }
     STORAGE_EVENT_REMOVE_SESSION(sessionId);
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
     AVSessionUtils::DeleteFile(fileNameLocal);
@@ -287,14 +294,6 @@ sptr<AVSessionItem> AVSessionUsersManager::RemoveSessionForAllUser(const std::st
     result = GetContainerFromAll().RemoveSession(sessionId);
     CHECK_AND_RETURN_RET_LOG(result != nullptr, result, "remove session from all get nullptr");
     int32_t userId = result->GetUserId();
-    // The session may exist in a user container whose id differs from the item's userId (e.g. caller-specified
-    // user), remove it from every user container to avoid residual sessions blocking later creation.
-    for (auto& [containerUserId, sessionStack] : sessionStackMapByUserId_) {
-        if (sessionStack == nullptr) {
-            continue;
-        }
-        sessionStack->RemoveSession(pid, abilityName);
-    }
     GetContainerFromUser(userId).RemoveSession(sessionId);
     STORAGE_EVENT_REMOVE_SESSION(sessionId);
     std::string fileNameLocal = AVSessionUtils::GetCachePathName(userId) + sessionId + AVSessionUtils::GetFileSuffix();
