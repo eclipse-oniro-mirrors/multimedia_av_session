@@ -21,4 +21,18 @@ AVSessionManager& AVSessionManager::GetInstance()
     static AVSessionManagerImpl avSessionManager;
     return avSessionManager;
 }
+
+#ifndef CLIENT_LITE
+std::shared_ptr<AVSession> AVSessionManager::CreateSession(const std::string& tag, int32_t type,
+    const AppExecFwk::ElementName& elementName, int32_t userId)
+{
+    return CreateSession(tag, type, elementName);
+}
+
+int32_t AVSessionManager::CreateSession(const std::string& tag, int32_t type,
+    const AppExecFwk::ElementName& elementName, std::shared_ptr<AVSession>& session, int32_t userId)
+{
+    return CreateSession(tag, type, elementName, session);
+}
+#endif
 } // namespace OHOS::AVSession
