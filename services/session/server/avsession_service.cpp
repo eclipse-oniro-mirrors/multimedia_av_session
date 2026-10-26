@@ -1493,16 +1493,13 @@ void AVSessionService::NotifyTopSessionChanged(const AVSessionDescriptor& descri
         }
     }
 #ifdef CAR_FEATURE_ENABLE
-   {
-        std::lock_guard lockGuard(sessionListenersLock_);
-        auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
-        auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(descriptor.userId_);
-        CHECK_AND_RETURN_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
-            "NotifyTopSessionChange no listeners for user:%{public}d", descriptor.userId_);
-        for (const auto& [pid, listener] : listenersForUserIt->second) {
-            if (listener != nullptr) {
-                listener->OnTopSessionChange(descriptor);
-            }
+    auto& listenersMapByUserIdForAudioZone = GetUsersManager().GetSessionListenersMapForAudioZone();
+    auto listenersForUserIt = listenersMapByUserIdForAudioZone.find(descriptor.userId_);
+    CHECK_AND_RETURN_LOG(listenersForUserIt != listenersMapByUserIdForAudioZone.end(),
+        "NotifyTopSessionChange no listeners for user:%{public}d", descriptor.userId_);
+    for (const auto& [pid, listener] : listenersForUserIt->second) {
+        if (listener != nullptr) {
+            listener->OnTopSessionChange(descriptor);
         }
     }
 #endif
