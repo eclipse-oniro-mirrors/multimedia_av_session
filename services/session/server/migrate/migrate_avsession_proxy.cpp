@@ -589,6 +589,8 @@ void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
         if (oldAsset != assetId) {
             metaData.SetTitle("");
             metaData.SetArtist("");
+            metaData.SetAvQueueId("");
+            metaData.SetAvQueueName("");
         }
         metaData.SetAssetId(assetId);
     }
@@ -606,7 +608,21 @@ void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
         }
         metaData.SetArtist(artist);
     }
+    if (cJSON_HasObjectItem(jsonValue, METADATA_AVQUEUE_ID)) {
+        std::string avQueueId = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_AVQUEUE_ID);
+        if (avQueueId.empty()) {
+            avQueueId = DEFAULT_STRING;
+        }
+        metaData.SetAvQueueId(avQueueId);
+    }
 
+    if (cJSON_HasObjectItem(jsonValue, METADATA_AVQUEUE_NAME)) {
+        std::string avQueueName = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_AVQUEUE_NAME);
+        if (avQueueName.empty()) {
+            avQueueName = DEFAULT_STRING;
+        }
+        metaData.SetAvQueueName(avQueueName);
+    }
     sessionItem->SetAVMetaData(metaData);
 }
 

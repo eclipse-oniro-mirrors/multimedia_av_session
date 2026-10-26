@@ -220,6 +220,18 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
         return;
     }
 
+    if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_AVQUEUE_ID, metaDataCache_.GetAvQueueId().c_str())) {
+        SLOGE("AddStringToJson avQueueId value:%{public}s fail", metaDataCache_.GetAvQueueId().c_str());
+        cJSON_Delete(metaDataItem);
+        return;
+    }
+
+    if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_AVQUEUE_NAME, metaDataCache_.GetAvQueueName().c_str())) {
+        SLOGE("AddStringToJson avQueueName value:%{public}s fail", metaDataCache_.GetAvQueueName().c_str());
+        cJSON_Delete(metaDataItem);
+        return;
+    }
+
     std::string msg = std::string({MSG_HEAD_MODE_FOR_NEXT, SYNC_FOCUS_META_INFO});
     SoftbusSessionUtils::TransferJsonToStr(metaDataItem, msg);
     MigratePostTask(
