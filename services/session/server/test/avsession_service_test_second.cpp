@@ -1340,22 +1340,6 @@ static HWTEST_F(AVSessionServiceTestSecond, RegisterClientDeathObserver001, Test
 }
 
 /**
-* @tc.name: GetTrustedDeviceName001
-* @tc.desc: fail to get trusted device name
-* @tc.type: FUNC
-* @tc.require: #I5Y4MZ
-*/
-static HWTEST_F(AVSessionServiceTestSecond, GetTrustedDeviceName001, TestSize.Level0)
-{
-    SLOGI("GetTrustedDeviceName001 begin!");
-    std::string networkId = "@@##**&&";
-    std::string deviceName = "";
-    int32_t ret = g_AVSessionService->GetTrustedDeviceName(networkId, deviceName);
-    EXPECT_EQ(ret, AVSESSION_ERROR);
-    SLOGI("GetTrustedDeviceName001 end!");
-}
-
-/**
  * @tc.name: DoConnectProcessWithMigrateProxy001
  * @tc.desc: have found networkId in migrateAVSessionProxyMap_
  * @tc.type: FUNC

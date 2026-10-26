@@ -3143,7 +3143,8 @@ napi_status NapiAVSession::OffToggleFavorite(napi_env env, NapiAVSession* napiSe
         "NapiAVSessionCallback object is nullptr");
     auto status = napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE, callback);
     CHECK_AND_RETURN_RET_LOG(status == napi_ok, status, "RemoveCallback failed");
-    if (napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE)) {
+    if (napiSession->callback_ &&
+        napiSession->callback_->IsCallbacksEmpty(NapiAVSessionCallback::EVENT_TOGGLE_FAVORITE)) {
         CHECK_AND_RETURN_RET_LOG(napiSession->session_ != nullptr, napi_generic_failure,
                                  "NapiAVSession object is nullptr");
         int32_t ret = napiSession->session_->DeleteSupportCommand(AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE);
