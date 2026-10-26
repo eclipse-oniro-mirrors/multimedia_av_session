@@ -75,7 +75,8 @@
           "openssl",
           "bounds_checking_function",
           "ets_frontend",
-          "taihe_ffi_gen"
+          "taihe_ffi_gen",
+          "time_service"
         ],
         "third_party": [
         ]
