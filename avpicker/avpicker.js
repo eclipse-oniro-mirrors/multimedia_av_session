@@ -1268,8 +1268,12 @@ export class AVCastPicker extends ViewPU {
         if (u2.icon) {
             this.observeComponentCreation2((j3, k3) => {
                 Image.create(u2.icon);
-                Image.width(78);
-                Image.height(16);   
+                Image.width(78 * Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale));
+                Image.height(16 * Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale));
+                Image.interpolation(ImageInterpolation.Medium);
+                Image.autoResize(false);
+                Image.flexShrink(0);
+                Image.objectFit(ImageFit.Contain);
             }, Image);
         } else {
             Row.create();
