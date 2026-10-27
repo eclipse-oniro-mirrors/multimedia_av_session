@@ -1031,8 +1031,8 @@ export struct AVCastPicker {
   highQualityIconBuilder(params: HighQualityParams) {
     if (params?.icon) {
       Image(params.icon)
-        .width(78)
-        .height(16)
+        .width(78 * Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))
+        .height(16 * Math.min(HIGH_QUALITY_MAX_SCALE, this.fontSizeScale))
     } else {
       Row() {
         Text(params.iconLeft)
