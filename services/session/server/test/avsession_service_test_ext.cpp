@@ -2542,6 +2542,7 @@ static HWTEST_F(AVSessionServiceTestExt, HotSwitchReportCastDisplay001, TestSize
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 }
 
+#ifdef CAR_FEATURE_ENABLE
 /**
  * @tc.name: GetUserIdByDisplayId001
  * @tc.desc: Test GetUserIdByDisplayId with invalid displayId (< 0), should return defaultUserId
@@ -2590,6 +2591,7 @@ static HWTEST_F(AVSessionServiceTestExt, GetUserIdByDisplayId003, TestSize.Level
     int32_t userId = g_AVSessionService->GetUserIdByDisplayId(displayId);
     EXPECT_EQ(userId, cachedUserId);
 }
+#endif
 
 /**
  * @tc.name: GetTopSessionForUser001
@@ -2607,7 +2609,7 @@ static HWTEST_F(AVSessionServiceTestExt, GetTopSessionForUser001, TestSize.Level
 
 /**
  * @tc.name: GetTopSessionForUser002
- * @tc.desc: Test GetTopSessionForUser with userId > 0 but no session for that user, should return nullptr
+ * @tc.desc: Test GetTopSessionForUser with userId > 0 but not alive, should fall back to current user TopSession
  * @tc.type: FUNC
  * @tc.require: #I5Y4MZ
  */
@@ -2616,7 +2618,9 @@ static HWTEST_F(AVSessionServiceTestExt, GetTopSessionForUser002, TestSize.Level
     CHECK_AND_RETURN(g_AVSessionService != nullptr);
     int32_t userId = 999;
     sptr<AVSessionItem> result = g_AVSessionService->GetTopSessionForUser(userId);
-    EXPECT_EQ(result, nullptr);
+    int32_t currentUserId = g_AVSessionService->GetUsersManager().GetCurrentUserId();
+    sptr<AVSessionItem> expected = g_AVSessionService->GetUsersManager().GetTopSession(currentUserId);
+    EXPECT_EQ(result, expected);
 }
 
 /**

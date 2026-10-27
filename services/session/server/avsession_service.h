@@ -223,6 +223,8 @@ public:
     
     int32_t GetDistributedSessionControllersForAudioZone(
         std::vector<sptr<IRemoteObject>>& sessionControllers);
+
+    int32_t GetUserIdByDisplayId(int32_t displayId);
 #endif
 
     int32_t HandleKeyEvent(const MMI::KeyEvent& keyEvent, const std::string& deviceId = "", int32_t userId = -1);
@@ -639,8 +641,6 @@ private:
     void HandleSystemKeyColdStart(const AVControlCommand &command, const std::string deviceId = "",
         int32_t userId = -1);
 
-    int32_t GetUserIdByDisplayId(int32_t displayId);
-
     sptr<AVSessionItem> GetTopSessionForUser(int32_t userId);
 
     void HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId);
@@ -956,8 +956,10 @@ private:
     std::map<int32_t, int32_t> desktopLyricAbilityStateMap_;
     std::mutex desktopLyricAbilityStateMutex_;
 
+#ifdef CAR_FEATURE_ENABLE
     std::map<int32_t, int32_t> displayIdToUserIdCache_;
     std::mutex displayIdToUserIdMutex_;
+#endif
 
     const int32_t ONE_CLICK = 1;
     const int32_t DOUBLE_CLICK = 2;
