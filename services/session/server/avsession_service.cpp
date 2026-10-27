@@ -3476,6 +3476,7 @@ int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, co
     return AVSESSION_SUCCESS;
 }
 
+#ifdef CAR_FEATURE_ENABLE
 int32_t AVSessionService::GetUserIdByDisplayId(int32_t displayId)
 {
     if (displayId < 0) {
@@ -3491,14 +3492,12 @@ int32_t AVSessionService::GetUserIdByDisplayId(int32_t displayId)
         }
     }
     int32_t userId = defaultUserId;
-#ifdef CAR_FEATURE_ENABLE
     auto ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(displayId, userId);
     if (ret != 0 || userId <= 0) {
         SLOGW("GetForegroundOsAccountLocalId failed displayId=%{public}d ret=%{public}d userId=%{public}d",
             displayId, static_cast<int32_t>(ret), userId);
         userId = defaultUserId;
     }
-#endif
     {
         std::lock_guard<std::mutex> lockGuard(displayIdToUserIdMutex_);
         displayIdToUserIdCache_[displayId] = userId;
@@ -3506,6 +3505,7 @@ int32_t AVSessionService::GetUserIdByDisplayId(int32_t displayId)
     SLOGI("GetUserIdByDisplayId displayId=%{public}d userId=%{public}d", displayId, userId);
     return userId;
 }
+#endif
 
 sptr<AVSessionItem> AVSessionService::GetTopSessionForUser(int32_t userId)
 {
@@ -3526,14 +3526,20 @@ sptr<AVSessionItem> AVSessionService::GetTopSessionForUser(int32_t userId)
         return nullptr;
     }
 #endif
-    return userId > 0 ? GetUsersManager().GetTopSession(userId) : GetUsersManager().GetTopSession();
+    return GetUsersManager().GetTopSession(GetTargetUserId(userId));
 }
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent)
 {
     SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
     int32_t displayId = keyEvent.GetTargetDisplayId();
-    int32_t userId = GetUserIdByDisplayId(displayId);
+    int32_t userId = -1;
+#ifdef CAR_FEATURE_ENABLE
+    userId = GetUserIdByDisplayId(displayId);
+#else
+    userId = GetUsersManager().GetCurrentUserId();
+    SLOGI("SendSystemAVKeyEvent non-car use current userId=%{public}d displayId=%{public}d", userId, displayId);
+#endif
     int32_t ret = HandleKeyEvent(keyEvent, "", userId);
     if (ret != AVSESSION_CONTINUE) {
         return ret;
