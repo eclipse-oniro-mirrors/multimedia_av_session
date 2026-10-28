@@ -411,7 +411,7 @@ HWTEST_F(AVControllerItemTest, IsDesktopLyricEnabled_002, TestSize.Level1)
 
 /**
 * @tc.name: SetDesktopLyricVisible_001
-* @tc.desc: set desktop lyric visible
+* @tc.desc: set desktop lyric visible with empty calling bundle name
 * @tc.type: FUNC
 * @tc.require: #1990
 */
@@ -423,7 +423,7 @@ HWTEST_F(AVControllerItemTest, SetDesktopLyricVisible_001, TestSize.Level1)
     g_AVSessionItem->isSupportedDesktopLyric_ = false;
     bool isVisible = false;
     int32_t res = controller->SetDesktopLyricVisible(isVisible);
-    EXPECT_EQ(res, ERR_DESKTOPLYRIC_NOT_SUPPORT);
+    EXPECT_EQ(res, AVSESSION_ERROR);
 }
 
 /**
