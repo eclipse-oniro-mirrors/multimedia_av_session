@@ -419,7 +419,8 @@ void AVSessionService::CreateSessionByCast(const int64_t castHandle, const int32
     elementName.SetBundleName("castBundleName");
     elementName.SetAbilityName("castAbilityName");
     sptr<AVSessionItem> sinkSession;
-    auto res = CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName, sinkSession);
+    auto res = CreateSessionInner("RemoteCast", AVSession::SESSION_TYPE_AUDIO, false, elementName, sinkSession,
+        userId);
     CHECK_AND_RETURN_LOG(res == AVSESSION_SUCCESS, "CreateSession at sink failed");
     SLOGI("Create Cast sink sessionId %{public}s",
         AVSessionUtils::GetAnonySessionId(sinkSession->GetSessionId()).c_str());

@@ -61,6 +61,19 @@ public:
                                                      const AppExecFwk::ElementName& elementName) = 0;
 
     /**
+     * Create Session Object with specified userId.
+     *
+     * @param tag Custom name of the session
+     * @param type Session type
+     * @param elementName element Name
+     * @param userId Target user id
+     * @return Returns Session Object
+    */
+    virtual std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
+                                                     const AppExecFwk::ElementName& elementName,
+                                                     int32_t userId);
+
+    /**
      * Create Session Object.
      *
      * @param tag Custom name of the session
@@ -72,6 +85,19 @@ public:
     */
     virtual int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
                                   std::shared_ptr<AVSession>& session) = 0;
+
+    /**
+     * Create Session Object with specified userId.
+     *
+     * @param tag Custom name of the session
+     * @param type Session type
+     * @param elementName element Name
+     * @param session Created session {@link AVSession}
+     * @param userId Target user id
+     * @return Returns result of creating session
+    */
+    virtual int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
+                                  std::shared_ptr<AVSession>& session, int32_t userId);
 #endif
 
     /**

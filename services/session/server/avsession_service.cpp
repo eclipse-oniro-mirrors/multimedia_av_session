@@ -41,6 +41,7 @@
 #include "system_ability_definition.h"
 #include "params_config_operator.h"
 #include "ability_connect_helper.h"
+#include "account_manager_adapter.h"
 #include "extension_connect_helper.h"
 #include "want_agent_helper.h"
 #include "avsession_radar.h"
@@ -1904,7 +1905,7 @@ void AVSessionService::ServiceCallback(sptr<AVSessionItem>& sessionItem)
 }
 
 sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, int32_t type, bool thirdPartyApp,
-                                                       const AppExecFwk::ElementName& elementName)
+                                                       const AppExecFwk::ElementName& elementName, int32_t userId)
 {
     HILOG_COMM_INFO("%{public}s %{public}d %{public}s %{public}s thirdPartyApp=%{public}d", tag.c_str(), type,
         elementName.GetBundleName().c_str(), elementName.GetAbilityName().c_str(), thirdPartyApp);
@@ -1914,7 +1915,9 @@ sptr<AVSessionItem> AVSessionService::CreateNewSession(const std::string& tag, i
         SLOGE("alloc session id failed");
         return nullptr;
     }
-    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    if (userId <= 0) {
+        userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    }
     descriptor.userId_ = userId;
     descriptor.sessionTag_ = tag;
     descriptor.sessionType_ = type;
@@ -2102,7 +2105,8 @@ AppExecFwk::ElementName AVSessionService::CorrectElementForThirdPartyCaller(bool
 
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type, bool thirdPartyApp,
                                              const AppExecFwk::ElementName& elementName,
-                                             sptr<AVSessionItem>& sessionItem)
+                                             sptr<AVSessionItem>& sessionItem,
+                                             int32_t userId)
 {
     if (!IsParamInvalid(tag, type, elementName)) {
         AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
@@ -2112,7 +2116,13 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
     RefreshUserFromAnco(tag, elementName);
     AppExecFwk::ElementName sessionElement = CorrectElementForThirdPartyCaller(thirdPartyApp, elementName);
     auto pid = GetCallingPid();
-    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    if (userId <= 0) {
+        userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    } else if (!AccountManagerAdapter::GetInstance().IsOsAccountActive(userId)) {
+        SLOGW("CreateSessionInner userId:%{public}d from caller is not an active account, fallback to calling uid",
+            userId);
+        userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+    }
     std::lock_guard lockGuard(sessionServiceLock_);
     if (AbilityHasSession(pid, userId)) {
         SLOGE("process %{public}d %{public}s already has one session.", pid, elementName.GetAbilityName().c_str());
@@ -2122,7 +2132,7 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
         return ERR_SESSION_IS_EXIST;
     }
 
-    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, sessionElement);
+    sptr<AVSessionItem> result = CreateNewSession(tag, type, thirdPartyApp, sessionElement, userId);
     if (result == nullptr) {
         SLOGE("create new session failed");
         if (dumpHelper_ != nullptr) dumpHelper_->SetErrorInfo("CreateSessionInner create new session failed");
@@ -2219,12 +2229,13 @@ void AVSessionService::ReportSessionInfo(const sptr <AVSessionItem>& session, in
 
 int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
                                              const AppExecFwk::ElementName& elementName,
-                                             sptr<IRemoteObject>& object)
+                                             sptr<IRemoteObject>& object,
+                                             int32_t userId)
 {
     sptr<AVSessionItem> session;
     auto res = CreateSessionInner(tag, type,
         PermissionChecker::GetInstance().CheckPermission(PermissionChecker::CHECK_SYSTEM_PERMISSION),
-        elementName, session);
+        elementName, session, userId);
     CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, res, "create session fail");
 
     std::string supportModule;
@@ -2263,10 +2274,11 @@ int32_t AVSessionService::CreateSessionInner(const std::string& tag, int32_t typ
 }
 
 sptr <IRemoteObject> AVSessionService::CreateSessionInner(const std::string& tag, int32_t type,
-                                                          const AppExecFwk::ElementName& elementName)
+                                                          const AppExecFwk::ElementName& elementName,
+                                                          int32_t userId)
 {
     sptr<IRemoteObject> object;
-    auto res = CreateSessionInner(tag, type, elementName, object);
+    auto res = CreateSessionInner(tag, type, elementName, object, userId);
     CHECK_AND_RETURN_RET_LOG(res == AVSESSION_SUCCESS, nullptr, "create session fail");
     return object;
 }
@@ -5651,6 +5663,7 @@ int32_t AVSessionService::StartAVPlaybackForAudioZone(int32_t userId, const std:
 
 int32_t AVSessionService::RegisterSessionListenerForUser(int32_t userId, const sptr<ISessionListener>& listener)
 {
+    std::lock_guard lockGuard(sessionListenersLock_);
     GetUsersManager().UpdateZoneToUseridMap(userId);
     pid_t pid = GetCallingPid();
     SLOGI("Enter RegisterSessionListenerForUser process for pid:%{public}d and target userId:%{public}d",

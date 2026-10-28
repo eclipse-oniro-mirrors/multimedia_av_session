@@ -28,13 +28,15 @@ public:
     explicit RemoteSessionCommandProcess(const sptr<IRemoteObject>& impl);
 
     sptr<IRemoteObject> CreateSessionInner(const std::string& tag, int32_t type,
-                                           const AppExecFwk::ElementName& elementName) override
+                                           const AppExecFwk::ElementName& elementName,
+                                           int32_t userId = -1) override
     {
         return nullptr;
     }
 
     int32_t CreateSessionInner(const std::string& tag, int32_t type,
-                               const AppExecFwk::ElementName& elementName, sptr<IRemoteObject>& object) override
+                               const AppExecFwk::ElementName& elementName, sptr<IRemoteObject>& object,
+                               int32_t userId = -1) override
     {
         return AVSESSION_SUCCESS;
     }

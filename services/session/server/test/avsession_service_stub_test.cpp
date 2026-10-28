@@ -128,9 +128,9 @@ public:
 class AVSessionServiceStubPerDemo : public AVSessionServiceStub {
 public:
     OHOS::sptr<IRemoteObject> CreateSessionInner(const std::string &tag, int32_t type,
-        const OHOS::AppExecFwk::ElementName &elementName) override { return nullptr; };
+        const OHOS::AppExecFwk::ElementName &elementName, int32_t userId = -1) override { return nullptr; };
     int32_t CreateSessionInner(const std::string &tag, int32_t type, const OHOS::AppExecFwk::ElementName &elementName,
-        OHOS::sptr<IRemoteObject> &session) override { return 0; };
+        OHOS::sptr<IRemoteObject> &session, int32_t userId = -1) override { return 0; };
     int32_t GetAllSessionDescriptors(std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
     int32_t GetSessionDescriptors(int32_t category,
         std::vector<AVSessionDescriptor> &descriptors) override { return 0; };
@@ -775,6 +775,7 @@ static HWTEST_F(AVSessionServiceStubTest, HandleCreateSessionInner_001, TestSize
     data.WriteString(sessionTag);
     data.WriteInt32(sessionType);
     data.WriteParcelable(&elementName);
+    data.WriteInt32(-1);
     AVSessionServiceStubPerDemo stub;
     int32_t result = stub.HandleCreateSessionInner(data, reply);
     EXPECT_EQ(result, OHOS::ERR_NONE);

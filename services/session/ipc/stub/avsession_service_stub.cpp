@@ -96,7 +96,8 @@ int32_t AVSessionServiceStub::HandleCreateSessionInner(MessageParcel& data, Mess
         return ERR_NONE;
     }
     sptr<IRemoteObject> object;
-    auto ret = CreateSessionInner(sessionTag, sessionType, *elementName, object);
+    int32_t userId = data.ReadInt32();
+    auto ret = CreateSessionInner(sessionTag, sessionType, *elementName, object, userId);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     if (ret == AVSESSION_SUCCESS) {
         CHECK_AND_PRINT_LOG(reply.WriteRemoteObject(object), "write object failed");

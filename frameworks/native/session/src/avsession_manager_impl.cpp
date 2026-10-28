@@ -164,6 +164,13 @@ int32_t AVSessionManagerImpl::GetSession(const AppExecFwk::ElementName& elementN
 std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type,
                                                                const AppExecFwk::ElementName& elementName)
 {
+    return CreateSession(tag, type, elementName, -1);
+}
+
+std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type,
+                                                               const AppExecFwk::ElementName& elementName,
+                                                               int32_t userId)
+{
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateSession");
     if (tag.empty() || elementName.GetBundleName().empty() || elementName.GetAbilityName().empty()) {
         SLOGE("param is invalid");
@@ -177,12 +184,20 @@ std::shared_ptr<AVSession> AVSessionManagerImpl::CreateSession(const std::string
     }
 
     auto service = GetService();
-    return service ? service->CreateSession(tag, type, elementName) : nullptr;
+    return service ? service->CreateSession(tag, type, elementName, userId) : nullptr;
 }
 
 int32_t AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type,
                                             const AppExecFwk::ElementName& elementName,
                                             std::shared_ptr<AVSession>& session)
+{
+    return CreateSession(tag, type, elementName, session, -1);
+}
+
+int32_t AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type,
+                                            const AppExecFwk::ElementName& elementName,
+                                            std::shared_ptr<AVSession>& session,
+                                            int32_t userId)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::CreateSession with ret");
     if (tag.empty() || elementName.GetBundleName().empty() || elementName.GetAbilityName().empty()) {
@@ -201,7 +216,7 @@ int32_t AVSessionManagerImpl::CreateSession(const std::string& tag, int32_t type
     }
 
     auto service = GetService();
-    return service ? service->CreateSession(tag, type, elementName, session) : ERR_SERVICE_NOT_EXIST;
+    return service ? service->CreateSession(tag, type, elementName, session, userId) : ERR_SERVICE_NOT_EXIST;
 }
 #endif
 

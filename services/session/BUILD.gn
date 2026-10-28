@@ -244,6 +244,7 @@ av_session_ohos_library("avsession_service") {
     "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libdm_lite",
