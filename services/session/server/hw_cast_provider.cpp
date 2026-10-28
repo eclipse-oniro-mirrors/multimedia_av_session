@@ -268,7 +268,7 @@ bool HwCastProvider::RemoveCastDevice(int castId, DeviceInfo deviceInfo, const D
         return false;
     }
 
-    return hwCastProviderSession->RemoveDevice(deviceInfo.realDeviceId_, deviceRemoveAction);
+    return hwCastProviderSession->RemoveDevice(deviceInfo.GetRealDeviceId(), deviceRemoveAction);
 }
 
 bool HwCastProvider::RegisterCastStateListener(std::shared_ptr<IAVCastStateListener> listener)

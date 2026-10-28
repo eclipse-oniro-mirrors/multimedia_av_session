@@ -393,6 +393,7 @@ public:
     void UnregisterCastControllerListeners();
 
     void UpdateCastDeviceMap(DeviceInfo deviceInfo);
+    void EnrichDeviceInfo(OutputDeviceInfo& outputDeviceInfo);
 
     void SetCastHandle(int64_t castHandle);
 

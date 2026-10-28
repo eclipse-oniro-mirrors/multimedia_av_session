@@ -315,8 +315,6 @@ HWTEST_F(AVSessionDescriptorTest, DeviceInfo_Marshalling001, TestSize.Level1)
     deviceInfo.brMacAddress_ = "testBrMacAddress";
     deviceInfo.triggerType_ = 1;
     deviceInfo.uuid_ = "testUuid";
-    deviceInfo.realDeviceId_ = "testRealDeviceId";
-    deviceInfo.screenId_ = 1;
 
     Parcel out;
     bool ret = deviceInfo.Marshalling(out);
@@ -379,8 +377,6 @@ HWTEST_F(AVSessionDescriptorTest, DeviceInfo_ReadFromParcel001, TestSize.Level1)
     in.WriteInt32(0);
     in.WriteString("testModuleId");
     in.WriteString("testSubModuleId");
-    in.WriteString("testRealDeviceId");
-    in.WriteInt32(1);
 
     bool ret = deviceInfo.ReadFromParcel(in);
     EXPECT_EQ(ret, true);
