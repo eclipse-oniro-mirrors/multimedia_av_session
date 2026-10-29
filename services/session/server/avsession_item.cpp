@@ -181,7 +181,7 @@ int32_t AVSessionItem::Destroy()
 
 void AVSessionItem::DelRecommend()
 {
-    CHECK_AND_RETURN_LOG(descriptor_.sessionTag_ != "RemoteCast", "remote cast session, return");
+    CHECK_AND_RETURN_LOG(!IsSinkCastSession(), "remote cast session, return");
     if (isRecommend_) {
         AVSessionHiAnalyticsReport::PublishRecommendInfo(GetBundleName(), "", "", "", -1);
         isRecommend_ = false;
@@ -195,7 +195,7 @@ void AVSessionItem::DelRecommend()
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 void AVSessionItem::DestroyCast(bool continuePlay)
 {
-    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0) {
+    if (!IsSinkCastSession() && castHandle_ > 0) {
         if (serviceCallbackForPhotoCast_ && descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
             serviceCallbackForPhotoCast_(descriptor_.sessionId_, false);
         }
@@ -2266,7 +2266,7 @@ void AVSessionItem::ListenCollaborationOnStop()
 
 void AVSessionItem::PublishAVCastHa(int32_t castState, DeviceInfo deviceInfo)
 {
-    CHECK_AND_RETURN_LOG(descriptor_.sessionTag_ != "RemoteCast", "remote cast session, return");
+    CHECK_AND_RETURN_LOG(!IsSinkCastSession(), "remote cast session, return");
     if (castState == connectStateFromCast_) {
         AVSessionHiAnalyticsReport::PublishCastEvent(GetBundleName(), connectStateFromCast_,
             castDeviceInfoMap_[deviceInfo.deviceId_]);
@@ -3781,7 +3781,7 @@ int32_t AVSessionItem::DoContinuousTaskUnregister()
 bool AVSessionItem::IsCasting()
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    if (descriptor_.sessionTag_ != "RemoteCast" && castHandle_ > 0 &&
+    if (!IsSinkCastSession() && castHandle_ > 0 &&
         (castHandle_ != AVRouter::GetInstance().GetMirrorCastHandle() ||
         AVRouter::GetInstance().IsInMirrorToStreamState())) {
         return true;
