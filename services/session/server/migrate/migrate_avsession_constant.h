@@ -138,6 +138,10 @@ const char* METADATA_TITLE = "MetadataTitle";
 
 const char* METADATA_ARTIST = "MetadataArtist";
 
+const char* METADATA_AVQUEUE_ID = "MetadataAVQueueId";
+
+const char* METADATA_AVQUEUE_NAME = "MetadataAVQueueName";
+
 const char* METADATA_LYRIC = "MetadataLyric";
 
 const char* METADATA_IMAGE = "MetadataArt";
