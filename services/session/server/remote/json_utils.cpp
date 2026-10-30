@@ -825,7 +825,7 @@ bool JsonUtils::GetBoolParamFromJsonString(const std::string& jsonStr, const std
         SLOGE("get jsonStr empty:%{public}d or key empty:%{public}d", jsonStr.empty(), key.empty());
         return false;
     }
-    cJSON* strJson = cJSON_Parse(jsonStr.c_str());
+    cJSON* strJson = cJSON_Parse(jsonStr.data());
     if (strJson == nullptr || !IsBool(strJson, key.c_str())) {
         SLOGE("get itemObj fail for key:%{public}s", key.c_str());
         cJSON_Delete(strJson);
