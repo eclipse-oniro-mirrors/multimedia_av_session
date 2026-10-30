@@ -28,6 +28,24 @@
 
 namespace OHOS::AVSession {
 
+using MetaDataSetter = void (AVMetaData::*)(const std::string&);
+
+static std::string GetStringOrDefault(cJSON* json, const char* key)
+{
+    if (json == nullptr || key == nullptr) {
+        return DEFAULT_STRING;
+    }
+    std::string value = SoftbusSessionUtils::GetStringFromJson(json, key);
+    return value.empty() ? DEFAULT_STRING : std::move(value);
+}
+
+static const std::pair<const char*, MetaDataSetter> kMetadataSetters[] = {
+    {METADATA_TITLE,        &AVMetaData::SetTitle},
+    {METADATA_ARTIST,       &AVMetaData::SetArtist},
+    {METADATA_AVQUEUE_ID,   &AVMetaData::SetAVQueueId},
+    {METADATA_AVQUEUE_NAME, &AVMetaData::SetAVQueueName},
+};
+
 MigrateAVSessionProxy::MigrateAVSessionProxy(AVSessionService *ptr, int32_t mode, std::string deviceId)
 {
     std::lock_guard lockGuard(migrateProxyDeviceIdLock_);
@@ -594,24 +612,16 @@ void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
         if (oldAsset != assetId) {
             metaData.SetTitle("");
             metaData.SetArtist("");
+            metaData.SetAVQueueId("");
+            metaData.SetAVQueueName("");
         }
         metaData.SetAssetId(assetId);
     }
-    if (cJSON_HasObjectItem(jsonValue, METADATA_TITLE)) {
-        std::string title = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_TITLE);
-        if (title.empty()) {
-            title = DEFAULT_STRING;
+    for (const auto& [key, setter] : kMetadataSetters) {
+        if (cJSON_HasObjectItem(jsonValue, key)) {
+            (metaData.*setter)(GetStringOrDefault(jsonValue, key));
         }
-        metaData.SetTitle(title);
     }
-    if (cJSON_HasObjectItem(jsonValue, METADATA_ARTIST)) {
-        std::string artist = SoftbusSessionUtils::GetStringFromJson(jsonValue, METADATA_ARTIST);
-        if (artist.empty()) {
-            artist = DEFAULT_STRING;
-        }
-        metaData.SetArtist(artist);
-    }
-
     sessionItem->SetAVMetaData(metaData);
 }
 

@@ -185,6 +185,16 @@ bool MigrateAVSessionServer::CheckPostMetaData(const AVMetaData& data)
         metaDataCache_.SetTitle(data.GetTitle());
         needRefresh = true;
     }
+    if (data.GetMetaMask().test(AVMetaData::META_KEY_AVQUEUE_ID) &&
+        data.GetAVQueueId() != metaDataCache_.GetAVQueueId()) {
+        metaDataCache_.SetAVQueueId(data.GetAVQueueId());
+        needRefresh = true;
+    }
+    if (data.GetMetaMask().test(AVMetaData::META_KEY_AVQUEUE_NAME) &&
+        data.GetAVQueueName() != metaDataCache_.GetAVQueueName()) {
+        metaDataCache_.SetAVQueueName(data.GetAVQueueName());
+        needRefresh = true;
+    }
     if (data.GetMetaMask().test(AVMetaData::META_KEY_ARTIST) && data.GetArtist() != metaDataCache_.GetArtist()) {
         metaDataCache_.SetArtist(data.GetArtist());
         needRefresh = true;
@@ -214,8 +224,29 @@ void MigrateAVSessionServer::DoMetaDataSyncToRemote(const AVMetaData& data)
         cJSON_Delete(metaDataItem);
         return;
     }
-    if (!SoftbusSessionUtils::AddStringToJson(metaDataItem, METADATA_ASSET_ID, metaDataCache_.GetAssetId().c_str())) {
+    if (!SoftbusSessionUtils::AddStringToJson(
+        metaDataItem,
+        METADATA_ASSET_ID,
+        metaDataCache_.GetAssetId().c_str())) {
         SLOGE("AddStringToJson assetId value:%{public}s fail", metaDataCache_.GetAssetId().c_str());
+        cJSON_Delete(metaDataItem);
+        return;
+    }
+
+    if (!SoftbusSessionUtils::AddStringToJson(
+        metaDataItem,
+        METADATA_AVQUEUE_ID,
+        metaDataCache_.GetAVQueueId().c_str())) {
+        SLOGE("AddStringToJson avQueueId value:%{public}s fail", metaDataCache_.GetAVQueueId().c_str());
+        cJSON_Delete(metaDataItem);
+        return;
+    }
+
+    if (!SoftbusSessionUtils::AddStringToJson(
+        metaDataItem,
+        METADATA_AVQUEUE_NAME,
+        metaDataCache_.GetAVQueueName().c_str())) {
+        SLOGE("AddStringToJson avQueueName value:%{public}s fail", metaDataCache_.GetAVQueueName().c_str());
         cJSON_Delete(metaDataItem);
         return;
     }
