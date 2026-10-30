@@ -3612,9 +3612,13 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
     {
         std::lock_guard lockGuard(sessionServiceLock_);
         if (ancoSession_ != nullptr && ancoSession_->IsActive()) {
-            SLOGI("ExecuteCommand %{public}d for anco_audio without top and frontlist", command.GetCommand());
-            ancoSession_->ExecuteControllerCommand(command);
-            return;
+            if (CheckSessionEmpty()) {
+                SLOGI("no anco session, skip anco branch");
+            } else {
+                SLOGI("ExecuteCommand %{public}d for anco_audio without top and frontlist", command.GetCommand());
+                ancoSession_->ExecuteControllerCommand(command);
+                return;
+            }
         }
     }
 
