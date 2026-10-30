@@ -190,7 +190,7 @@ public:
 
     int32_t GetSessionDescriptorsBySessionId(const std::string& sessionId, AVSessionDescriptor& descriptor) override;
 
-    int32_t GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors);
+    int32_t GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors, int32_t userId = -1);
 
     int32_t GetHistoricalSessionDescriptors(int32_t maxSize, std::vector<AVSessionDescriptor>& descriptors) override;
 
@@ -352,6 +352,8 @@ public:
 
     std::string GetAVSortDir(int32_t userId = 0);
 
+    std::string GetAVSortDirWithUserId(int32_t userId = 0);
+
     void HandleUserEvent(const std::string &type, const int &userId);
 
     void HandleRemoveMediaCardEvent(int32_t uid, bool isPhoto);
@@ -374,6 +376,9 @@ public:
 
     int32_t GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
         std::vector<sptr<IRemoteObject>>& sessionControllers) override;
+
+    void GetDistributedSessions(std::vector<sptr<AVSessionItem>>& sessions,
+        const std::vector<int32_t>& characteristics);
 
     void NotifyRemoteDistributedSessionControllersChanged(
         const std::vector<sptr<IRemoteObject>>& sessionControllers);
@@ -621,7 +626,8 @@ private:
 
     void DeleteAVQueueImage(cJSON* item);
 
-    int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors);
+    int32_t GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors,
+        int32_t userId = 0);
 
     int32_t UpdateControlListFromFile();
 
@@ -645,7 +651,8 @@ private:
 
     sptr<AVSessionItem> GetTopSessionForUser(int32_t userId);
 
-    void HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId);
+    void HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId,
+        int32_t userId = -1);
 
     bool CheckSessionEmpty();
 

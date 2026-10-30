@@ -557,7 +557,7 @@ void AVSessionUsersManager::UpdateSessionStackForAudioZone(int32_t userId)
         return;
     }
     SLOGI("UpdateSessionStackForAudioZone zoneId=%{public}d userId=%{public}d", zoneId, userId);
-    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>> sessionWithTime;
     
     CollectLocalSessionsForAudioZone(zoneId, sessionWithTime);
     SLOGI("CollectLocalSessionsForAudioZone size=%{public}d", static_cast<int32_t>(sessionWithTime.size()));
@@ -593,15 +593,14 @@ void AVSessionUsersManager::HandleScreenMove(int32_t uid, int32_t srcUserId, int
 }
 
 void AVSessionUsersManager::AddSessionToVector(const sptr<AVSessionItem>& session,
-    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime)
 {
-    AVSessionDescriptor desc = session->GetDescriptor();
     int64_t playingTime = session->GetPlayingTime();
-    sessionWithTime.push_back({desc, playingTime});
+    sessionWithTime.push_back({session, playingTime});
 }
 
 void AVSessionUsersManager::CollectLocalSessionsForAudioZone(int32_t zoneId,
-    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime)
 {
     std::lock_guard lockGuard(userLock_);
     auto allSessions = GetContainerFromAll().GetAllSessions();
@@ -641,16 +640,16 @@ void AVSessionUsersManager::AddControllerToVector(
 }
 
 void AVSessionUsersManager::CollectDistributedSessionsForAudioZone(int32_t zoneId,
-    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime)
 {
     auto service = AVSessionService::GetInstance();
     if (!service) {
         return;
     }
-    std::vector<sptr<IRemoteObject>> controllers;
-    int32_t ret = service->GetDistributedSessionControllersForAudioZone(controllers);
-    if (ret != AVSESSION_SUCCESS || controllers.empty()) {
-        SLOGI("No migrate-in distributed sessions, ret=%{public}d", ret);
+    std::vector<sptr<AVSessionItem>> sessions;
+    service->GetDistributedSessions(sessions, {MSG_HEAD_MODE});
+    if (sessions.empty()) {
+        SLOGI("No migrate-in distributed sessions");
         return;
     }
     std::lock_guard lockGuard(userLock_);
@@ -659,39 +658,35 @@ void AVSessionUsersManager::CollectDistributedSessionsForAudioZone(int32_t zoneI
         return;
     }
     const std::vector<int32_t>& targetUserIds = zoneIter->second;
-    for (auto& controllerObj : controllers) {
-        sptr<AVControllerItem> controller = iface_cast<AVControllerItem>(controllerObj);
-        if (!controller) {
-            continue;
-        }
-        AVSessionDescriptor desc = controller->GetSessionDescriptor();
-        int32_t controllerUserId = desc.userId_;
+    for (auto& session : sessions) {
+        CHECK_AND_CONTINUE(session != nullptr);
+        int32_t sessionUserId = session->GetDescriptor().userId_;
         bool isTargetZone = std::find(targetUserIds.begin(), targetUserIds.end(),
-            controllerUserId) != targetUserIds.end();
+            sessionUserId) != targetUserIds.end();
         if (isTargetZone) {
-            AddControllerToVector(controller, sessionWithTime);
+            AddSessionToVector(session, sessionWithTime);
         }
     }
 }
 
 void AVSessionUsersManager::SortAndCacheSessionStack(int32_t zoneId,
-    std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime)
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime)
 {
     std::sort(sessionWithTime.begin(), sessionWithTime.end(),
-        [](const std::pair<AVSessionDescriptor, int64_t>& a,
-           const std::pair<AVSessionDescriptor, int64_t>& b) {
+        [](const std::pair<sptr<AVSessionItem>, int64_t>& a,
+           const std::pair<sptr<AVSessionItem>, int64_t>& b) {
             return a.second > b.second;
         });
-    
-    std::vector<AVSessionDescriptor> descriptors;
+
+    std::vector<sptr<AVSessionItem>> sessions;
     for (auto& item : sessionWithTime) {
-        descriptors.push_back(item.first);
+        sessions.push_back(item.first);
     }
-    
-    sessionStackMapForAudioZone_[zoneId] = descriptors;
+
+    sessionStackMapForAudioZone_[zoneId] = sessions;
 }
 
-std::vector<AVSessionDescriptor> AVSessionUsersManager::GetSessionStackForAudioZone(int32_t userId)
+std::vector<sptr<AVSessionItem>> AVSessionUsersManager::GetSessionStackForAudioZone(int32_t userId)
 {
     int32_t zoneId = GetZoneIdForUser(userId);
     SLOGI("GetSessionStackForAudioZone zoneId=%{public}d userId=%{public}d", zoneId, userId);
@@ -706,6 +701,18 @@ std::vector<AVSessionDescriptor> AVSessionUsersManager::GetSessionStackForAudioZ
         return iter->second;
     }
     return {};
+}
+
+std::vector<AVSessionDescriptor> AVSessionUsersManager::GetSessionDescriptorForAudioZone(int32_t userId)
+{
+    std::vector<sptr<AVSessionItem>> sessions = GetSessionStackForAudioZone(userId);
+    std::vector<AVSessionDescriptor> descriptors;
+    for (const auto& session : sessions) {
+        if (session != nullptr) {
+            descriptors.push_back(session->GetDescriptor());
+        }
+    }
+    return descriptors;
 }
 #endif
 }

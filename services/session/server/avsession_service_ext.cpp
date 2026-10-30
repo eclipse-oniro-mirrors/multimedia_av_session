@@ -17,6 +17,7 @@
 #include "avsession_service.h"
 #include "migrate_avsession_manager.h"
 #include "parameters.h"
+#include <algorithm>
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 #include "cast_engine_common.h"
@@ -1237,6 +1238,31 @@ bool AVSessionService::CheckWhetherTargetDevIsNext(const OHOS::DistributedHardwa
     return false;
 }
 #endif
+
+void AVSessionService::GetDistributedSessions(std::vector<sptr<AVSessionItem>>& sessions,
+    const std::vector<int32_t>& characteristics)
+{
+    CHECK_AND_RETURN_LOG(!characteristics.empty(), "characteristics is empty");
+    std::map<std::string, std::shared_ptr<SoftbusSession>> migrateAVSessionProxyMap;
+    {
+        std::lock_guard lockGuard(migrateProxyMapLock_);
+        migrateAVSessionProxyMap = migrateAVSessionProxyMap_;
+    }
+    std::vector<std::shared_ptr<MigrateAVSessionProxy>> allMigrateProxy;
+    for (const auto& pair : migrateAVSessionProxyMap) {
+        std::shared_ptr<MigrateAVSessionProxy> migrateAVSessionProxy =
+            std::static_pointer_cast<MigrateAVSessionProxy>(pair.second);
+        CHECK_AND_CONTINUE(migrateAVSessionProxy != nullptr);
+        int32_t characteristic = migrateAVSessionProxy->GetCharacteristic();
+        if (std::find(characteristics.begin(), characteristics.end(), characteristic)
+            != characteristics.end()) {
+            allMigrateProxy.push_back(migrateAVSessionProxy);
+        }
+    }
+    for (const auto& migrateAVSessionProxy : allMigrateProxy) {
+        migrateAVSessionProxy->GetAllMigrateSessions(sessions);
+    }
+}
 
 int32_t AVSessionService::GetDistributedSessionControllersInner(const DistributedSessionType& sessionType,
     std::vector<sptr<IRemoteObject>>& sessionControllers)
