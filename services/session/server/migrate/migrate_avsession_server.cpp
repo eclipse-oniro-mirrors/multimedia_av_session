@@ -1544,11 +1544,14 @@ void AVControllerObserver::OnPlaybackStateChange(const AVPlaybackState &state)
         server = migrateServer_.lock();
         mode = migrateMode_;
     }
-    if (server != nullptr && mode == MIGRATE_MODE_NEXT) {
+    CHECK_AND_RETURN_LOG(server != nullptr, "migrate server is nullptr");
+    if (mode == MIGRATE_MODE_NEXT) {
         server->HandleFocusPlaybackStateChange(playerId_, state);
         return;
     }
-    if (server != nullptr) {
+    if (server->isSinkHarmonyOsNext_) {
+        server->OnPlaybackStateChange(playerId_, state);
+    } else if (state.GetState() != AVPlaybackState::PLAYBACK_STATE_INITIAL) {
         server->OnPlaybackStateChange(playerId_, state);
     }
 }

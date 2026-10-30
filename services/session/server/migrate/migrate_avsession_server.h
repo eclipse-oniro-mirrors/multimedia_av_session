@@ -59,6 +59,7 @@ public:
     int32_t GetCharacteristic() override;
     void OnBytesReceived(const std::string &deviceId, const std::string &data) override;
     bool IsNeedByRemote() const { return isNeedByRemote.load(); }
+    bool isSinkHarmonyOsNext_ = true;
 
     void Init(AVSessionService *ptr);
 

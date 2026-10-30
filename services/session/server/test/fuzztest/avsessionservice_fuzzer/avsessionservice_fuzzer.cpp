@@ -567,7 +567,7 @@ void AvSessionServiceSuperLauncherTest001(sptr<AVSessionService> service)
     std::string extraInfo2 = GetString();
     service->SuperLauncher(deviceId2, serviceName2, extraInfo2, state);
     service->ReleaseSuperLauncher(serviceName);
-    service->ConnectSuperLauncher(deviceId, serviceName);
+    service->ConnectSuperLauncher(deviceId, serviceName, (randomNumber & 1) == 1);
     service->SucceedSuperLauncher(deviceId, extraInfo);
 }
 

@@ -1552,3 +1552,83 @@ static HWTEST(JsonUtilsTest, GetIntParamFromJsonString007, TestSize.Level0)
     EXPECT_EQ(result, 0);
     SLOGI("GetIntParamFromJsonString007 end!");
 }
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString001, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString001 begin!");
+    std::string jsonStr = "";
+    std::string key = "";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, false);
+    SLOGI("GetBoolParamFromJsonString001 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString002, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString002 begin!");
+    std::string jsonStr = "";
+    std::string key = "testKey";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, false);
+    SLOGI("GetBoolParamFromJsonString002 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString003, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString003 begin!");
+    std::string jsonStr = "{\"testKey\": true}";
+    std::string key = "";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, false);
+    SLOGI("GetBoolParamFromJsonString003 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString004, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString004 begin!");
+    std::string jsonStr = "invalid json";
+    std::string key = "testKey";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, false);
+    SLOGI("GetBoolParamFromJsonString004 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString005, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString005 begin!");
+    std::string jsonStr = "{\"testKey\": true}";
+    std::string key = "testKey";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, true);
+    SLOGI("GetBoolParamFromJsonString005 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString006, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString006 begin!");
+    std::string jsonStr = "{\"testKey\": \"true\"}";
+    std::string key = "testKey";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, false);
+    SLOGI("GetBoolParamFromJsonString006 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString007, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString007 begin!");
+    std::string jsonStr = "{\"otherKey\": true}";
+    std::string key = "testKey";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, false);
+    SLOGI("GetBoolParamFromJsonString007 end!");
+}
+
+static HWTEST(JsonUtilsTest, GetBoolParamFromJsonString008, TestSize.Level0)
+{
+    SLOGI("GetBoolParamFromJsonString008 begin!");
+    std::string jsonStr = "{\"testKey\": false}";
+    std::string key = "testKey";
+    bool result = OHOS::AVSession::JsonUtils::GetBoolParamFromJsonString(jsonStr, key);
+    EXPECT_EQ(result, false);
+    SLOGI("GetBoolParamFromJsonString008 end!");
+}
