@@ -224,6 +224,52 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote003, Te
 }
 
 /**
+ * @tc.name: CheckPostMetaData001
+ * @tc.desc: test CheckPostMetaData caches avQueueId/avQueueName when mask set
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostMetaData001, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+    AVMetaData data;
+    data.SetAVQueueId("queueId_001");
+    data.SetAVQueueName("queueName_001");
+
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckPostMetaData(data), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueId(), "queueId_001");
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueName(), "queueName_001");
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+}
+
+/**
+ * @tc.name: CheckPostMetaData002
+ * @tc.desc: test CheckPostMetaData clears avQueue when assetId changed and not resent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostMetaData002, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+    g_MigrateAVSessionServer->metaDataCache_.SetAssetId("old_asset");
+    g_MigrateAVSessionServer->metaDataCache_.SetAVQueueId("old_queue");
+    g_MigrateAVSessionServer->metaDataCache_.SetAVQueueName("old_queue_name");
+
+    AVMetaData data;
+    data.SetAssetId("new_asset");
+
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckPostMetaData(data), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAssetId(), "new_asset");
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueId(), "");
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueName(), "");
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+}
+
+/**
  * @tc.name: DoMediaImageSyncToRemote001
  * @tc.desc: input innerPixelMap to DoMediaImageSyncToRemote
  * @tc.type: FUNC
