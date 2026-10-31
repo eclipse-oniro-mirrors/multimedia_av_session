@@ -97,15 +97,16 @@ AVSession_OutputDeviceInfo* OHDeviceInfo::ConvertDesc(const OHOS::AVSession::Out
 void OHDeviceInfo::DestroyAVSessionOutputDevice(AVSession_OutputDeviceInfo *array)
 {
     if (array) {
-        for (uint32_t index = 0; index < array->size; index++) {
-            OHDeviceInfo *outputDeviceInfo = (OHDeviceInfo *)array->deviceInfos[index];
-            delete outputDeviceInfo;
-            array->deviceInfos[index] = nullptr;
+        if (array->size > 0 && array->deviceInfos != nullptr) {
+            for (uint32_t index = 0; index < array->size; index++) {
+                OHDeviceInfo *outputDeviceInfo = (OHDeviceInfo *)array->deviceInfos[index];
+                delete outputDeviceInfo;
+                array->deviceInfos[index] = nullptr;
+            }
         }
         free(array->deviceInfos);
         array->deviceInfos = nullptr;
         free(array);
-        array = nullptr;
     }
 }
 

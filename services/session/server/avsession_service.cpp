@@ -1343,13 +1343,17 @@ bool AVSessionService::AbilityHasSession(pid_t pid, int32_t userId)
 
 sptr<AVControllerItem> AVSessionService::GetPresentController(pid_t pid, const std::string& sessionId)
 {
-    std::lock_guard lockGuard(sessionServiceLock_);
-    auto it = controllers_.find(pid);
-    if (it != controllers_.end()) {
-        for (const auto& controller: it->second) {
-            if (controller != nullptr && controller->HasSession(sessionId)) {
-                return controller;
-            }
+    std::list<sptr<AVControllerItem>> controllers;
+    {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        auto it = controllers_.find(pid);
+        if (it != controllers_.end()) {
+            controllers = it->second;
+        }
+    }
+    for (const auto& controller : controllers) {
+        if (controller != nullptr && controller->HasSession(sessionId)) {
+            return controller;
         }
     }
     SLOGI("Not found controller for pid:%{public}d, sessionId:%{public}s.", pid,
@@ -3246,21 +3250,24 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
     int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
     SLOGI("CreateControllerInner for sessionId:%{public}s|%{public}d|%{public}d|%{public}d",
         AVSessionUtils::GetAnonySessionId(sessionId).c_str(), pid, GetCallingPid(), userId);
-    std::lock_guard lockGuard(sessionServiceLock_);
+    sptr<AVSessionItem> session;
+    {
+        std::lock_guard lockGuard(sessionServiceLock_);
 #ifdef CAR_FEATURE_ENABLE
-    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
+        session = GetUsersManager().GetContainerFromAll().GetSessionById(sessionId);
 #else
-    sptr<AVSessionItem> session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
+        session = GetUsersManager().GetContainerFromUser(userId).GetSessionById(sessionId);
 #endif
 
-    if (session == nullptr) {
-        SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
-        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
-            AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "no session", false);
-        return ERR_SESSION_NOT_EXIST;
-    }
-    if (pid < 0 || GetCallingPid() != getpid()) {
-        pid = GetCallingPid();
+        if (session == nullptr) {
+            SLOGE("no session id %{public}s", AVSessionUtils::GetAnonySessionId(sessionId).c_str());
+            AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+                AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "no session", false);
+            return ERR_SESSION_NOT_EXIST;
+        }
+        if (pid < 0 || GetCallingPid() != getpid()) {
+            pid = GetCallingPid();
+        }
     }
     auto existController = GetPresentController(pid, sessionId);
     if (existController != nullptr) {
@@ -3279,7 +3286,10 @@ int32_t AVSessionService::CreateControllerInner(const std::string& sessionId, sp
         return ERR_NO_MEMORY;
     }
 
-    controllers_[pid].push_back(newController);
+    {
+        std::lock_guard lockGuard(sessionServiceLock_);
+        controllers_[pid].push_back(newController);
+    }
     object = newController;
 
     return AVSESSION_SUCCESS;

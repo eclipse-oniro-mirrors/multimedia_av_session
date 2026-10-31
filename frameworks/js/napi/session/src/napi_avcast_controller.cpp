@@ -494,8 +494,8 @@ napi_value NapiAVCastController::Update(napi_env env, napi_callback_info info)
     auto* napiCastController = reinterpret_cast<NapiAVCastController*>(context->native);
     bool identical = napiCastController != nullptr &&
         IsAVQueueItemEqual(napiCastController->lastUpdateItem_, context->avQueueItem_);
-    if (napiCastController == nullptr || identical) {
-        SLOGI("Update controller nullptr or media info identical to last update");
+    if (identical) {
+        SLOGI("Update media info identical to last update");
         return NapiAsyncWork::Enqueue(env, context, "Update", []() {},
             [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); });
     }
