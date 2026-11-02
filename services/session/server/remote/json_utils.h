@@ -44,6 +44,7 @@ public:
 
     static std::string GetStringParamFromJsonString(const std::string& jsonStr, const std::string& key);
     static int32_t GetIntParamFromJsonString(const std::string& jsonStr, const std::string& key);
+    static bool GetBoolParamFromJsonString(const std::string& jsonStr, const std::string& key);
 private:
     static int32_t JsonToVector(cJSON* object, std::vector<int32_t>& out);
     static int32_t ConvertSessionType(const std::string& typeString);

@@ -4375,7 +4375,7 @@ static HWTEST_F(AVSessionServiceTest, ReleaseSuperLauncher001, TestSize.Level0)
 static HWTEST_F(AVSessionServiceTest, ConnectSuperLauncher001, TestSize.Level0)
 {
     SLOGD("ConnectSuperLauncher001 begin!");
-    avservice_->ConnectSuperLauncher("adcdef", "SuperLauncher-Dual");
+    avservice_->ConnectSuperLauncher("adcdef", "SuperLauncher-Dual", true);
     EXPECT_NE(avservice_->migrateAVSession_->servicePtr_, nullptr);
     SLOGD("ConnectSuperLauncher001 end!");
 }

@@ -818,4 +818,22 @@ int32_t JsonUtils::GetIntParamFromJsonString(const std::string& jsonStr, const s
     cJSON_Delete(strJson);
     return valueInt;
 }
+
+bool JsonUtils::GetBoolParamFromJsonString(const std::string& jsonStr, const std::string& key)
+{
+    if (jsonStr.empty() || key.empty()) {
+        SLOGE("get jsonStr empty:%{public}d or key empty:%{public}d", jsonStr.empty(), key.empty());
+        return false;
+    }
+    cJSON* strJson = cJSON_Parse(jsonStr.data());
+    if (strJson == nullptr || !IsBool(strJson, key.c_str())) {
+        SLOGE("get itemObj fail for key:%{public}s", key.c_str());
+        cJSON_Delete(strJson);
+        return false;
+    }
+    cJSON* itemObj = cJSON_GetObjectItem(strJson, key.c_str());
+    bool valueBool = cJSON_IsTrue(itemObj);
+    cJSON_Delete(strJson);
+    return valueBool;
+}
 } // namespace OHOS::AVSession

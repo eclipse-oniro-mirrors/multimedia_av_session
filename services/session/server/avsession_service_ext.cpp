@@ -37,7 +37,9 @@ void AVSessionService::SuperLauncher(std::string deviceId, std::string serviceNa
         if (state == "IDLE") {
             ReleaseSuperLauncher(serviceName);
         } else if (state == "CONNECTING") {
-            ConnectSuperLauncher(deviceId, serviceName);
+            bool isSinkHarmonyOsNext = JsonUtils::GetBoolParamFromJsonString(extraInfo, IS_SINK_HARMONY_OS_NEXT);
+            SLOGI("ConnectSuperLauncher isSinkHarmonyOsNext:%{public}d", static_cast<int>(isSinkHarmonyOsNext));
+            ConnectSuperLauncher(deviceId, serviceName, isSinkHarmonyOsNext);
         } else if (state == "CONNECT_SUCC") {
             SucceedSuperLauncher(deviceId, extraInfo);
         }
@@ -94,7 +96,7 @@ void AVSessionService::ReleaseSuperLauncher(std::string serviceName)
     }
 }
 
-void AVSessionService::ConnectSuperLauncher(std::string deviceId, std::string serviceName)
+void AVSessionService::ConnectSuperLauncher(std::string deviceId, std::string serviceName, bool isSinkHarmonyOsNext)
 {
     std::shared_ptr<MigrateAVSessionServer> migrateAVSession;
     {
@@ -105,6 +107,7 @@ void AVSessionService::ConnectSuperLauncher(std::string deviceId, std::string se
         migrateAVSession = migrateAVSession_;
     }
     migrateAVSession->Init(this);
+    migrateAVSession->isSinkHarmonyOsNext_ = isSinkHarmonyOsNext;
     MigrateAVSessionManager::GetInstance().CreateLocalSessionStub(serviceName, migrateAVSession);
     AddInnerSessionListener(migrateAVSession.get());
     AddHistoricalRecordListener(migrateAVSession.get());

@@ -287,7 +287,7 @@ public:
 
     void ReleaseSuperLauncher(std::string serviceName);
 
-    void ConnectSuperLauncher(std::string deviceId, std::string serviceName);
+    void ConnectSuperLauncher(std::string deviceId, std::string serviceName, bool isSinkHarmonyOsNext);
 
     void SucceedSuperLauncher(std::string deviceId, std::string extraInfo);
 

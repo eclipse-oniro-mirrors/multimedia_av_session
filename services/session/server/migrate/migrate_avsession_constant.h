@@ -180,6 +180,8 @@ const char* VOLUME_INFO = "VolumeInfo";
 
 const char* IS_SUPPORT_SINGLE_FRAME_MEDIA_PLAY = "mIsSupportSingleFrameMediaPlay";
 
+const char* IS_SINK_HARMONY_OS_NEXT = "mIsSinkHarmonyOsNext";
+
 const char* ROLE_TYPE = "mRoleType";
 
 class RoleType {
