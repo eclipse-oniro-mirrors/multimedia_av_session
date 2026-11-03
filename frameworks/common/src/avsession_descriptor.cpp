@@ -88,8 +88,6 @@ bool AVSessionDescriptor::Marshalling(Parcel& out) const
         CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.uuid_), false, "write uuid failed");
         CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.WriteToParcel(out), false,
             "write hiPlayDeviceInfo failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteString(deviceInfo.realDeviceId_), false, "write realDeviceId failed");
-        CHECK_AND_RETURN_RET_LOG(out.WriteInt32(deviceInfo.screenId_), false, "write screenId failed");
     }
     CHECK_AND_RETURN_RET_LOG(out.WriteParcelable(&elementName_), false, "write elementName failed");
     return true;
@@ -163,8 +161,6 @@ bool AVSessionDescriptor::CheckBeforReadFromParcel(Parcel& in, DeviceInfo& devic
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.uuid_), false, "Read uuid failed");
     CHECK_AND_RETURN_RET_LOG(deviceInfo.hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadString(deviceInfo.realDeviceId_), false, "Read realDeviceId failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(deviceInfo.screenId_), false, "Read screenId failed");
     outputDeviceInfo_.deviceInfos_.emplace_back(deviceInfo);
     return true;
 }
@@ -231,8 +227,6 @@ bool DeviceInfo::Marshalling(Parcel& out) const
     CHECK_AND_RETURN_RET_LOG(out.WriteInt32(triggerType_), false, "write triggerType failed");
     CHECK_AND_RETURN_RET_LOG(out.WriteString(uuid_), false, "write uuid failed");
     CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.WriteToParcel(out), false, "write hiPlayDeviceInfo failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteString(realDeviceId_), false, "write realDeviceId failed");
-    CHECK_AND_RETURN_RET_LOG(out.WriteInt32(screenId_), false, "write screenId failed");
     return true;
 }
 
@@ -241,6 +235,11 @@ DeviceInfo* DeviceInfo::Unmarshalling(Parcel& in)
     auto info = std::make_unique<DeviceInfo>();
     CHECK_AND_RETURN_RET_LOG(info != nullptr && info->ReadFromParcel(in), nullptr, "info is nullptr");
     return info.release();
+}
+
+std::string DeviceInfo::GetRealDeviceId() const
+{
+    return realDeviceId_.empty() ? deviceId_ : realDeviceId_;
 }
 
 bool DeviceInfo::ReadFromParcel(Parcel& in)
@@ -291,8 +290,6 @@ bool DeviceInfo::ReadFromParcel(Parcel& in)
     CHECK_AND_RETURN_RET_LOG(in.ReadInt32(triggerType_), false, "Read triggerType failed");
     CHECK_AND_RETURN_RET_LOG(in.ReadString(uuid_), false, "Read uuid failed");
     CHECK_AND_RETURN_RET_LOG(hiPlayDeviceInfo_.ReadFromParcel(in), false, "Read hiPlayDeviceInfo failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadString(realDeviceId_), false, "Read realDeviceId failed");
-    CHECK_AND_RETURN_RET_LOG(in.ReadInt32(screenId_), false, "Read screenId failed");
     return true;
 }
 

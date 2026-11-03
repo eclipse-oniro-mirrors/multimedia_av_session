@@ -78,7 +78,7 @@ bool HwCastProviderSession::AddDevice(const DeviceInfo deviceInfo, uint32_t spid
         return false;
     }
     CastRemoteDevice castRemoteDevice = {};
-    castRemoteDevice.deviceId = deviceInfo.realDeviceId_;
+    castRemoteDevice.deviceId = deviceInfo.GetRealDeviceId();
     castRemoteDevice.bleMac = deviceInfo.bleMac_;
     castRemoteDevice.triggerType = static_cast<CastEngine::TriggerType>(deviceInfo.triggerType_);
     castRemoteDevice.spid = spid;

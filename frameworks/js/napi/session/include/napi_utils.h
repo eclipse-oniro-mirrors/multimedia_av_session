@@ -352,7 +352,6 @@ public:
     static constexpr size_t TIME_OUT_SECOND = 5;
     static constexpr int HTTP_ERROR_CODE = 400;
     static constexpr int COAP = 2;
-    static constexpr int NO_SCREEN_ID = -1;
     static constexpr int32_t CURL_MAX_CERTNUM = 4;
     static constexpr int32_t CURL_MAX_ISSUERNAME = 256;
     static bool isNeedReportIssuerName;

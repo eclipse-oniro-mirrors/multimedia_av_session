@@ -658,6 +658,8 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
 
+    OutputDeviceInfo enrichedInfo = outputDeviceInfo;
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     auto appSession = GetContainer().GetSessionById(sessionToken.sessionId);
     bool isValidSession = (appSession != nullptr);
@@ -706,9 +708,10 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
 #endif
     CHECK_AND_RETURN_RET_LOG(session != nullptr, ERR_SESSION_NOT_EXIST, "session %{public}s not exist",
         AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
-    ReportStartCastBegin("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_);
-    int32_t ret = session->StartCast(outputDeviceInfo);
-    ReportStartCastEnd("AVSessionService::StartCast", outputDeviceInfo, session->GetDescriptor().uid_, ret);
+    session->EnrichDeviceInfo(enrichedInfo);
+    ReportStartCastBegin("AVSessionService::StartCast", enrichedInfo, session->GetDescriptor().uid_);
+    int32_t ret = session->StartCast(enrichedInfo);
+    ReportStartCastEnd("AVSessionService::StartCast", enrichedInfo, session->GetDescriptor().uid_, ret);
     CHECK_AND_RETURN_RET_LOG(ret == AVSESSION_SUCCESS, ret, "StartCast failed");
     SLOGD("StartCast set isSourceInCast");
 

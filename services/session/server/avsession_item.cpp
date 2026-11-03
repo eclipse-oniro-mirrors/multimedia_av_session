@@ -1825,7 +1825,7 @@ int32_t AVSessionItem::RegisterListenerStreamToCast(const std::pair<std::string,
         SetCastHandle(AVRouter::GetInstance().StartCast(outputDeviceInfo, castServiceNameStatePair_, GetSessionId()));
         CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
         AVRouter::GetInstance().RegisterCallback(castHandle_, cssListener_, GetSessionId(), deviceInfo);
-        AVRouter::GetInstance().GetRemoteDrmCapabilities(castHandle_, deviceInfo.realDeviceId_,
+        AVRouter::GetInstance().GetRemoteDrmCapabilities(castHandle_, deviceInfo.GetRealDeviceId(),
             deviceInfo.supportedDrmCapabilities_);
         AVRouter::GetInstance().SetServiceAllConnectState(castHandle_, deviceInfo);
         mirrorToStreamOnceFlag_ = true;
@@ -2186,8 +2186,8 @@ void AVSessionItem::DealCollaborationPublishState(int32_t castState, DeviceInfo 
     if (castState == disconnectStateFromCast_) { // 5 is disconnected status
         if (collaborationNeedNetworkId_.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkId(deviceInfo.realDeviceId_).c_str());
-            collaborationNeedNetworkId_ = deviceInfo.realDeviceId_;
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.GetRealDeviceId()).c_str());
+            collaborationNeedNetworkId_ = deviceInfo.GetRealDeviceId();
         }
         CollaborationManagerURLCasting::GetInstance().PublishServiceState(collaborationNeedDeviceId_.c_str(),
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
@@ -2286,16 +2286,16 @@ void AVSessionItem::BuildCollaborationPublishStateParam(int32_t castState, Devic
         castHandle = castHandle_;
     }
     std::string networkId;
-    AVRouter::GetInstance().GetRemoteNetWorkId(castHandle, deviceInfo.realDeviceId_, networkId);
+    AVRouter::GetInstance().GetRemoteNetWorkId(castHandle, deviceInfo.GetRealDeviceId(), networkId);
     {
         std::lock_guard lockGuard(castLock_);
         if (networkId.empty()) {
             SLOGI("networkId is empty, try use deviceId:%{public}s",
-                AVSessionUtils::GetAnonyNetworkId(deviceInfo.realDeviceId_).c_str());
-            networkId = deviceInfo.realDeviceId_;
+                AVSessionUtils::GetAnonyNetworkId(deviceInfo.GetRealDeviceId()).c_str());
+            networkId = deviceInfo.GetRealDeviceId();
         }
         collaborationNeedNetworkId_ = networkId;
-        collaborationNeedDeviceId_ = deviceInfo.realDeviceId_;
+        collaborationNeedDeviceId_ = deviceInfo.GetRealDeviceId();
     }
 }
 
@@ -3651,6 +3651,18 @@ void AVSessionItem::UpdateCastDeviceMap(DeviceInfo deviceInfo)
         OutputDeviceInfo outputDeviceInfo;
         outputDeviceInfo.deviceInfos_.emplace_back(deviceInfo);
         descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+    }
+}
+
+void AVSessionItem::EnrichDeviceInfo(OutputDeviceInfo& outputDeviceInfo)
+{
+    for (auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
+        std::lock_guard mapLockGuard(castDeviceInfoMapMutex_);
+        auto iter = castDeviceInfoMap_.find(deviceInfo.deviceId_);
+        if (iter != castDeviceInfoMap_.end()) {
+            deviceInfo.realDeviceId_ = iter->second.realDeviceId_;
+            deviceInfo.screenId_ = iter->second.screenId_;
+        }
     }
 }
 

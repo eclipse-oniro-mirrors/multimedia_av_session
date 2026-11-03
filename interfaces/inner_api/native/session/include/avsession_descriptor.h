@@ -52,6 +52,7 @@ public:
     bool Marshalling(Parcel& out) const override;
     bool ReadFromParcel(Parcel& in);
     static DeviceInfo* Unmarshalling(Parcel& in);
+    std::string GetRealDeviceId() const;
 
     int32_t castCategory_ {};
     std::string deviceId_; // car is castRemoteDevice.deviceId+serviceInfo.screenId, other is castRemoteDevice.deviceId
