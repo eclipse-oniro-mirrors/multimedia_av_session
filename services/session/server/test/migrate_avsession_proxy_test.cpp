@@ -293,7 +293,8 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData003, TestSize.Level0)
         SLOGE("create jsonvalue nullptr");
         FAIL();
     }
-    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "queueId_001") ||
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ASSET_ID, "test_asset") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "queueId_001") ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_NAME, "queueName_001")) {
         SLOGE("AddStringToJson fail");
         cJSON_Delete(jsonValue);
@@ -326,7 +327,8 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData004, TestSize.Level0)
         SLOGE("create jsonvalue nullptr");
         FAIL();
     }
-    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "") ||
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ASSET_ID, "test_asset") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "") ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_NAME, "")) {
         SLOGE("AddStringToJson fail");
         cJSON_Delete(jsonValue);

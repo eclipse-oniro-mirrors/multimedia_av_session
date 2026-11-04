@@ -224,6 +224,31 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote003, Te
 }
 
 /**
+ * @tc.name: DoMetaDataSyncToRemote004
+ * @tc.desc: cover avQueueId/avQueueName serialization happy path
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, DoMetaDataSyncToRemote004, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->isSoftbusConnecting_.store(false);
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+
+    AVMetaData data;
+    data.SetAssetId("test_asset");
+    data.SetAVQueueId("queueId_001");
+    data.SetAVQueueName("queueName_001");
+
+    g_MigrateAVSessionServer->DoMetaDataSyncToRemote(data);
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueId(), "queueId_001");
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueName(), "queueName_001");
+
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+}
+
+/**
  * @tc.name: CheckPostMetaData001
  * @tc.desc: test CheckPostMetaData caches avQueueId/avQueueName when mask set
  * @tc.type: FUNC
@@ -265,6 +290,30 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostMetaData002, TestSiz
     EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAssetId(), "new_asset");
     EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueId(), "");
     EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueName(), "");
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+}
+
+/**
+ * @tc.name: CheckPostMetaData003
+ * @tc.desc: test CheckPostMetaData skips when avQueueId/avQueueName unchanged
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostMetaData003, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(true);
+    g_MigrateAVSessionServer->metaDataCache_.Reset();
+    g_MigrateAVSessionServer->metaDataCache_.SetAVQueueId("queueId_001");
+    g_MigrateAVSessionServer->metaDataCache_.SetAVQueueName("queueName_001");
+
+    AVMetaData data;
+    data.SetAVQueueId("queueId_001");
+    data.SetAVQueueName("queueName_001");
+
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckPostMetaData(data), false);
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueId(), "queueId_001");
+    EXPECT_EQ(g_MigrateAVSessionServer->metaDataCache_.GetAVQueueName(), "queueName_001");
     g_MigrateAVSessionServer->metaDataCache_.Reset();
     g_MigrateAVSessionServer->isNeedByRemote.store(false);
 }
