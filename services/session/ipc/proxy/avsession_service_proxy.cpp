@@ -917,6 +917,33 @@ int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const
     return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
 }
 
+int32_t AVSessionServiceProxy::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo,
+    const AAFwk::WantParams& commandArgs)
+{
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()), ERR_MARSHALLING,
+        "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(sessionToken.sessionId), ERR_MARSHALLING, "write sessionId failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionToken.pid), ERR_MARSHALLING, "write pid failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(sessionToken.uid), ERR_MARSHALLING, "write uid failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteParcelable(&commandArgs), ERR_MARSHALLING, "Write args failed");
+    int32_t deviceInfoSize = static_cast<int32_t>(outputDeviceInfo.deviceInfos_.size());
+    CHECK_AND_RETURN_RET_LOG(data.WriteInt32(deviceInfoSize), ERR_MARSHALLING, "write deviceInfoSize failed");
+    for (const DeviceInfo& deviceInfo : outputDeviceInfo.deviceInfos_) {
+        CHECK_AND_RETURN_RET_LOG(deviceInfo.Marshalling(data), ERR_MARSHALLING, "write deviceInfo failed");
+    }
+    auto remote = Remote();
+    CHECK_AND_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST, "get remote service failed");
+    MessageParcel reply;
+    MessageOption option;
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(
+        static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_WITH_ARGS),
+            data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+    int32_t res = AVSESSION_ERROR;
+    return reply.ReadInt32(res) ? res : AVSESSION_ERROR;
+}
+
 int32_t AVSessionServiceProxy::StopCast(const SessionToken& sessionToken)
 {
     MessageParcel data;

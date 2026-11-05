@@ -29,6 +29,7 @@
 #include "avsession_service.h"
 #include "avsession_event_handler.h"
 #include <filesystem>
+#include <cstdint>
 
 namespace OHOS::AVSession {
 
@@ -276,7 +277,8 @@ void PcmCastSession::OnCastEventRecv(int32_t errorCode, std::string& errorMsg)
 }
 
 int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
-    std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
+    std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken,
+    const AAFwk::WantParams& commandArgs)
 {
     SLOGI("PcmCastSession StartCast");
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
@@ -287,39 +289,16 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
     bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession" &&
         ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
         ProtocolType::TYPE_CAST_PLUS_AUDIO) == 0));
+    bool isPcmNfc = (commandArgs.GetStringParam(CONNECT_TYPE) == CONNECT_TO_NFC);
     if (isPcmScreen) {
         AVRouter::GetInstance().OnSystemCommonEvent(QUERY_PINCODE, "");
     }
 
     if (castHandle_ > 0 && !isPcmScreen) {
-        if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
-            SLOGI("repeat startcast %{public}lld", static_cast<long long>(castHandle_));
-            SendStateChangeRequest(sessionToken);
-            {
-                std::lock_guard lockGuard(castLock_);
-                descriptor_.uid_ = sessionToken.uid;
-                CHECK_AND_RETURN_RET_LOG(descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0, ERR_INVALID_PARAM,
-                    "empty device info");
-                descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = sessionToken.uid;
-            }
-            return ERR_REPEAT_CAST;
-        } else {
-            SLOGI("cast check with pre cast alive %{public}lld, unregister callback",
-                static_cast<long long>(castHandle_));
-            {
-                std::lock_guard lockGuard(castLock_);
-                multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
-                newOutputDeviceInfo_ = outputDeviceInfo;
-                newSessionToken_ = sessionToken;
-                newServiceNameStatePair_ = serviceNameStatePair;
-            }
-            StopCast(DeviceRemoveAction::ACTION_TO_SWITCH_HIPLAY);
- 
-            return AVSESSION_SUCCESS;
-        }
+        return HandleAliveCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
     }
 
-    OutputDeviceInfo connectOutputDeviceInfo = ConstructConnectOutputDeviceInfo(outputDeviceInfo);
+    OutputDeviceInfo connectOutputDeviceInfo = ConstructConnectOutputDeviceInfo(outputDeviceInfo, isPcmNfc);
     int sourceAllConnectResult = CollaborationManagerHiPlay::GetInstance().CastAddToCollaboration(
         connectOutputDeviceInfo.deviceInfos_[0]);
     if (sourceAllConnectResult != AVSESSION_SUCCESS) {
@@ -327,15 +306,52 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         SLOGE("Collaboration to start cast failed");
         return sourceAllConnectResult;
     }
-    return isPcmScreen ? StartScreenCast(connectOutputDeviceInfo, serviceNameStatePair, sessionToken) :
-        SubStartCast(connectOutputDeviceInfo, serviceNameStatePair, sessionToken);
+    if (isPcmScreen) {
+        return StartScreenCast(connectOutputDeviceInfo, serviceNameStatePair, sessionToken);
+    }
+    if (isPcmNfc) {
+        return StartNfcCast(connectOutputDeviceInfo, serviceNameStatePair, sessionToken, commandArgs);
+    }
+    return SubStartCast(connectOutputDeviceInfo, serviceNameStatePair, sessionToken);
 }
 
-OutputDeviceInfo PcmCastSession::ConstructConnectOutputDeviceInfo(const OutputDeviceInfo& outputDeviceInfo)
+int32_t PcmCastSession::HandleAliveCast(const OutputDeviceInfo& outputDeviceInfo,
+    std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken)
+{
+    if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
+        SLOGI("repeat startcast %{public}lld", static_cast<long long>(castHandle_));
+        SendStateChangeRequest(sessionToken);
+        {
+            std::lock_guard lockGuard(castLock_);
+            descriptor_.uid_ = sessionToken.uid;
+            CHECK_AND_RETURN_RET_LOG(descriptor_.outputDeviceInfo_.deviceInfos_.size() > 0, ERR_INVALID_PARAM,
+                "empty device info");
+            descriptor_.outputDeviceInfo_.deviceInfos_[0].hiPlayDeviceInfo_.castUid_ = sessionToken.uid;
+        }
+        return ERR_REPEAT_CAST;
+    } else {
+        SLOGI("cast check with pre cast alive %{public}lld, unregister callback",
+            static_cast<long long>(castHandle_));
+        {
+            std::lock_guard lockGuard(castLock_);
+            multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
+            newOutputDeviceInfo_ = outputDeviceInfo;
+            newSessionToken_ = sessionToken;
+            newServiceNameStatePair_ = serviceNameStatePair;
+        }
+        StopCast(DeviceRemoveAction::ACTION_TO_SWITCH_HIPLAY);
+        return AVSESSION_SUCCESS;
+    }
+}
+
+OutputDeviceInfo PcmCastSession::ConstructConnectOutputDeviceInfo(const OutputDeviceInfo& outputDeviceInfo,
+    bool isNotScreen)
 {
     OutputDeviceInfo connectOutputDeviceInfo = outputDeviceInfo;
     if ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
         ProtocolType::TYPE_CAST_PLUS_AUDIO) == 0) {
+        connectOutputDeviceInfo.deviceInfos_[0].realDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+    } else if (isNotScreen) {
         connectOutputDeviceInfo.deviceInfos_[0].realDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
     }
     return connectOutputDeviceInfo;
@@ -379,6 +395,50 @@ int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo
         DestroyTask();
     }
     SLOGI("PcmCastSession StartCast ret %{public}d", ret);
+    return ret;
+}
+
+int32_t PcmCastSession::StartNfcCast(const OutputDeviceInfo& outputDeviceInfo,
+    std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken,
+    const AAFwk::WantParams& commandArgs)
+{
+    SLOGI("PcmCastSession StartNfcCast");
+    uint16_t port = commandArgs.GetIntParam(PORT, 0);
+    std::string ip = commandArgs.GetStringParam(IP);
+    CHECK_AND_RETURN_RET_LOG(port > 0, AVSESSION_ERROR, "get port failed");
+    CHECK_AND_RETURN_RET_LOG(!ip.empty(), AVSESSION_ERROR, "get ip failed");
+    castHandle_ = AVRouter::GetInstance().StartCast(outputDeviceInfo, serviceNameStatePair, "pcmCastSession");
+    CHECK_AND_RETURN_RET_LOG(castHandle_ != AVSESSION_ERROR, AVSESSION_ERROR, "StartCast failed");
+    AVRouter::GetInstance().RegisterCallback(castHandle_, shared_from_this(),
+        "pcmCastSession", outputDeviceInfo.deviceInfos_[0]);
+
+    bool isDeviceLevel = (sessionToken.sessionId == "pcmCastSession");
+    int32_t castMode = isDeviceLevel ? HiPlayCastMode::DEVICE_LEVEL : HiPlayCastMode::APP_LEVEL;
+    {
+        std::lock_guard lockGuard(castLock_);
+        tempDeviceInfo_ = outputDeviceInfo.deviceInfos_[0];
+        tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = castMode;
+        descriptor_.uid_ = isDeviceLevel ? 0 : sessionToken.uid;
+        SLOGI("PcmCastSession StartNfcCast castMode: %{public}d", tempDeviceInfo_.hiPlayDeviceInfo_.castMode_);
+    }
+
+    SendStateChangeRequest(sessionToken);
+    WriteCastPairToFile(outputDeviceInfo.deviceInfos_[0].deviceId_, castMode);
+
+    int32_t castId = static_cast<int32_t>(castHandle_);
+    CastEngine::ConnectionConfig connectionConfig = {};
+    connectionConfig.triggerType = CastEngine::TriggerType::HIPLAY_NFC_CONNECT;
+    connectionConfig.wifiPort = port;
+    connectionConfig.remoteWifiIp = ip;
+    int32_t ret = AVRouter::GetInstance().AddDeviceWithConnectionConfig(castId, outputDeviceInfo, 0, connectionConfig);
+    if (ret == AVSESSION_SUCCESS) {
+        castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
+        SLOGI("PcmCastSession StartNfcCast castHandleDeviceId_: %{public}s", castHandleDeviceId_.c_str());
+        CreateExtraInfo("SPEAKER", "nfc");
+    } else {
+        DestroyTask();
+    }
+    SLOGI("PcmCastSession StartNfcCast ret %{public}d", ret);
     return ret;
 }
 

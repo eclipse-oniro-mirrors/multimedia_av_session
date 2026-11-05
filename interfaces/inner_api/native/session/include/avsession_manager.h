@@ -392,6 +392,18 @@ public:
      * @since 10
     */
     virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
+
+    /**
+     * Start cast process.
+     *
+     * @param sessionToken Session token
+     * @param outputDeviceInfo outputdeviceInfo
+     * @param commandArgs The commandArgs
+     * @return Returns whether the device was successfully found
+     * @since 26
+    */
+    virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo,
+        const AAFwk::WantParams& commandArgs) = 0;
     
     /**
      * Start cast process.

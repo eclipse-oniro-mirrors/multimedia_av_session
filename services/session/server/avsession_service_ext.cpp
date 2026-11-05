@@ -720,6 +720,44 @@ int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const Outp
     return AVSESSION_SUCCESS;
 }
 
+int32_t AVSessionService::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo,
+    const AAFwk::WantParams& commandArgs)
+{
+    SLOGI("SessionId is %{public}s", AVSessionUtils::GetAnonySessionId(sessionToken.sessionId).c_str());
+    CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    auto appSession = GetContainer().GetSessionById(sessionToken.sessionId);
+    bool isValidSession = (appSession != nullptr);
+    bool isCastPlusAudio = (static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) ==
+        ProtocolType::TYPE_CAST_PLUS_AUDIO);
+    bool isContainCastPlusAudio = ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
+        ProtocolType::TYPE_CAST_PLUS_AUDIO) != 0);
+    bool isAudioSessionType = isValidSession ?
+        appSession->GetDescriptor().sessionType_ == AVSession::SESSION_TYPE_AUDIO : false;
+
+    bool isPcm = (sessionToken.sessionId == "pcmCastSession") || (sessionToken.sessionId == "hiplayDefault") ||
+        (isValidSession && isCastPlusAudio) || (isValidSession && isContainCastPlusAudio && isAudioSessionType);
+    if (isPcm) {
+        std::shared_ptr<PcmCastSession> pcmCastSession;
+        {
+            std::lock_guard lockGuard(sessionServiceLock_);
+            if (pcmCastSession_ == nullptr) {
+                SLOGI("Create pcmCastSession");
+                pcmCastSession_ = std::make_shared<PcmCastSession>();
+            }
+            pcmCastSession = pcmCastSession_;
+        }
+        
+        SessionToken pcmSessionToken;
+        pcmSessionToken.sessionId = sessionToken.sessionId;
+        pcmSessionToken.uid = 0;
+        return pcmCastSession->StartCast(outputDeviceInfo, castServiceNameStatePair_, pcmSessionToken, commandArgs);
+    }
+#endif //CASTPLUS_CAST_ENGINE_ENABLE
+    return StartCast(sessionToken, outputDeviceInfo);
+}
+
 int32_t AVSessionService::StopCast(const SessionToken& sessionToken)
 {
 #ifdef CAR_FEATURE_ENABLE

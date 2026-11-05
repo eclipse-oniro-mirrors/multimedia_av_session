@@ -163,6 +163,17 @@ private:
     static void FillExtraInfo(napi_env env, napi_value arg, std::string& extraInfo);
 
     static void SetStartAVPlaybackError(int32_t ret, std::shared_ptr<ContextBase> context);
+
+    struct StartCastContext : public ContextBase {
+        SessionToken sessionToken_ {};
+        OutputDeviceInfo outputdeviceInfo_;
+        AAFwk::WantParams commandArgs_;
+    };
+
+    static void ProcessStartCastCommandArgs(napi_env env, std::shared_ptr<StartCastContext> context,
+        size_t argc, napi_value* argv);
+    
+    static int32_t StartCastWithArgs(std::shared_ptr<StartCastContext> context);
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_NAPI_AVSESSION_MANAGER_H
