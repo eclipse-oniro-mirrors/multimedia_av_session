@@ -175,10 +175,10 @@ AVSession_ErrCode OHAVCastController::RegisterMediaItemChangedCallback(
 AVSession_ErrCode OHAVCastController::UnregisterMediaItemChangedCallback(
     OH_AVCastControllerCallback_MediaItemChange callback)
 {
+    std::lock_guard<std::mutex> lockGuard(lock_);
     if (ohAVCastControllerCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    std::lock_guard<std::mutex> lockGuard(lock_);
     return ohAVCastControllerCallbackImpl_->UnregisterMediaItemChangedCallback((OH_AVCastController*)this,
         callback);
 }

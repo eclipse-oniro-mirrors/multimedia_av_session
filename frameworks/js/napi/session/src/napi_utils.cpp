@@ -1341,6 +1341,7 @@ napi_status NapiUtils::GetValueEx(napi_env env, napi_value in, std::vector<doubl
         status = napi_get_typedarray_info(env, in, &type, &length, reinterpret_cast<void**>(&data), &buffer, &offset);
         SLOGD("GetValueEx type=%{public}d length=%{public}zu", static_cast<int>(type), length);
         CHECK_RETURN(status == napi_ok, "napi_get_typedarray_info failed!", napi_invalid_arg);
+        CHECK_RETURN(type == napi_float64_array, "is not float64 typed array!", napi_invalid_arg);
         if (data != nullptr) {
             TypedArray2Vector<double>(data, length, type, out);
         }
