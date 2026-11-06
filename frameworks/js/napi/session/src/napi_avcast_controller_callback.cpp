@@ -36,10 +36,13 @@ NapiAVCastControllerCallback::~NapiAVCastControllerCallback()
         SLOGI("destroy with isValid_ set false");
         *isValid_ = false;
     }
-    if (dataSrcRef_ != nullptr) {
-        napi_ref ref = dataSrcRef_;
-        dataSrcRef_ = nullptr;
-        napi_delete_reference(env_, ref);
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (dataSrcRef_ != nullptr) {
+            napi_ref ref = dataSrcRef_;
+            dataSrcRef_ = nullptr;
+            napi_delete_reference(env_, ref);
+        }
     }
     SLOGI("destroy");
 }
@@ -349,7 +352,12 @@ int32_t NapiAVCastControllerCallback::onDataSrcRead(const std::shared_ptr<AVShar
                                                     uint32_t length, int64_t pos, int32_t& result)
 {
     SLOGI("napi onDataSrcRead length %{public}d", length);
-    return readDataSrc(env_, mem, length, pos, result);
+    napi_env envSnapshot;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        envSnapshot = env_;
+    }
+    return readDataSrc(envSnapshot, mem, length, pos, result);
 }
 
 napi_status NapiAVCastControllerCallback::saveDataSrc(napi_env env, napi_value avQueueItem)
@@ -363,6 +371,7 @@ napi_status NapiAVCastControllerCallback::saveDataSrc(napi_env env, napi_value a
         return status;
     }
 
+    std::lock_guard<std::mutex> lockGuard(lock_);
     napi_env preEnv = env_;
     env_ = env;
     if (dataSrcRef_ != nullptr) {
@@ -427,9 +436,14 @@ void NapiAVCastControllerCallback::threadSafeReadDataSrcCb(napi_env env, napi_va
 int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, const std::shared_ptr<AVSharedMemoryBase>& mem,
     uint32_t length, int64_t pos, int32_t& result)
 {
-    if (dataSrcRef_ == nullptr) {
-        SLOGE("dataSrcRef_ nullptr");
-        return 0;
+    napi_threadsafe_function tsfnSnapshot = nullptr;
+    {
+        std::lock_guard<std::mutex> lockGuard(lock_);
+        if (dataSrcRef_ == nullptr) {
+            SLOGE("dataSrcRef_ nullptr");
+            return 0;
+        }
+        tsfnSnapshot = threadSafeReadDataSrcFunc_;
     }
     if (mem == nullptr) {
         SLOGE("mem nullptr");
@@ -438,7 +452,7 @@ int32_t NapiAVCastControllerCallback::readDataSrc(napi_env env, const std::share
     auto resultPtr = std::make_shared<std::atomic<int32_t>>(0);
     DataContextForThreadSafe* data =
         new DataContextForThreadSafe { dataSrcRef_, mem, length, pos, resultPtr, dataSrcSyncCond_ };
-    napi_status status = napi_call_threadsafe_function(threadSafeReadDataSrcFunc_, data, napi_tsfn_blocking);
+    napi_status status = napi_call_threadsafe_function(tsfnSnapshot, data, napi_tsfn_blocking);
     if (status != napi_ok) {
         SLOGE("readDataSrc function call failed %{public}d", status);
         delete data;

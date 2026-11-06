@@ -215,6 +215,7 @@ public:
      *
      * @param callback Listen for death callback event{@link DeathCallback}.
      * @return Whether to return successful callback.
+     * @note Thread-safe. The registered callback is invoked asynchronously outside any internal lock.
      * @since 9
     */
     virtual int32_t RegisterServiceDeathCallback(const DeathCallback& callback) = 0;
@@ -224,6 +225,7 @@ public:
      *
      * @param callback Listen for death callback event{@link DeathCallback}.
      * @return Whether to return successful callback.
+     * @note Thread-safe. Must be called with the same thread-safety guarantee as RegisterServiceDeathCallback.
      * @since 9
     */
     virtual int32_t UnregisterServiceDeathCallback() = 0;

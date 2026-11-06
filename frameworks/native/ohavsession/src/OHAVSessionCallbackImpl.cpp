@@ -121,8 +121,8 @@ void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState
         OHDeviceInfo::DestroyAVSessionOutputDevice);
     CHECK_AND_CONTINUE_LOG(avSessionOutputDeviceInfo != nullptr,
         "OnOutputDeviceChange avSession OutputDeviceInfo is nullptr.");
-    CHECK_AND_CONTINUE_LOG(avsession_ != nullptr, "OnOutputDeviceChange avsession is nullptr.");
     std::lock_guard<std::mutex> lockGuard(lock_);
+    CHECK_AND_CONTINUE_LOG(avsession_ != nullptr, "OnOutputDeviceChange avsession is nullptr.");
     for (auto it = outputDeviceChangeCallbacks_.begin(); it != outputDeviceChangeCallbacks_.end(); ++it) {
         (*it)(avsession_, (AVSession_ConnectionState)connectionState, avSessionOutputDeviceInfo.get());
     }

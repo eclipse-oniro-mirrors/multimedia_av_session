@@ -50,6 +50,7 @@ public:
 
     static constexpr size_t TIME_OUT_SECOND = 5;
     static std::string bundleName_;
+    static std::mutex downloadAVQImgMutex_;
 
 private:
     static napi_value ConstructorCallback(napi_env env, napi_callback_info info);
@@ -191,7 +192,6 @@ private:
     Rosen::IInputEventRecipientInfo recipientInfo_;
 
     static std::mutex lock_;
-    static std::mutex downloadAVQImgMutex_;
     static std::recursive_mutex currentNapiSessionMutex_;
     static std::shared_ptr<NapiAVSession> currentNapiSession_;
     static std::shared_ptr<NapiAVSession> napiAVSession_;
