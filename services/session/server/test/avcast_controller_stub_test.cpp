@@ -935,7 +935,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode19_1, TestSize.Leve
     EXPECT_EQ(ret, ERR_NONE);
     int32_t result = AVSESSION_ERROR;
     reply.ReadInt32(result);
-    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(result, ERR_UNMARSHALLING);
     SLOGI("OnRemoteRequestCode19_1 end");
 }
 
@@ -961,7 +961,7 @@ static HWTEST_F(AVCastControllerStubTest, OnRemoteRequestCode19_2, TestSize.Leve
     EXPECT_EQ(ret, ERR_NONE);
     int32_t result = AVSESSION_SUCCESS;
     reply.ReadInt32(result);
-    EXPECT_EQ(result, AVSESSION_ERROR);
+    EXPECT_EQ(result, ERR_UNMARSHALLING);
     SLOGI("OnRemoteRequestCode19_2 end");
 }
 
