@@ -615,4 +615,17 @@ static HWTEST_F(AVSessionProxyTest, GetAllCastDisplays002, testing::ext::TestSiz
 }
 #endif
 
+/**
+ * @tc.name: Occupy001
+ * @tc.desc: Test Occupy
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionProxyTest, Occupy001, testing::ext::TestSize.Level1)
+{
+    SLOGI("Occupy001, start");
+    int32_t ret = g_AVSessionProxy->Occupy();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    SLOGI("Occupy001, end");
+}
+
 } //OHOS::AVSESSION

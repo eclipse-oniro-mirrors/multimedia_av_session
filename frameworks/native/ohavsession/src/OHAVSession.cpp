@@ -452,6 +452,34 @@ AVSession_ErrCode OHAVSession::UnregisterOutputDeviceChangeCallback(OH_AVSession
     return AV_SESSION_ERR_SUCCESS;
 }
 
+AVSession_ErrCode OHAVSession::Occupy()
+{
+    if (IsAVSessionNull()) {
+        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+    }
+    int32_t ret = avSession_->Occupy();
+    return GetEncodeErrcode(ret);
+}
+
+AVSession_ErrCode OHAVSession::RegisterOccupiedLostCallback(OH_AVSessionCallback_OnOccupiedLost callback,
+    void* userData)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    CheckAndRegister();
+    ohAVSessionCallbackImpl_->RegisterOccupiedLostCallback((OH_AVSession*)this, callback, userData);
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSession::UnregisterOccupiedLostCallback(OH_AVSessionCallback_OnOccupiedLost callback)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (ohAVSessionCallbackImpl_ == nullptr) {
+        return AV_SESSION_ERR_SUCCESS;
+    }
+    ohAVSessionCallbackImpl_->UnregisterOccupiedLostCallback((OH_AVSession*)this, callback);
+    return AV_SESSION_ERR_SUCCESS;
+}
+
 AVSession_ErrCode OHAVSession::GetAVCastController(OHAVCastController **avcastController)
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -1055,6 +1083,49 @@ AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterOutputDeviceChangeCallback(callback);
+}
+
+AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession)
+{
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "AVSession is null", true),
+        "AVSession is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->Occupy();
+}
+
+AVSession_ErrCode OH_AVSession_RegisterOccupiedLostCallback(OH_AVSession* avsession,
+    OH_AVSessionCallback_OnOccupiedLost callback, void* userData)
+{
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "AVSession is null", true),
+        "AVSession is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "callback is null", true),
+        "callback is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->RegisterOccupiedLostCallback(callback, userData);
+}
+
+AVSession_ErrCode OH_AVSession_UnregisterOccupiedLostCallback(OH_AVSession* avsession,
+    OH_AVSessionCallback_OnOccupiedLost callback)
+{
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "AVSession is null", true),
+        "AVSession is null");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
+        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "callback is null", true),
+        "callback is null");
+
+    OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
+    return oh_avsession->UnregisterOccupiedLostCallback(callback);
 }
 
 AVSession_ErrCode OH_AVSession_AcquireSession(const char* sessionTag, const char* bundleName, const char* abilityName,

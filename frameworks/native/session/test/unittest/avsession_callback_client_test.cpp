@@ -533,5 +533,22 @@ HWTEST_F(AVSessionCallbackClientTest, OnDesktopLyricStateChanged001, TestSize.Le
     ErrCode ret = sessionCallbackClient->OnDesktopLyricStateChanged(state);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
+
+/**
+* @tc.name: OnOccupiedLost001
+* @tc.desc: test OnOccupiedLost
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionCallbackClientTest, OnOccupiedLost001, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::shared_ptr<AVSessionCallback> sessionCallback = std::make_shared<AVSessionCallbackImpl>();
+    std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
+        std::make_shared<AVSessionCallbackClient>(sessionCallback);
+    EXPECT_NE(sessionCallbackClient, nullptr);
+    ErrCode ret = sessionCallbackClient->OnOccupiedLost();
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
 } // namespace AVSession
 } // namespace OHOS

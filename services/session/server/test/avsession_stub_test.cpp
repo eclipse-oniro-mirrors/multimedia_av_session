@@ -648,3 +648,19 @@ static HWTEST(AVSessionStubTest, HandleSetSupportedLoopModes003, TestSize.Level1
     EXPECT_EQ(ret, OHOS::ERR_NONE);
     SLOGI("HandleSetSupportedLoopModes003 end!");
 }
+
+/**
+ * @tc.name: HandleOccupy001
+ * @tc.desc: Test HandleOccupy
+ * @tc.type: FUNC
+ */
+static HWTEST(AVSessionStubTest, HandleOccupy001, TestSize.Level0)
+{
+    SLOGI("HandleOccupy001 begin!");
+    AVSessionStubDemo avSessionStub;
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    int ret = avSessionStub.HandleOccupy(data, reply);
+    EXPECT_EQ(ret, OHOS::ERR_NONE);
+    SLOGI("HandleOccupy001 end!");
+}

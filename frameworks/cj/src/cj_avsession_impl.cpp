@@ -214,6 +214,14 @@ int32_t CJAVSessionImpl::Deactivate()
     return CJExecMethod(call, "Deactivate");
 }
 
+int32_t CJAVSessionImpl::Occupy()
+{
+    auto call = [&]() {
+        return session_->Occupy();
+    };
+    return CJExecMethod(call, "Occupy");
+}
+
 int32_t CJAVSessionImpl::Destroy()
 {
     auto call = [&]() {

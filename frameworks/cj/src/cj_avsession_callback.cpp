@@ -42,7 +42,8 @@ const int8_t ANSWER = 16;
 const int8_t HANG_UP = 17;
 const int8_t TOGGLE_CALL_MUTE = 18;
 const int8_t CAST_DISPLAY_CHANGE = 19;
-const int8_t MAX_EVENT_NUM = 20;
+const int8_t OCCUPIED_LOST = 20;
+const int8_t MAX_EVENT_NUM = 21;
 
 CJAVSessionCallback::CJAVSessionCallback()
 {
@@ -66,6 +67,7 @@ CJAVSessionCallback::CJAVSessionCallback()
     typeToCallbackMap_[HANG_UP] = &CJAVSessionCallback::InitHangUp;
     typeToCallbackMap_[TOGGLE_CALL_MUTE] = &CJAVSessionCallback::InitToggleCallMute;
     typeToCallbackMap_[CAST_DISPLAY_CHANGE] = &CJAVSessionCallback::InitCastDisplayChange;
+    typeToCallbackMap_[OCCUPIED_LOST] = &CJAVSessionCallback::InitOccupiedLost;
     for (uint32_t i = 0; i < MAX_EVENT_NUM; i++) {
         callbackMutexMap_.push_back(std::make_shared<std::recursive_mutex>());
     }
@@ -332,6 +334,18 @@ void CJAVSessionCallback::InitCastDisplayChange(int64_t id)
     };
 }
 
+void CJAVSessionCallback::InitOccupiedLost(int64_t id)
+{
+    if (id == 0) {
+        occupiedLost = nullptr;
+        return;
+    }
+    auto callback = reinterpret_cast<void(*)()>(id);
+    occupiedLost = [lambda = CJLambda::Create(callback)]() -> void {
+        lambda();
+    };
+}
+
 
 void CJAVSessionCallback::OnPlay(const AVControlCommand& cmd)
 {
@@ -566,6 +580,15 @@ void CJAVSessionCallback::OnCastDisplayChange(const CastDisplayInfo& castDisplay
         }
         castDisplayChange(ccastDisplayInfo);
         cjStructHeapFree(ccastDisplayInfo);
+    }
+}
+
+void CJAVSessionCallback::OnOccupiedLost()
+{
+    std::lock_guard<std::recursive_mutex> lock(*callbackMutexMap_[OCCUPIED_LOST]);
+    if (occupiedLost) {
+        SLOGD("occupied lost");
+        occupiedLost();
     }
 }
 } // end of avsession namespace

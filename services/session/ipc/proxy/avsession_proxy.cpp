@@ -1168,4 +1168,28 @@ int32_t AVSessionProxy::SetBackgroundPlayMode(int32_t mode)
     int32_t ret = AVSESSION_ERROR;
     return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
 }
+
+int32_t AVSessionProxy::Occupy()
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionProxy::Occupy");
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SESSION_NOT_EXIST_LOCAL_SET, "session is destroyed", false),
+        "session is destroyed");
+    MessageParcel data;
+    CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
+        ERR_MARSHALLING, "write interface token failed");
+    MessageParcel reply;
+    MessageOption option;
+    auto remote = Remote();
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(remote != nullptr, ERR_SERVICE_NOT_EXIST,
+        AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
+        AudioStandard::AVSESSION_CONTROL_SERVICE_NOT_EXIST_LOCAL_SET, "get remote service failed", false),
+        "get remote service failed");
+    CHECK_AND_RETURN_RET_LOG(remote->SendRequest(SESSION_CMD_OCCUPY, data, reply, option) == 0,
+        ERR_IPC_SEND_REQUEST, "send request failed");
+
+    int32_t ret = AVSESSION_ERROR;
+    return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
+}
 } // namespace OHOS::AVSession

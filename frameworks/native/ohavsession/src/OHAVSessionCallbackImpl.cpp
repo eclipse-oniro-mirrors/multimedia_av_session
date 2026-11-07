@@ -128,6 +128,15 @@ void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState
     }
 }
 
+void OHAVSessionCallbackImpl::OnOccupiedLost()
+{
+    CHECK_AND_CONTINUE_LOG(avsession_ != nullptr, "OnOccupiedLost avsession is nullptr.");
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    for (auto it = occupiedLostCallbacks_.begin(); it != occupiedLostCallbacks_.end(); ++it) {
+        it->first(avsession_, it->second);
+    }
+}
+
 AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void*userData)
 {
@@ -450,6 +459,37 @@ AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOutputDeviceChangeCallback(
         }
     }
 
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSessionCallbackImpl::RegisterOccupiedLostCallback(OH_AVSession* session,
+    OH_AVSessionCallback_OnOccupiedLost callback, void* userData)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (avsession_ == nullptr) {
+        avsession_ = session;
+    }
+    auto it = std::find_if(occupiedLostCallbacks_.begin(), occupiedLostCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnOccupiedLost, void*> &element) {
+            return element.first == callback;
+        });
+    if (it == occupiedLostCallbacks_.end()) {
+        occupiedLostCallbacks_.emplace_back(std::make_pair(callback, userData));
+    }
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOccupiedLostCallback(OH_AVSession* session,
+    OH_AVSessionCallback_OnOccupiedLost callback)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    auto it = std::find_if(occupiedLostCallbacks_.begin(), occupiedLostCallbacks_.end(),
+        [callback](const std::pair<OH_AVSessionCallback_OnOccupiedLost, void*> &element) {
+            return element.first == callback;
+        });
+    if (it != occupiedLostCallbacks_.end()) {
+        occupiedLostCallbacks_.erase(it);
+    }
     return AV_SESSION_ERR_SUCCESS;
 }
 }

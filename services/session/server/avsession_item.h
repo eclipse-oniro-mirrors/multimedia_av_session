@@ -202,6 +202,8 @@ public:
 
     int32_t SetBackgroundPlayMode(int32_t mode) override;
 
+    int32_t Occupy() override;
+
     int32_t GetBackgroundPlayMode();
 
     AVCallState GetAVCallState();

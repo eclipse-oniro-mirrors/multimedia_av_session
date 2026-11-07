@@ -68,6 +68,7 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "playWithAssetId", OnPlayWithAssetId },
     { "castDisplayChange", OnCastDisplayChange },
     { "customDataChange", OnCustomData },
+    { "occupiedLost", OnOccupiedLost },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -93,6 +94,7 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "playWithAssetId", OffPlayWithAssetId },
     { "castDisplayChange", OffCastDisplayChange },
     { "customDataChange", OffCustomData },
+    { "occupiedLost", OffOccupiedLost },
 };
 std::list<int32_t> registerEventList_;
 std::map<std::string, int32_t> convertEventType_ = {
@@ -182,6 +184,7 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setDesktopLyricState", SetDesktopLyricState),
         DECLARE_NAPI_FUNCTION("getDesktopLyricState", GetDesktopLyricState),
         DECLARE_NAPI_FUNCTION("setBackgroundPlayMode", SetBackgroundPlayMode),
+        DECLARE_NAPI_FUNCTION("occupy", Occupy),
         DECLARE_NAPI_FUNCTION("onPlay", OnEventPlay),
         DECLARE_NAPI_FUNCTION("offPlay", OffEventPlay),
         DECLARE_NAPI_FUNCTION("onPlayNext", OnEventPlayNext),
@@ -2695,6 +2698,37 @@ napi_value NapiAVSession::SetBackgroundPlayMode(napi_env env, napi_callback_info
     return NapiAsyncWork::Enqueue(env, context, "SetBackgroundPlayMode", executor, complete);
 }
 
+napi_value NapiAVSession::Occupy(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("Occupy failed : no memory");
+        NapiUtils::ThrowError(env, "Occupy failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    context->GetCbInfo(env, info);
+    auto executor = [context]() {
+        auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
+            ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "Occupy", context->errMessage);
+            return;
+        }
+        int32_t ret = napiSession->session_->Occupy();
+        if (ret != AVSESSION_SUCCESS) {
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ret];
+            ErrCodeToMessage(ret, "Occupy", context->errMessage);
+        }
+    };
+    auto complete = [env](napi_value &output) {
+        output = NapiUtils::GetUndefinedValue(env);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "Occupy", executor, complete);
+}
+
 void NapiAVSession::ErrCodeToMessage(int32_t errCode, std::string& message)
 {
     switch (errCode) {
@@ -2875,6 +2909,13 @@ napi_status NapiAVSession::OnOutputDeviceChange(napi_env env, NapiAVSession* nap
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
+}
+
+napi_status NapiAVSession::OnOccupiedLost(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OCCUPIED_LOST, callback);
 }
 
 napi_status NapiAVSession::OnCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)
@@ -3184,6 +3225,14 @@ napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* na
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
+}
+
+napi_status NapiAVSession::OffOccupiedLost(napi_env env, NapiAVSession* napiSession, napi_value callback)
+{
+    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
+    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
+        "NapiAVSessionCallback object is nullptr");
+    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OCCUPIED_LOST, callback);
 }
 
 napi_status NapiAVSession::OffCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)

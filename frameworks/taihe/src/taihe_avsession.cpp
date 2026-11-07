@@ -71,6 +71,7 @@ std::set<std::string> AVSessionImpl::onEventHandlers_ = {
     "customDataChange",
     "desktopLyricVisibilityChanged",
     "desktopLyricStateChanged",
+    "occupiedLost",
 };
 std::set<std::string> AVSessionImpl::offEventHandlers_ = {
     "play",
@@ -98,6 +99,7 @@ std::set<std::string> AVSessionImpl::offEventHandlers_ = {
     "customDataChange",
     "desktopLyricVisibilityChanged",
     "desktopLyricStateChanged",
+    "occupiedLost",
 };
 std::map<std::string, int32_t> convertEventType_ = {
     { "play", OHOS::AVSession::AVControlCommand::SESSION_CMD_PLAY },
@@ -1009,6 +1011,22 @@ void AVSessionImpl::SetBackgroundPlayModeSync(BackgroundPlayMode mode)
     }
 }
 
+void AVSessionImpl::OccupySync()
+{
+    OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::Occupy");
+    if (session_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_SESSION_NOT_EXIST],
+            "Occupy failed : session is nullptr");
+        return;
+    }
+    int32_t ret = session_->Occupy();
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        std::string errMessage;
+        ErrCodeToMessage(ret, "Occupy", errMessage);
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], errMessage);
+    }
+}
+
 void AVSessionImpl::SetMediaCenterControlTypeSync(array_view<string> controlTypes)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::SetMediaCenterControlTypeSync");
@@ -1430,6 +1448,16 @@ void AVSessionImpl::OnDesktopLyricStateChanged(callback_view<void(DesktopLyricSt
         CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
         int32_t status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_DESKTOP_LYRIC_STATE_CHANGED,
             cacheCallback);
+        CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
+    }
+}
+
+void AVSessionImpl::OnOccupiedLost(callback_view<void()> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    if (OnEvent("occupiedLost", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_ON_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->AddCallback(TaiheAVSessionCallback::EVENT_OCCUPIED_LOST, cacheCallback);
         CHECK_RETURN_VOID_THROW_ON_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "add callback failed");
     }
 }
@@ -1887,6 +1915,19 @@ void AVSessionImpl::OffDesktopLyricStateChanged(optional_view<callback<void(Desk
         CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
         int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_DESKTOP_LYRIC_STATE_CHANGED,
             cacheCallback);
+        CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
+    }
+}
+
+void AVSessionImpl::OffOccupiedLost(optional_view<callback<void()>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    if (OffEvent("occupiedLost", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
+        CHECK_RETURN_VOID_THROW_OFF_ERR(callback_ != nullptr, "callback has not been registered");
+        int32_t status = callback_->RemoveCallback(TaiheAVSessionCallback::EVENT_OCCUPIED_LOST, cacheCallback);
         CHECK_RETURN_VOID_THROW_OFF_ERR(status == OHOS::AVSession::AVSESSION_SUCCESS, "remove callback failed");
     }
 }

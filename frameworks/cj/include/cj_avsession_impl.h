@@ -45,6 +45,7 @@ public:
     int32_t GetAllCastDisplays(CArray& infos);
     int32_t Activate();
     int32_t Deactivate();
+    int32_t Occupy();
     int32_t Destroy();
     int32_t StopCasting();
     int32_t DispatchSessionEvent(char*& event, CArray& args);

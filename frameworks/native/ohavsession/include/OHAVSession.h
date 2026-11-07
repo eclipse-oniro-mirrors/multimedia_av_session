@@ -49,6 +49,7 @@ public:
     AVSession_ErrCode SetFavorite(bool favorite);
     AVSession_ErrCode SetLoopMode(AVSession_LoopMode loopMode);
     AVSession_ErrCode SetRemoteCastEnabled(bool enabled);
+    AVSession_ErrCode Occupy();
 
     AVSession_ErrCode RegisterCommandCallback(AVSession_ControlCommand command,
                                               OH_AVSessionCallback_OnCommand callback, void* userData);
@@ -66,6 +67,8 @@ public:
     AVSession_ErrCode UnregisterToggleFavoriteCallback(OH_AVSessionCallback_OnToggleFavorite callback);
     AVSession_ErrCode RegisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback);
     AVSession_ErrCode UnregisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback);
+    AVSession_ErrCode RegisterOccupiedLostCallback(OH_AVSessionCallback_OnOccupiedLost callback, void* userData);
+    AVSession_ErrCode UnregisterOccupiedLostCallback(OH_AVSessionCallback_OnOccupiedLost callback);
 
     AVSession_ErrCode GetAVCastController(OHAVCastController **avcastController);
     AVSession_ErrCode StopCasting();

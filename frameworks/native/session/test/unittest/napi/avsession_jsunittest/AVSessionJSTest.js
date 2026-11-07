@@ -486,4 +486,37 @@ describe("AVSessionJsTest", function () {
     }
     done();
   })
+
+  it("occupyTest001", 0, async function (done) {
+    try {
+      await session.occupy();
+      console.info(TAG + "occupyTest001 succeed");
+      expect(true).assertTrue();
+    } catch (err) {
+      console.error(TAG + "occupyTest001 error " + JSON.stringify(err));
+      expect().assertFail();
+    }
+    done();
+  })
+
+  it("onOccupiedLostTest001", 0, async function (done) {
+    let receivedCallback = false;
+    const occupiedLostCallback = () => {
+      receivedCallback = true;
+      console.info(TAG + "onOccupiedLostTest001 received occupiedLost");
+    };
+    session.on('occupiedLost', occupiedLostCallback);
+    try {
+      await session.occupy();
+      sleep(200).then(() => {
+        expect(receivedCallback).assertTrue();
+        session.off('occupiedLost', occupiedLostCallback);
+        done();
+      });
+    } catch (err) {
+      console.error(TAG + "onOccupiedLostTest001 error " + JSON.stringify(err));
+      expect().assertFail();
+      done();
+    }
+  })
 })

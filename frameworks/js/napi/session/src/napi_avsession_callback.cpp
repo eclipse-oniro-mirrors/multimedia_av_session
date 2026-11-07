@@ -425,6 +425,13 @@ void NapiAVSessionCallback::OnDesktopLyricStateChanged(const DesktopLyricState &
     HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, callBackName, state);
 }
 
+void NapiAVSessionCallback::OnOccupiedLost()
+{
+    std::string callBackName = "NapiAVSessionCallback::OnOccupiedLost";
+    AVSESSION_TRACE_SYNC_START("NapiAVSessionCallback::OnOccupiedLost");
+    HandleEvent(EVENT_OCCUPIED_LOST, callBackName);
+}
+
 napi_status NapiAVSessionCallback::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     SLOGI("Add callback %{public}d", event);

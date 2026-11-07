@@ -352,6 +352,18 @@ public:
      */
     virtual int32_t SetBackgroundPlayMode(int32_t mode) {return 0;};
 
+    /**
+     * @brief Occupy the current AVSession for multi-module concurrent usage within one application.
+     *
+     * When multiple modules in an application multiplex a session, this interface is used for preemption.
+     * The server notifies the current occupier via OnOccupiedLost and switches the callback routing to
+     * the new caller, so that subsequent control commands are delivered to the new occupier.
+     *
+     * @return Return whether the occupy is successful.
+     * @since 26
+     */
+    virtual int32_t Occupy() { return AVSESSION_SUCCESS; };
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * @brief Get the controller corresponding to this session.

@@ -86,6 +86,7 @@ private:
     static napi_value SetDesktopLyricState(napi_env env, napi_callback_info info);
     static napi_value GetDesktopLyricState(napi_env env, napi_callback_info info);
     static napi_value SetBackgroundPlayMode(napi_env env, napi_callback_info info);
+    static napi_value Occupy(napi_env env, napi_callback_info info);
     static napi_value OnEventPlay(napi_env env, napi_callback_info info);
     static napi_value OffEventPlay(napi_env env, napi_callback_info info);
     static napi_value OnEventPlayNext(napi_env env, napi_callback_info info);
@@ -140,6 +141,7 @@ private:
     static napi_status OnPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OnCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OnOccupiedLost(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static napi_status OffPlay(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffPause(napi_env env, NapiAVSession* napiSession, napi_value callback);
@@ -164,6 +166,7 @@ private:
     static napi_status OffPlayWithAssetId(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffCastDisplayChange(napi_env env, NapiAVSession* napiSession, napi_value callback);
     static napi_status OffCustomData(napi_env env, NapiAVSession* napiSession, napi_value callback);
+    static napi_status OffOccupiedLost(napi_env env, NapiAVSession* napiSession, napi_value callback);
 
     static void ErrCodeToMessage(int32_t errCode, std::string& message);
     static void ErrCodeToMessage(int32_t errCode, const std::string &funcName, std::string &message);

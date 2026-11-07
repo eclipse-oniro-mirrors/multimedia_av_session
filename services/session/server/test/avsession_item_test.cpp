@@ -90,9 +90,11 @@ public:
     ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };
     ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override { return AVSESSION_SUCCESS; };
     ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override { return AVSESSION_SUCCESS; };
+    ErrCode OnOccupiedLost() override { occupiedLostCalled_ = true; return AVSESSION_SUCCESS; };
 
     AVSessionCallbackImpl() = default;
     ~AVSessionCallbackImpl() = default;
+    bool occupiedLostCalled_ = false;
 };
 
 class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProxy {
@@ -1829,5 +1831,54 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetAllCastDisplays_002, TestSize.Level
     SLOGI("AVSessionItem_GetAllCastDisplays_002 End");
 }
 #endif
+
+/**
+ * @tc.name: AVSessionItem_Occupy_001
+ * @tc.desc: Test Occupy with valid callback, verify OnOccupiedLost is called and callback cleared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_001, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_Occupy_001 begin!");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
+    g_AVSessionItem->RegisterCallbackInner(sessionCallback);
+    sessionCallback->occupiedLostCalled_ = false;
+    int32_t result = g_AVSessionItem->Occupy();
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(sessionCallback->occupiedLostCalled_, true);
+    SLOGD("AVSessionItem_Occupy_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_Occupy_002
+ * @tc.desc: Test Occupy after session destroyed, expect ERR_SESSION_NOT_EXIST.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_002, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_Occupy_002 begin!");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isDestroyed_ = true;
+    int32_t result = g_AVSessionItem->Occupy();
+    EXPECT_EQ(result, ERR_SESSION_NOT_EXIST);
+    g_AVSessionItem->isDestroyed_ = false;
+    SLOGD("AVSessionItem_Occupy_002 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_Occupy_003
+ * @tc.desc: Test Occupy with null callback, expect success and no side effect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_003, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_Occupy_003 begin!");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->callback_ = nullptr;
+    int32_t result = g_AVSessionItem->Occupy();
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    SLOGD("AVSessionItem_Occupy_003 end!");
+}
 } //AVSession
 } //OHOS
