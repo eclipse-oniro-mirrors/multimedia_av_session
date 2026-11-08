@@ -135,6 +135,7 @@ class AVSessionCallbackStubDemo : public AVSessionCallbackStub {
     };
     ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override { return AVSESSION_SUCCESS; };
     ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override { return AVSESSION_SUCCESS; };
+    ErrCode OnOccupiedLost() override { return AVSESSION_SUCCESS; };
 public:
     bool onSetTargetLoopMode_ = false;
     bool onPlayFromAssetId_ = false;
