@@ -1311,6 +1311,13 @@ enum AVSessionErrorCode {
     ERR_CODE_DESKTOP_LYRIC_NOT_SUPPORTED = 6600111,
 
     /**
+     * The picker does not exist.
+     * @syscap SystemCapability.Multimedia.AVSession.Core
+     * @since 26.1.0 dynamic&static
+     */
+    ERR_CODE_PICKER_NOT_EXIST = 6600112,
+
+    /**
      * The error code for cast control is unspecified.
      * @syscap SystemCapability.Multimedia.AVSession.AVCast
      * @atomicservice

@@ -17,6 +17,8 @@
 #define TAIHE_AVCAST_PICKER_HELPER_H
 
 #include <atomic>
+#include <map>
+#include <set>
 
 #include "ui_content.h"
 #include "ui_extension_context.h"
@@ -46,6 +48,7 @@ class ModalUICallback {
 public:
     explicit ModalUICallback(OHOS::Ace::UIContent* uiContent, PickerCallBack& pickerCallBack);
     void SetSessionId(int32_t sessionId);
+    int32_t GetSessionId() const;
     void OnRelease(int32_t releaseCode);
     void OnResult(int32_t resultCode, const OHOS::AAFwk::Want& result);
     void OnReceive(const OHOS::AAFwk::WantParams& request);
@@ -54,7 +57,7 @@ public:
     void OnDestroy();
 
 private:
-    int32_t sessionId_ = 0;
+    int32_t sessionId_ = -1;
     OHOS::Ace::UIContent* uiContent_;
     PickerCallBack pickerCallBack_;
 };
@@ -69,6 +72,7 @@ class AVCastPickerHelperInnerImpl {
 public:
     enum {
         EVENT_PICPKER_STATE_CHANGE,
+        EVENT_PICKER_STATE_CHANGE_FOR_ID,
         EVENT_TYPE_MAX
     };
 
@@ -86,9 +90,16 @@ public:
     ~AVCastPickerHelperInnerImpl();
 
     void SelectSync(optional_view<AVCastPickerOptions> options);
+    int32_t SelectForIdSync(optional_view<AVCastPickerOptions> options);
+    void CloseSync(optional_view<int32_t> pickerId);
     void ResetCommunicationDeviceSync();
     void OnPickerStateChange(callback_view<void(AVCastPickerState)> callback);
     void OffPickerStateChange(optional_view<callback<void(AVCastPickerState)>> callback);
+    void OnPickerStateChangeForId(callback_view<void(const AVCastPickerStateWithId&)> callback);
+    void OffPickerStateChangeForId(optional_view<callback<void(const AVCastPickerStateWithId&)>> callback);
+
+    static std::vector<std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>> CollectAllProxies();
+    static void SendCloseDataToProxies(const std::vector<std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>>& proxies);
 
 private:
     static int32_t OnEvent(const std::string& event, std::shared_ptr<uintptr_t> &callback,
@@ -101,11 +112,22 @@ private:
     static int32_t OffPickerStateChangeInner(AVCastPickerHelperInnerImpl *taihePicker,
         std::shared_ptr<uintptr_t> &callback);
 
+    static OHOS::Ace::ModalUIExtensionCallbacks CreateExtensionCallback(
+        const std::shared_ptr<ModalUICallback>& callback, AVCastPickerHelperInnerImpl* taihePicker);
+
+    void StoreProxy(int32_t sessionId, const std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>& proxy);
+    void RemoveProxy(int32_t sessionId);
+    int32_t SendCloseData(int32_t pickerId);
+    void SendCloseDataToAll();
+
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
+    static std::mutex instanceLock_;
+    static std::set<AVCastPickerHelperInnerImpl*> instances_;
 
     using TaiheFuncExecute = std::function<void(std::shared_ptr<uintptr_t> method)>;
     void HandleEvent(int32_t event, TaiheFuncExecute callback);
     void HandleEvent(int32_t event, uint32_t state);
+    void HandleEventForId(int32_t event, int32_t pickerId, uint32_t state);
 
     ani_env *env_ = nullptr;
     std::mutex lock_;
@@ -114,6 +136,9 @@ private:
     std::list<std::shared_ptr<uintptr_t>> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<std::atomic<bool>> isValid_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_ = nullptr;
+
+    std::mutex proxyLock_;
+    std::map<int32_t, std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>> proxyMap_;
 
     OHOS::Ace::UIContent *uiContent_;
     std::shared_ptr<uintptr_t> wrapperRef_{};
