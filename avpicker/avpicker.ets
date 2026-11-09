@@ -182,6 +182,7 @@ export interface AVCastPickerDeviceInfo {
   castMode?: number,
   castUid?: number,
   bundleInfo?: ShowingBundleTS,
+  isPcmCast?: boolean,
 }
 
 /**
@@ -1082,7 +1083,7 @@ export struct AVCastPicker {
                   .margin({top: 4})
                   .width('auto')
                    
-                  if ((item.isConnected || item.castUid !== 0) &&
+                  if (((item.isConnected && item.isPcmCast) || item.castUid !== 0) &&
                     item.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                     Flex({direction:FlexDirection.Row, alignItems:ItemAlign.Center}) {
                       Row() {

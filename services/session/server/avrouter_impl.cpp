@@ -1005,6 +1005,15 @@ int32_t AVRouterImpl::PcmCastSessionReleasePlayer()
     return servicePtr_->PcmCastSessionReleasePlayer();
 }
 
+DeviceInfo AVRouterImpl::GetValidDeviceInfo(const std::string& deviceId)
+{
+    std::lock_guard validDeviceInfoMapLockGuard(validDeviceInfoMapLock_);
+    auto iter = validDeviceInfoMap_.find(deviceId);
+    CHECK_AND_RETURN_RET_LOG(iter != validDeviceInfoMap_.end(), DeviceInfo(),
+        "deviceId %{public}s is not found in validDeviceInfoMap", deviceId.c_str());
+    return iter->second;
+}
+
 void AVRouterImpl::DisconnectOtherSession(std::string sessionId, DeviceInfo deviceInfo)
 {
     disconnectOtherSession_.store(true);

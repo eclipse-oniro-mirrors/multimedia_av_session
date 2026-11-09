@@ -280,19 +280,20 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
 {
     SLOGI("PcmCastSession StartCast");
     CHECK_AND_RETURN_RET_LOG(outputDeviceInfo.deviceInfos_.size() > 0, ERR_INVALID_PARAM, "empty device info");
+    OutputDeviceInfo enrichedInfo = outputDeviceInfo;
+    EnrichDeviceInfo(enrichedInfo);
     {
         std::lock_guard lockGuard(castLock_);
         descriptor_.sessionId_ = sessionToken.sessionId;
     }
     bool isPcmScreen = (sessionToken.sessionId == "pcmCastSession" &&
-        ((static_cast<uint32_t>(outputDeviceInfo.deviceInfos_[0].supportedProtocols_) &
+        ((static_cast<uint32_t>(enrichedInfo.deviceInfos_[0].supportedProtocols_) &
         ProtocolType::TYPE_CAST_PLUS_AUDIO) == 0));
     if (isPcmScreen) {
         AVRouter::GetInstance().OnSystemCommonEvent(QUERY_PINCODE, "");
     }
-
     if (castHandle_ > 0 && !isPcmScreen) {
-        if (castHandleDeviceId_ == outputDeviceInfo.deviceInfos_[0].deviceId_) {
+        if (castHandleDeviceId_ == enrichedInfo.deviceInfos_[0].deviceId_) {
             SLOGI("repeat startcast %{public}lld", static_cast<long long>(castHandle_));
             SendStateChangeRequest(sessionToken);
             {
@@ -309,17 +310,15 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
             {
                 std::lock_guard lockGuard(castLock_);
                 multiDeviceState_ = MultiDeviceState::CASTING_SWITCH_DEVICE;
-                newOutputDeviceInfo_ = outputDeviceInfo;
+                newOutputDeviceInfo_ = enrichedInfo;
                 newSessionToken_ = sessionToken;
                 newServiceNameStatePair_ = serviceNameStatePair;
             }
             StopCast(DeviceRemoveAction::ACTION_TO_SWITCH_HIPLAY);
- 
             return AVSESSION_SUCCESS;
         }
     }
-
-    OutputDeviceInfo connectOutputDeviceInfo = ConstructConnectOutputDeviceInfo(outputDeviceInfo);
+    OutputDeviceInfo connectOutputDeviceInfo = ConstructConnectOutputDeviceInfo(enrichedInfo);
     int sourceAllConnectResult = CollaborationManagerHiPlay::GetInstance().CastAddToCollaboration(
         connectOutputDeviceInfo.deviceInfos_[0]);
     if (sourceAllConnectResult != AVSESSION_SUCCESS) {
@@ -339,6 +338,17 @@ OutputDeviceInfo PcmCastSession::ConstructConnectOutputDeviceInfo(const OutputDe
         connectOutputDeviceInfo.deviceInfos_[0].realDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
     }
     return connectOutputDeviceInfo;
+}
+
+void PcmCastSession::EnrichDeviceInfo(OutputDeviceInfo& outputDeviceInfo)
+{
+    for (auto& deviceInfo : outputDeviceInfo.deviceInfos_) {
+        DeviceInfo validDeviceInfo = AVRouter::GetInstance().GetValidDeviceInfo(deviceInfo.deviceId_);
+        if (!validDeviceInfo.deviceId_.empty()) {
+            deviceInfo.realDeviceId_ = validDeviceInfo.realDeviceId_;
+            deviceInfo.screenId_ = validDeviceInfo.screenId_;
+        }
+    }
 }
 
 int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo,
@@ -522,6 +532,7 @@ void PcmCastSession::DestroyTask()
             ServiceCollaborationManagerBussinessStatus::SCM_IDLE);
     }
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
+    AVRouter::GetInstance().StopCast(castHandle_, DeviceRemoveAction::ACTION_DISCONNECT);
     AVRouter::GetInstance().StopCastSession(castHandle_);
     castHandle_ = -1;
     castState_ = CastState::DISCONNECTED;

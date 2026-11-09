@@ -36,6 +36,7 @@ public:
     int32_t StartScreenCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
     OutputDeviceInfo ConstructConnectOutputDeviceInfo(const OutputDeviceInfo& outputDeviceInfo);
+    void EnrichDeviceInfo(OutputDeviceInfo& outputDeviceInfo);
 
     void StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
 

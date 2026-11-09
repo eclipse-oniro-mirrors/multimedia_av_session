@@ -162,6 +162,8 @@ public:
 
     int32_t PcmCastSessionReleasePlayer() override;
 
+    DeviceInfo GetValidDeviceInfo(const std::string& deviceId) override;
+
     std::shared_ptr<AVCastProvider> GetCastProvider(int32_t providerNumber);
 
     std::shared_ptr<HwCastProvider> GetHwProvider();
