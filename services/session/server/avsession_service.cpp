@@ -374,6 +374,15 @@ std::string AVSessionService::GetAVSortDir(int32_t userId)
     return GetUsersManager().GetDirForCurrentUser(userId) + SORT_FILE_NAME;
 }
 
+std::string AVSessionService::GetAVSortDirWithUserId(int32_t userId)
+{
+#ifdef CAR_FEATURE_ENABLE
+    return GetAVSortDir(userId);
+#else
+    return GetAVSortDir();
+#endif
+}
+
 void AVSessionService::HandleUserEvent(const std::string &type, const int &userId)
 {
     // del capsule before account switching
@@ -992,7 +1001,8 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
     std::string oldSortContent;
-    if (!LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
+    if (!LoadStringFromFileEx(GetAVSortDirWithUserId(GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()))),
+        oldSortContent)) {
         SLOGE("LoadStringFromFileEx failed when refresh focus session sort!");
         return;
     }
@@ -1026,7 +1036,8 @@ void AVSessionService::RefreshFocusSessionSort(sptr<AVSessionItem> &session)
         InsertSessionItemToCJSON(session, valuesArray);
     }
     std::string newSortContentStr = DoCJSONArrayTransformToString(valuesArray);
-    if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
+    if (!SaveStringToFileEx(GetAVSortDirWithUserId(GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()))),
+        newSortContentStr)) {
         SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
     }
     cJSON_Delete(valuesArray);
@@ -2319,7 +2330,8 @@ bool AVSessionService::InsertSessionItemToCJSONAndPrint(const std::string& tag, 
         return false;
     }
     std::string newSortContentStr = DoCJSONArrayTransformToString(valuesArray);
-    if (!SaveStringToFileEx(GetAVSortDir(), newSortContentStr)) {
+    if (!SaveStringToFileEx(GetAVSortDirWithUserId(GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()))),
+        newSortContentStr)) {
         SLOGE("SaveStringToFileEx failed when refresh focus session sort!");
     }
     return true;
@@ -2350,7 +2362,8 @@ void AVSessionService::SaveSessionInfoInFile(const std::string& tag, const std::
     SLOGI("refresh sort when session created, bundleName=%{public}s", (elementName.GetBundleName()).c_str());
     std::string oldSortContent;
 
-    if (LoadStringFromFileEx(GetAVSortDir(), oldSortContent)) {
+    if (LoadStringFromFileEx(GetAVSortDirWithUserId(GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()))),
+        oldSortContent)) {
         cJSON* valuesArray = cJSON_Parse(oldSortContent.c_str());
         CHECK_AND_RETURN_LOG(valuesArray != nullptr, "parse json get nullptr");
         if (cJSON_IsInvalid(valuesArray) || !cJSON_IsArray(valuesArray)) {
@@ -2568,11 +2581,15 @@ void AVSessionService::ProcessDescriptorsFromCJSON(std::vector<AVSessionDescript
     }
 }
 
-int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors)
+int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AVSessionDescriptor>& descriptors,
+    int32_t userId)
 {
-    std::string oldSortContent;
-    int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+#ifdef CAR_FEATURE_ENABLE
+#else
+    userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
+#endif
     SLOGI("getHistoryFile for:%{public}d", userId);
+    std::string oldSortContent;
     if (!LoadStringFromFileEx(GetAVSortDir(userId), oldSortContent)) {
         SLOGE("GetHistoricalSessionDescriptorsFromFile read sort fail, Return!");
         return AVSESSION_ERROR;
@@ -2597,11 +2614,12 @@ int32_t AVSessionService::GetHistoricalSessionDescriptorsFromFile(std::vector<AV
     return AVSESSION_SUCCESS;
 }
 
-int32_t AVSessionService::GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors)
+int32_t AVSessionService::GetColdStartSessionDescriptors(std::vector<AVSessionDescriptor>& descriptors,
+    int32_t userId)
 {
     std::lock_guard sortFileLockGuard(sessionFileLock_);
     std::vector<AVSessionDescriptor> tempDescriptors;
-    GetHistoricalSessionDescriptorsFromFile(tempDescriptors);
+    GetHistoricalSessionDescriptorsFromFile(tempDescriptors, userId);
     for (auto iterator = tempDescriptors.begin(); iterator != tempDescriptors.end(); ++iterator) {
         descriptors.push_back(*iterator);
     }
@@ -3479,11 +3497,10 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
 
 int32_t AVSessionService::SendSystemAVKeyEvent(const MMI::KeyEvent& keyEvent, const AAFwk::Want &wantParam)
 {
-    SLOGI("SendSystemAVKeyEvent get key=%{public}d.", keyEvent.GetKeyCode());
     std::string deviceId = wantParam.GetStringParam("deviceId");
-    std::string userIdStr = wantParam.GetStringParam("userId");
     int32_t userId = -1;
-    AVSessionUtils::StringToInt32(userIdStr, userId);
+    AVSessionUtils::StringToInt32(wantParam.GetStringParam("userId"), userId);
+    SLOGI("SendSystemAVKeyEvent get key=%{public}d, userId=%{public}d.", keyEvent.GetKeyCode(), userId);
     int32_t ret = HandleKeyEvent(keyEvent, deviceId, userId);
     if (ret != AVSESSION_CONTINUE) {
         return ret;
@@ -3532,21 +3549,23 @@ int32_t AVSessionService::GetUserIdByDisplayId(int32_t displayId)
 sptr<AVSessionItem> AVSessionService::GetTopSessionForUser(int32_t userId)
 {
     // In car scenarios, retrieve the session list of the user's audio zone via
-    // GetSessionDescriptorsForAudioZone and take the first session as TopSession,
+    // GetSessionStackForAudioZone and take the first session as TopSession,
     // so that key event dispatch is isolated per audio zone instead of using the
     // global TopSession. Falls back to GetTopSession otherwise.
 #ifdef CAR_FEATURE_ENABLE
+    std::vector<sptr<AVSessionItem>> sessions;
     if (userId > 0) {
-        std::vector<AVSessionDescriptor> descriptors;
-        GetSessionDescriptorsForAudioZone(userId, descriptors);
-        if (!descriptors.empty()) {
-            SLOGI("GetTopSessionForUser by AudioZone userId=%{public}d sessionId=%{public}s",
-                userId, AVSessionUtils::GetAnonySessionId(descriptors[0].sessionId_).c_str());
-            return GetUsersManager().GetContainerFromAll().GetSessionById(descriptors[0].sessionId_);
-        }
-        SLOGI("GetTopSessionForUser AudioZone empty for userId=%{public}d", userId);
-        return nullptr;
+        std::lock_guard frontLockGuard(sessionFrontLock_);
+        GetUsersManager().UpdateSessionStackForAudioZone(userId);
+        sessions = GetUsersManager().GetSessionStackForAudioZone(userId);
     }
+    if (!sessions.empty() && sessions[0] != nullptr) {
+        SLOGI("GetTopSessionForUser by AudioZone userId=%{public}d sessionId=%{public}s",
+            userId, AVSessionUtils::GetAnonySessionId(sessions[0]->GetSessionId()).c_str());
+        return sessions[0];
+    }
+    SLOGI("GetTopSessionForUser AudioZone empty for userId=%{public}d", userId);
+    return nullptr;
 #endif
     return GetUsersManager().GetTopSession(GetTargetUserId(userId));
 }
@@ -3632,13 +3651,14 @@ void AVSessionService::HandleSystemKeyColdStart(const AVControlCommand &command,
         }
     }
 
-    HandleColdStartPlayback(command, deviceId);
+    HandleColdStartPlayback(command, deviceId, userId);
 }
 
-void AVSessionService::HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId)
+void AVSessionService::HandleColdStartPlayback(const AVControlCommand &command, const std::string deviceId,
+    int32_t userId)
 {
     std::vector<AVSessionDescriptor> coldStartDescriptors;
-    GetColdStartSessionDescriptors(coldStartDescriptors);
+    GetColdStartSessionDescriptors(coldStartDescriptors, userId);
     CHECK_AND_RETURN_LOG(coldStartDescriptors.size() > 0, "get coldStartDescriptors empty");
     // try start play for first history session
     if (command.GetCommand() == AVControlCommand::SESSION_CMD_PLAY ||
@@ -3659,7 +3679,6 @@ void AVSessionService::HandleColdStartPlayback(const AVControlCommand &command, 
 
         CHECK_AND_RETURN_LOG(!CheckIfOtherAudioPlaying(), "audioplaying control block");
 #ifdef CAR_FEATURE_ENABLE
-        int32_t userId = GetUserIdFromCallingUid(static_cast<int32_t>(GetCallingUid()));
         std::string extraInfo = R"({"controlCommand":)" + std::to_string(command.GetCommand()) +
             R"(,"isPlayList":1})";
         ret = StartAVPlaybackForAudioZone(userId, bundleName, "", CommandInfo{}, extraInfo);
@@ -3743,7 +3762,7 @@ int32_t AVSessionService::HandleMoveScreenCommand(const AAFwk::WantParams& comma
     auto& usersManager = GetUsersManager();
     std::map<int32_t, std::vector<AVSessionDescriptor>> oldStacks;
     for (int32_t userId : usersManager.GetAliveUserList()) {
-        oldStacks[userId] = usersManager.GetSessionStackForAudioZone(userId);
+        oldStacks[userId] = usersManager.GetSessionDescriptorForAudioZone(userId);
     }
     usersManager.HandleScreenMove(uid, srcUserId, dstUserId);
     std::set<int32_t> doneZones;
@@ -3752,7 +3771,7 @@ int32_t AVSessionService::HandleMoveScreenCommand(const AAFwk::WantParams& comma
         if (!doneZones.insert(zoneId).second) {
             continue;
         }
-        auto newStack = usersManager.GetSessionStackForAudioZone(userId);
+        auto newStack = usersManager.GetSessionDescriptorForAudioZone(userId);
         NotifySessionStackDiffForAudioZone(userId, oldStacks[userId], newStack);
     }
     return AVSESSION_SUCCESS;
@@ -5512,7 +5531,7 @@ void AVSessionService::UpdateTopSessionForAudioZone(int32_t userId)
     auto& usersManager = GetUsersManager();
     usersManager.UpdateZoneToUseridMap(userId);
     usersManager.UpdateSessionStackForAudioZone(userId);
-    std::vector<AVSessionDescriptor> zoneStack = usersManager.GetSessionStackForAudioZone(userId);
+    std::vector<AVSessionDescriptor> zoneStack = usersManager.GetSessionDescriptorForAudioZone(userId);
     if (zoneStack.empty()) {
         SLOGI("UpdateTopSessionForAudioZone zone stack empty for user:%{public}d", userId);
         return;
@@ -5527,11 +5546,11 @@ void AVSessionService::HandleSessionStackChangeForAudioZone()
     auto& usersManager = GetUsersManager();
     
     for (int32_t userId : usersManager.GetAliveUserList()) {
-        std::vector<AVSessionDescriptor> oldSessionStack = usersManager.GetSessionStackForAudioZone(userId);
+        std::vector<AVSessionDescriptor> oldSessionStack = usersManager.GetSessionDescriptorForAudioZone(userId);
         usersManager.UpdateZoneToUseridMap(userId);
         usersManager.UpdateSessionStackForAudioZone(userId);
         
-        std::vector<AVSessionDescriptor> newSessionStack = usersManager.GetSessionStackForAudioZone(userId);
+        std::vector<AVSessionDescriptor> newSessionStack = usersManager.GetSessionDescriptorForAudioZone(userId);
         
         NotifySessionStackDiffForAudioZone(userId, oldSessionStack, newSessionStack);
         SLOGI("HandleSessionStackChangeForAudioZone userId=%{public}d oldStacksize=%{public}d " \
@@ -5591,7 +5610,7 @@ int32_t AVSessionService::GetSessionDescriptorsForAudioZone(int32_t userId,
     
     std::lock_guard frontLockGuard(sessionFrontLock_);
     GetUsersManager().UpdateSessionStackForAudioZone(userId);
-    std::vector<AVSessionDescriptor> zoneDescriptors = GetUsersManager().GetSessionStackForAudioZone(userId);
+    std::vector<AVSessionDescriptor> zoneDescriptors = GetUsersManager().GetSessionDescriptorForAudioZone(userId);
     for (const auto& desc : zoneDescriptors) {
         descriptors.push_back(desc);
     }

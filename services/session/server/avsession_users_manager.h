@@ -119,7 +119,9 @@ public:
 
     void HandleScreenMove(int32_t uid, int32_t srcUserId, int32_t dstUserId);
 
-    std::vector<AVSessionDescriptor> GetSessionStackForAudioZone(int32_t userId);
+    std::vector<AVSessionDescriptor> GetSessionDescriptorForAudioZone(int32_t userId);
+
+    std::vector<sptr<AVSessionItem>> GetSessionStackForAudioZone(int32_t userId);
 
     std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>>& GetSessionListenersMapForAudioZone();
 #endif
@@ -132,16 +134,16 @@ private:
 
 #ifdef CAR_FEATURE_ENABLE
     void CollectLocalSessionsForAudioZone(int32_t zoneId,
-        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+        std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime);
 
     void CollectDistributedSessionsForAudioZone(int32_t zoneId,
-         std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+         std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime);
 
     void SortAndCacheSessionStack(int32_t zoneId,
-        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+        std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime);
     
     void AddSessionToVector(const sptr<AVSessionItem>& session,
-        std::vector<std::pair<AVSessionDescriptor, int64_t>>& sessionWithTime);
+        std::vector<std::pair<sptr<AVSessionItem>, int64_t>>& sessionWithTime);
     
     bool IsCastSessionValid(const sptr<AVSessionItem>& session, int32_t zoneId);
 
@@ -160,7 +162,7 @@ private:
 #ifdef CAR_FEATURE_ENABLE
     std::map<int32_t, std::map<pid_t, sptr<ISessionListener>>> sessionListenersMapByUserIdForAudioZone_;
     std::map<int32_t, std::vector<int32_t>> zoneToUserid_;
-    std::map<int32_t, std::vector<AVSessionDescriptor>> sessionStackMapForAudioZone_;
+    std::map<int32_t, std::vector<sptr<AVSessionItem>>> sessionStackMapForAudioZone_;
     static constexpr int32_t DEFAULT_ZONE_ID = -1;
 #endif
 
