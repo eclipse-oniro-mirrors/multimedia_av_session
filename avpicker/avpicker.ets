@@ -319,6 +319,8 @@ export struct AVCastPicker {
    */
   @State maxFontSizeScale: number = 1;
 
+  @State brandColor: string = '';
+
   /**
    * Accessibility Strings
    */
@@ -980,7 +982,7 @@ export struct AVCastPicker {
       SymbolGlyph(!isSelected ? $r(this.getDeviceIconName(item)) : $r(item.selectedIconName))
  	      .fontSize('24vp')
  	      .fontColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	        [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+          (!this.brandColor ? [$r('sys.color.comp_background_emphasize')] : [this.brandColor]) : [$r('sys.color.icon_primary')])
  	      .renderingStrategy(item.fromCall && item.deviceType === 2 ? 
  	        SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY)
     } else {
@@ -988,7 +990,7 @@ export struct AVCastPicker {
         .width(24)
         .height(24)
         .fillColor((isSelected && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-          $r('sys.color.comp_background_emphasize') : $r('sys.color.icon_primary'))
+          (!this.brandColor ? $r('sys.color.comp_background_emphasize') : this.brandColor) : $r('sys.color.icon_primary'))
     }
   }
 
@@ -999,7 +1001,7 @@ export struct AVCastPicker {
       .fontSize($r('sys.float.ohos_id_text_size_body2'))
       .fontColor((item.isConnected && !this.houseMusicIsSelect) ?
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
-        $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
+        (!this.brandColor ? $r('sys.color.font_emphasize') : this.brandColor) : $r('sys.color.font_primary')) :
         (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
         $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
       .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -1016,7 +1018,7 @@ export struct AVCastPicker {
         .fontSize($r('sys.float.ohos_id_text_size_body2'))
         .fontColor((item.isConnected && !this.houseMusicIsSelect) ?
           (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
-          $r('sys.color.font_emphasize') : $r('sys.color.font_primary')) :
+          (!this.brandColor ? $r('sys.color.font_emphasize') : this.brandColor) : $r('sys.color.font_primary')) :
           (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ?
           $r('sys.color.font_primary') : $r('sys.color.font_secondary')))
         .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -1268,7 +1270,7 @@ export struct AVCastPicker {
                 SymbolGlyph($r('sys.symbol.checkmark'))
                   .fontSize('24vp')
                   .fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-                    [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+                    (!this.brandColor ? [$r('sys.color.comp_background_emphasize')] : [this.brandColor]) : [$r('sys.color.icon_primary')])
               }
             }
             .width(48)
@@ -1314,7 +1316,7 @@ export struct AVCastPicker {
                 SymbolGlyph($r('sys.symbol.checkmark'))
                   .fontSize('24vp')
                   .fontColor((this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-                    [$r('sys.color.comp_background_emphasize')] : [$r('sys.color.icon_primary')])
+                    (!this.brandColor ? [$r('sys.color.comp_background_emphasize')] : [this.brandColor]) : [$r('sys.color.icon_primary')])
               }
             }
             .width(48)
@@ -1489,6 +1491,11 @@ export struct AVCastPicker {
           if (data['maxFontSizeScale'] !== undefined) {
             console.info(TAG, `maxFontSizeScale : ${JSON.stringify(data['maxFontSizeScale'])}`);
             this.maxFontSizeScale = data['maxFontSizeScale'] as number;
+          }
+
+          if (data['brandColor'] !== undefined) {
+            console.info(TAG, `brandColor : ${data['brandColor']}`);
+            this.brandColor = data['brandColor'] as string;
           }
 
           if (data['isShowLoadingProgress'] !== undefined) {
