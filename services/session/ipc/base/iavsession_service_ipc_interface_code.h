@@ -58,6 +58,7 @@ enum class AvsessionSeviceInterfaceCode {
     SERVICE_CMD_GET_SESSION_DESCRIPTORS_FOR_AUDIO_ZONE,
     SERVICE_CMD_START_AV_PLAYBACK_FOR_ZONE,
 #endif
+    SERVICE_CMD_START_CAST_WITH_ARGS,
     SERVICE_CMD_MAX
 };
 } // namespace OHOS::AVSession

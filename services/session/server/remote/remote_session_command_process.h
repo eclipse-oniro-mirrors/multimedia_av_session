@@ -150,6 +150,12 @@ public:
         return AVSESSION_SUCCESS;
     }
 
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo,
+        const AAFwk::WantParams& commandArgs) override
+    {
+        return AVSESSION_SUCCESS;
+    }
+
     int32_t StopCast(const SessionToken& sessionToken) override
     {
         return AVSESSION_SUCCESS;

@@ -879,6 +879,27 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCast");
+    return HandleStartCastInner(data, reply, false);
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStartCastWithArgs(MessageParcel& data, MessageParcel& reply)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    AVSESSION_TRACE_SYNC_START("AVSessionServiceStub::HandleStartCastWithArgs");
+    return HandleStartCastInner(data, reply, true);
+#else
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(AVSESSION_ERROR), ERR_NONE, "WriteInt32 result failed");
+#endif
+    return ERR_NONE;
+}
+
+int32_t AVSessionServiceStub::HandleStartCastInner(MessageParcel& data, MessageParcel& reply, const bool hasArgs)
+{
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
     int32_t err = PermissionChecker::GetInstance().CheckPermission(
         PermissionChecker::CHECK_MEDIA_RESOURCES_PERMISSION);
     if (err != ERR_NONE) {
@@ -888,10 +909,13 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
         CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(err), ERR_NONE, "write int32 failed");
         return ERR_NONE;
     }
-    SessionToken sessionToken {};
-    sessionToken.sessionId = data.ReadString();
-    sessionToken.pid = data.ReadInt32();
-    sessionToken.uid = data.ReadInt32();
+    SessionToken sessionToken {data.ReadString(), data.ReadInt32(), data.ReadInt32()};
+
+    sptr<AAFwk::WantParams> commandArgs = nullptr;
+    if (hasArgs) {
+        commandArgs = data.ReadParcelable<AAFwk::WantParams>();
+        CHECK_AND_RETURN_RET_LOG(commandArgs != nullptr, ERR_NONE, "read commandArgs failed");
+    }
 
     OutputDeviceInfo outputDeviceInfo;
     int32_t deviceInfoSize = 0;
@@ -914,7 +938,8 @@ int32_t AVSessionServiceStub::HandleStartCast(MessageParcel& data, MessageParcel
     if (temp < 0) {
         SLOGE("SetFirstCallerTokenID fail");
     }
-    int32_t ret = StartCast(sessionToken, outputDeviceInfo);
+    int32_t ret = hasArgs ? StartCast(sessionToken, outputDeviceInfo, *commandArgs) :
+        StartCast(sessionToken, outputDeviceInfo);
     SLOGI("StartCast ret %{public}d", ret);
     CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(ret), ERR_NONE, "write int32 failed");
     SLOGI("HandleStartCast success");

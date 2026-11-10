@@ -55,6 +55,8 @@ private:
     int32_t HandleSetDiscoverable(MessageParcel& data, MessageParcel& reply);
     int32_t CheckBeforeHandleStartCast(MessageParcel& data, OutputDeviceInfo& outputDeviceInfo);
     int32_t HandleStartCast(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartCastWithArgs(MessageParcel& data, MessageParcel& reply);
+    int32_t HandleStartCastInner(MessageParcel& data, MessageParcel& reply, const bool hasArgs);
     int32_t HandleStopCast(MessageParcel& data, MessageParcel& reply);
     int32_t HandleClose(MessageParcel& data, MessageParcel& reply);
     int32_t HandleIsDesktopLyricSupported(MessageParcel &data, MessageParcel &reply);
@@ -126,6 +128,8 @@ private:
             [this](MessageParcel& data, MessageParcel& reply) { return HandleSetDiscoverable(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStartCast(data, reply); }},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_WITH_ARGS),
+            [this](MessageParcel& data, MessageParcel& reply) { return HandleStartCastWithArgs(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST),
             [this](MessageParcel& data, MessageParcel& reply) { return HandleStopCast(data, reply); }},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),
@@ -202,6 +206,8 @@ private:
             "HandleSetDiscoverable"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST),
             "HandleStartCast"},
+        {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_START_CAST_WITH_ARGS),
+            "HandleStartCastWithArgs"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_STOP_CAST),
             "HandleStopCast"},
         {static_cast<uint32_t>(AvsessionSeviceInterfaceCode::SERVICE_CMD_CLOSE),

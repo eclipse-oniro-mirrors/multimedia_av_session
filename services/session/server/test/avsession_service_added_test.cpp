@@ -41,6 +41,7 @@
 #include "avsession_service.h"
 #include "avsession_service_proxy.h"
 #include "avrouter_impl.h"
+#include "want_params_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::AVSession;
@@ -356,6 +357,93 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast004, TestSize.Level0)
     EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
 #endif
     SLOGD("StartCast004 end!");
+}
+
+/**
+ * @tc.name: StartCast005
+ * @tc.desc: test StartCast with commandArgs, pcmCastSession is nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, StartCast005, TestSize.Level0)
+{
+    SLOGD("StartCast005 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AVSession::SessionToken sessionToken;
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "-100";
+    deviceInfo.realDeviceId_ = "-100";
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    sessionToken.sessionId = "pcmCastSession";
+    sessionToken.pid = 1234;
+    sessionToken.uid = 5678;
+    OHOS::AAFwk::WantParams commandArgs;
+    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo, commandArgs);
+    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+    EXPECT_NE(g_AVSessionService->pcmCastSession_, nullptr);
+#endif
+    SLOGD("StartCast005 end!");
+}
+
+/**
+ * @tc.name: StartCast006
+ * @tc.desc: test StartCast with commandArgs, pcmCastSession_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, StartCast006, TestSize.Level0)
+{
+    SLOGD("StartCast006 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AVSession::SessionToken sessionToken;
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "-100";
+    deviceInfo.realDeviceId_ = "-100";
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    sessionToken.sessionId = "testSessionId";
+    sessionToken.pid = 1234;
+    sessionToken.uid = 5678;
+    OHOS::AAFwk::WantParams commandArgs;
+    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo, commandArgs);
+    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+    EXPECT_NE(g_AVSessionService->pcmCastSession_, nullptr);
+#endif
+    SLOGD("StartCast006 end!");
+}
+
+/**
+ * @tc.name: StartCast007
+ * @tc.desc: test StartCast with commandArgs, pcmCastSession_ already exits
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceAddedTest, StartCast007, TestSize.Level0)
+{
+    SLOGD("StartCast007 begin!");
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    OHOS::AVSession::SessionToken sessionToken;
+    OutputDeviceInfo outputDeviceInfo;
+    OHOS::AVSession::DeviceInfo deviceInfo;
+    deviceInfo.castCategory_ = 1;
+    deviceInfo.deviceId_ = "-100";
+    deviceInfo.realDeviceId_ = "-100";
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    sessionToken.sessionId = "pcmCastSession";
+    sessionToken.pid = 1234;
+    sessionToken.uid = 5678;
+    OHOS::AAFwk::WantParams commandArgs;
+    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo, commandArgs);
+    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+#endif
+    SLOGD("StartCast007 end!");
 }
 
 /**

@@ -143,6 +143,9 @@ public:
 
     int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) override;
 
+    int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo,
+        const AAFwk::WantParams& commandArgs) override;
+
     int32_t StopCast(const SessionToken& sessionToken) override;
 #endif
 

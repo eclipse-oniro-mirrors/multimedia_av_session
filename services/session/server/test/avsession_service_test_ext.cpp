@@ -30,6 +30,7 @@
 #include "avrouter_impl.h"
 #include "pcm_cast_session.h"
 #include "avsession_users_manager.h"
+#include "int_wrapper.h"
 
 #define private public
 #include "avsession_service.h"
@@ -2056,6 +2057,68 @@ static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionStartCast002, TestSize.Le
     SessionToken sessionToken;
     sessionToken.sessionId = "pcmCastSession";
     pcmCastSession->StartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionStartCast003
+ * @tc.desc: Test PcmCastSession::StartCast with commandArgs
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionStartCast003, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    sessionToken.sessionId = "pcmCastSession";
+    OHOS::AAFwk::WantParams commandArgs;
+    commandArgs.SetParam("connect_type", OHOS::AAFwk::String::Box("CONNECT_TO_NFC"));
+    int32_t ret = pcmCastSession->StartCast(outputDeviceInfo, serviceNameStatePair, sessionToken, commandArgs);
+    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
+    pcmCastSession->DestroyTask();
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+
+/**
+ * @tc.name: PcmCastSessionStartCast004
+ * @tc.desc: Test PcmCastSession::StartCast with valid hiplay outputDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionStartCast004, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    pcmCastSession->descriptor_.outputDeviceInfo_ = outputDeviceInfo;
+    pcmCastSession->castHandle_ = 1;
+    pcmCastSession->castHandleDeviceId_ = "testDeviceId";
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    sessionToken.sessionId = "pcmCastSession";
+    sessionToken.uid = 5678;
+    OHOS::AAFwk::WantParams commandArgs;
+    int32_t ret = pcmCastSession->StartCast(outputDeviceInfo, serviceNameStatePair, sessionToken, commandArgs);
+    EXPECT_EQ(ret, ERR_REPEAT_CAST);
     pcmCastSession->DestroyTask();
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);

@@ -31,11 +31,17 @@ public:
     void OnCastEventRecv(int32_t errorCode, std::string& errorMsg) override;
 
     int32_t StartCast(const OutputDeviceInfo& outputDeviceInfo,
-        std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
+        std::pair<std::string, std::string>& serviceNameStatePair,
+        const SessionToken& sessionToken, const AAFwk::WantParams& commandArgs = AAFwk::WantParams());
     
     int32_t StartScreenCast(const OutputDeviceInfo& outputDeviceInfo,
         std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
-    OutputDeviceInfo ConstructConnectOutputDeviceInfo(const OutputDeviceInfo& outputDeviceInfo);
+
+    int32_t StartNfcCast(const OutputDeviceInfo& outputDeviceInfo,
+        std::pair<std::string, std::string>& serviceNameStatePair,
+        const SessionToken& sessionToken, const AAFwk::WantParams& commandArgs);
+
+    OutputDeviceInfo ConstructConnectOutputDeviceInfo(const OutputDeviceInfo& outputDeviceInfo, bool isNotScreen);
 
     void StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
 
@@ -114,6 +120,7 @@ private:
     bool needHandleTimer_ = false;
 
     const std::string COMMAND_TYPE = "command_type";
+    const std::string CONNECT_TYPE = "connect_type";
     const std::string COMMAND_BODY = "command_body";
 
     const std::string CHANGE_CAST_MODE = "CHANGE_CAST_MODE";
@@ -126,6 +133,7 @@ private:
 
     const std::string QUERY_TO_CAST = "QUERY_TO_CAST";
     const std::string QUERY_TO_AVSESSION = "QUERY_TO_AVSESSION";
+    const std::string CONNECT_TO_NFC = "CONNECT_TO_NFC";
 
     const std::string SAVE_TO_PCM = "SAVE_TO_PCM";
     const std::string CREATE_STREAM_PLAYER = "CREATE_STREAM_PLAYER";
@@ -136,6 +144,8 @@ private:
     const std::string VALUE = "VALUE";
     const std::string CAST_SESSION_ID = "CAST_SESSION_ID";
     const std::string PIN_CODE = "PIN_CODE";
+    const std::string PORT = "PORT";
+    const std::string IP = "IP";
     const std::string QUERY_PINCODE = "QUERY_PINCODE";
     const std::string SESSION_ID = "SESSION_ID";
 
@@ -210,6 +220,8 @@ private:
         {PIN_CODE, PIN_CODE_NUM},
     };
 
+    int32_t HandleAliveCast(const OutputDeviceInfo& outputDeviceInfo,
+        std::pair<std::string, std::string>& serviceNameStatePair, const SessionToken& sessionToken);
     void WriteCastPairToFile(const std::string& deviceId, int32_t castMode);
     int32_t SendStateChangeRequest(const SessionToken& sessionToken);
     void CastStateCommandParams(const AAFwk::WantParams& commandArgs);
