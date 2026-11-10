@@ -166,6 +166,7 @@ export class AVCastPicker extends ViewPU {
             new ObservedPropertySimplePU(ConfigurationColorMode.COLOR_MODE_NOT_SET, this, 'configurationColorMode');
         this.__deviceInfoType = new ObservedPropertySimplePU('', this, 'deviceInfoType');
         this.__maxFontSizeScale = new ObservedPropertySimplePU(1, this, 'maxFontSizeScale');
+        this.__brandColor = new ObservedPropertySimplePU('', this, 'brandColor');
         this.__accessibilityAudioControlStr = new ObservedPropertySimplePU(
             this.getUIContext()?.getHostContext()?.resourceManager.getStringByNameSync('access_audio_control') || '音视频投播',
             this, 'accessibilityAudioControlStr');
@@ -270,6 +271,9 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.maxFontSizeScale !== undefined) {
             this.maxFontSizeScale = c11.maxFontSizeScale;
+        }
+        if (c11.brandcolor !== undefined) {
+            this.brandcolor = c11.brandcolor;
         }
         if (c11.accessibilityAudioControlStr !== undefined) {
             this.accessibilityAudioControlStr = c11.accessibilityAudioControlStr;
@@ -394,6 +398,7 @@ export class AVCastPicker extends ViewPU {
         this.__configurationColorMode.purgeDependencyOnElmtId(a11);
         this.__deviceInfoType.purgeDependencyOnElmtId(a11);
         this.__maxFontSizeScale.purgeDependencyOnElmtId(a11);
+        this.__brandColor.purgeDependencyOnElmtId(a11);
         this.__accessibilityAudioControlStr.purgeDependencyOnElmtId(a11);
         this.__houseMusicTitle.purgeDependencyOnElmtId(a11);
         this.__houseMusicPlay.purgeDependencyOnElmtId(a11);
@@ -444,6 +449,7 @@ export class AVCastPicker extends ViewPU {
         this.__configurationColorMode.aboutToBeDeleted();
         this.__deviceInfoType.aboutToBeDeleted();
         this.__maxFontSizeScale.aboutToBeDeleted();
+        this.__brandColor.aboutToBeDeleted();
         this.__accessibilityAudioControlStr.aboutToBeDeleted();
         this.__houseMusicTitle.aboutToBeDeleted();
         this.__houseMusicPlay.aboutToBeDeleted();
@@ -598,6 +604,14 @@ export class AVCastPicker extends ViewPU {
 
     set maxFontSizeScale(e1) {
         this.__maxFontSizeScale.set(e1);
+    }
+
+    get brandcolor() {
+        return this.__brandColor.get();
+    }
+
+    set brandcolor(e1) {
+        this.__brandColor.set(e1);
     }
 
     get accessibilityAudioControlStr() {
@@ -1180,8 +1194,8 @@ export class AVCastPicker extends ViewPU {
  	                    SymbolGlyph.create(!c3 ? { 'id': -1, 'type': -1, params: [this.getDeviceIconName(b3)], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
  	                        { 'id': -1, 'type': -1, params: [b3.selectedIconName], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
  	                    SymbolGlyph.fontSize('24vp');
- 	                    SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
- 	                        [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] :
+ 	                    SymbolGlyph.fontColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ? (!this.brandColor ? 
+ 	                        [{ 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }] : [this.brandcolor]) :
  	                        [{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
  	                    SymbolGlyph.renderingStrategy(b3.fromCall && b3.deviceType === 2 ?
                             SymbolRenderingStrategy.SINGLE : SymbolRenderingStrategy.MULTIPLE_OPACITY);
@@ -1197,8 +1211,8 @@ export class AVCastPicker extends ViewPU {
                         Image.width(24);
                         Image.height(24);
                         Image.fillColor((c3 && this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK) ?
-                            { 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
-                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                            (!this.brandColor ? { 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                            'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : this.brandColor) :
                             { 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
                             'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Image);
@@ -1216,8 +1230,8 @@ export class AVCastPicker extends ViewPU {
                 'moduleName': '__harDefaultModuleName__' });
             Text.fontColor((u1.isConnected && !this.houseMusicIsSelect) ?
                 (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
-                { 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                (!this.brandcolor ? { 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : this.brandColor) :
                 { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
                 (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
@@ -1246,8 +1260,8 @@ export class AVCastPicker extends ViewPU {
                 'moduleName': '__harDefaultModuleName__' });
             Text.fontColor((u3.isConnected && !this.houseMusicIsSelect) ?
                 (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
-                { 'id': -1, 'type': 10001, params: ['sys.color.font_emphasize'],
-                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } :
+                (!this.brandcolor ? { 'id': -1, 'type': 10001, params: ['sys.color.font_emphasize'],
+                'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : this.brandColor) :
                 { 'id': -1, 'type': 10001, params: ['sys.color.font_primary'],
                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
                 (this.configurationColorMode !== ConfigurationColorMode.COLOR_MODE_DARK ? 
@@ -2078,10 +2092,10 @@ export class AVCastPicker extends ViewPU {
                         SymbolGlyph.fontSize('24vp');
                         SymbolGlyph.fontColor((this.configurationColorMode !==
                             ConfigurationColorMode.COLOR_MODE_DARK) ?
-                            [{
+                            (!this.brandcolor ? [{
                                 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
                                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
-                            }] :
+                            }] : [this.brandcolor]) :
                             [{
                                 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
                                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
@@ -2159,10 +2173,10 @@ export class AVCastPicker extends ViewPU {
                         SymbolGlyph.fontSize('24vp');
                         SymbolGlyph.fontColor((this.configurationColorMode !==
                             ConfigurationColorMode.COLOR_MODE_DARK) ?
-                            [{
+                            (!this.brandcolor ? [{
                                 'id': -1, 'type': 10001, params: ['sys.color.comp_background_emphasize'],
                                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
-                            }] :
+                            }] : [this.brandcolor]) :
                             [{
                                 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'],
                                 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__'
@@ -2406,6 +2420,11 @@ export class AVCastPicker extends ViewPU {
                 if (l8.maxFontSizeScale !== undefined) {
                     console.info(TAG, `maxFontSizeScale : ${l8.maxFontSizeScale}`);
                     this.maxFontSizeScale = l8.maxFontSizeScale;
+                }
+
+                if (l8.brandcolor !== undefined) {
+                    console.info(TAG, `brandcolor : ${l8.brandcolor}`);
+                    this.brandcolor = l8.brandcolor;
                 }
 
                 if (l8.isShowLoadingProgress !== undefined) {
