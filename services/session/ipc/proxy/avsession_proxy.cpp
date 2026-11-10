@@ -145,6 +145,7 @@ int32_t AVSessionProxy::Destroy()
         return AVSESSION_ERROR;
     }
     if (ret == AVSESSION_SUCCESS) {
+        std::lock_guard lockGuard(controllerLock_);
         isDestroyed_.store(true);
         controller_ = nullptr;
     }
@@ -684,6 +685,7 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
+    std::lock_guard lockGuard(controllerLock_);
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, nullptr, "session is destroyed");
     CHECK_AND_RETURN_RET_LOG(controller_ == nullptr || controller_->IsDestroy(), controller_,
         "controller already exist");

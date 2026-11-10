@@ -1577,18 +1577,23 @@ void AVSessionService::PlayStateCheck(int32_t uid, AudioStandard::StreamUsage st
 void AVSessionService::NotifyBackgroundReportCheck(const int32_t uid, const int32_t pid,
     AudioStandard::StreamUsage streamUsage, AudioStandard::RendererState rendererState)
 {
+    auto weakThis = wptr<AVSessionService>(this);
     // low quality check
     if (rendererState == AudioStandard::RENDERER_RUNNING) {
         AVSessionEventHandler::GetInstance().AVSessionPostTask(
-            [this, uid, pid, streamUsage, rendererState]() {
-                LowQualityCheck(uid, pid, streamUsage, rendererState);
+            [weakThis, uid, pid, streamUsage, rendererState]() {
+                auto sharedThis = weakThis.promote();
+                CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionService is already destroyed");
+                sharedThis->LowQualityCheck(uid, pid, streamUsage, rendererState);
             }, "LowQualityCheck", lowQualityTimeout);
     }
 
     // error renderer state check
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
-        [this, uid, streamUsage, rendererState]() {
-            PlayStateCheck(uid, streamUsage, rendererState);
+        [weakThis, uid, streamUsage, rendererState]() {
+            auto sharedThis = weakThis.promote();
+            CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionService is already destroyed");
+            sharedThis->PlayStateCheck(uid, streamUsage, rendererState);
         }, "PlayStateCheck", errorStateTimeout);
 }
 
@@ -3477,8 +3482,11 @@ int32_t AVSessionService::HandleKeyEvent(const MMI::KeyEvent& keyEvent, const st
         pressCount_.fetch_add(1);
         SLOGI("isFirstPress_=%{public}d", isFirstPress_.load());
         if (isFirstPress_.exchange(false)) {
-            auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([this, userId]() {
-                HandleEventHandlerCallBack(userId);
+            auto weakThis = wptr<AVSessionService>(this);
+            auto ret = AVSessionEventHandler::GetInstance().AVSessionPostTask([weakThis, userId]() {
+                auto sharedThis = weakThis.promote();
+                CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionService is already destroyed");
+                sharedThis->HandleEventHandlerCallBack(userId);
             }, "SendSystemAVKeyEvent", CLICK_TIMEOUT);
             CHECK_AND_RETURN_RET_LOG(ret, AVSESSION_ERROR, "init eventHandler failed");
         }
@@ -5136,17 +5144,20 @@ std::string AVSessionService::GetLocalTitle(sptr<AVSessionItem> session)
 
 void AVSessionService::DealFlowControl(int32_t uid, bool isBroker, int32_t userId)
 {
+    auto weakThis = wptr<AVSessionService>(this);
     AVSessionEventHandler::GetInstance().AVSessionPostTask(
-        [this, uid, isBroker, userId]() {
+        [weakThis, uid, isBroker, userId]() {
+            auto sharedThis = weakThis.promote();
+            CHECK_AND_RETURN_LOG(sharedThis != nullptr, "AVSessionService is already destroyed");
             bool isTopSessionNtf = false;
             {
-                std::lock_guard lockGuard(sessionServiceLock_);
+                std::lock_guard lockGuard(sharedThis->sessionServiceLock_);
                 sptr<AVSessionItem> userTopSession = GetUsersManager().GetTopSession(userId);
                 isTopSessionNtf = userTopSession != nullptr && (userTopSession->GetUid() == uid ||
-                    (isBroker && userTopSession->GetUid() == audioBrokerUid));
+                    (isBroker && userTopSession->GetUid() == sharedThis->audioBrokerUid));
             }
-            std::lock_guard lockGuard(notifyLock_);
-            hasRemoveEvent_ = false;
+            std::lock_guard lockGuard(sharedThis->notifyLock_);
+            sharedThis->hasRemoveEvent_ = false;
             CHECK_AND_RETURN_LOG(isTopSessionNtf, "not top session");
             auto ret = Notification::NotificationHelper::PublishNotification(g_NotifyRequest);
             SLOGI("WaitPublish uid %{public}d, isTop %{public}d result %{public}d", uid, isTopSessionNtf, ret);

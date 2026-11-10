@@ -225,7 +225,7 @@ static int32_t g_playOnCall = AVSESSION_ERROR;
 static int32_t g_pauseOnCall = AVSESSION_ERROR;
 static int32_t g_nextOnCall = AVSESSION_ERROR;
 static int32_t g_previousOnCall = AVSESSION_ERROR;
-static AVSessionService *avservice_;
+static OHOS::sptr<AVSessionService> avservice_;
 
 class AVSessionServiceTest : public testing::Test {
 public:
@@ -249,7 +249,6 @@ void AVSessionServiceTest::SetUpTestCase()
 void AVSessionServiceTest::TearDownTestCase()
 {
     if (avservice_ != nullptr) {
-        delete avservice_;
         avservice_ = nullptr;
     }
 }
