@@ -137,6 +137,8 @@ public:
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo> &castDisplays) override { return 0; };
 #endif
 
+    int32_t Occupy(const std::string& moduleName) override { return AVSESSION_SUCCESS; };
+
 protected:
     int32_t RegisterCallbackInner(const OHOS::sptr<IAVSessionCallback> &callback) override { return 0; };
     OHOS::sptr<IRemoteObject> GetControllerInner() override { return nullptr; };
@@ -659,6 +661,7 @@ static HWTEST(AVSessionStubTest, HandleOccupy001, TestSize.Level0)
     SLOGI("HandleOccupy001 begin!");
     AVSessionStubDemo avSessionStub;
     OHOS::MessageParcel data;
+    data.WriteString("testModule");
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleOccupy(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);

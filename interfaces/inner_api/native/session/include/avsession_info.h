@@ -399,7 +399,7 @@ public:
      * When multiple modules in an application share a session, the listener needs to be registered.
      * @since 26
      */
-    virtual void OnOccupiedLost() {};
+    virtual void OnOccupiedLost(const std::string& moduleName) {};
 };
 #endif
 

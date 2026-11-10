@@ -50,7 +50,6 @@ public:
     void OnAVCallToggleCallMute() override;
     void OnPlayFromAssetId(int64_t assetId) override;
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override;
-    void OnOccupiedLost() override;
 
     void RegisterCallback(int32_t type, int64_t id);
     void UnRegisterCallback(int32_t type);
@@ -78,7 +77,6 @@ private:
     void InitHangUp(int64_t id);
     void InitToggleCallMute(int64_t id);
     void InitCastDisplayChange(int64_t id);
-    void InitOccupiedLost(int64_t id);
 
     std::function<void(void)> play;
     std::function<void(void)> pause;
@@ -100,7 +98,6 @@ private:
     std::function<void(void)> hangUp;
     std::function<void(void)> toggleCallMute;
     std::function<void(const CCastDisplayInfo)> castDisplayChange;
-    std::function<void(void)> occupiedLost;
     std::map<int32_t, void(CJAVSessionCallback::*)(int64_t)> typeToCallbackMap_;
     std::vector<std::shared_ptr<std::recursive_mutex>> callbackMutexMap_;
 };

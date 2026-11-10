@@ -132,13 +132,6 @@ int32_t FfiMultimediaAVSessionDeactivate(int64_t sessionId)
     return session->Deactivate();
 }
 
-int32_t FfiMultimediaAVSessionOccupy(int64_t sessionId)
-{
-    auto session = GetSessionImpl(sessionId);
-    if (session == nullptr) { return OHOS::AVSession::ERR_SESSION_NOT_EXIST; }
-    return session->Occupy();
-}
-
 int32_t FfiMultimediaAVSessionDestroy(int64_t sessionId)
 {
     auto session = GetSessionImpl(sessionId);

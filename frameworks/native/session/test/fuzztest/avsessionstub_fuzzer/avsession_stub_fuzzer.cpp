@@ -64,6 +64,7 @@ public:
     int32_t Destroy() override { return 0; };
     int32_t AddSupportCommand(const int32_t cmd) override { return 0; };
     int32_t DeleteSupportCommand(const int32_t cmd) override { return 0; };
+    int32_t Occupy(const std::string& moduleName) override { return AVSESSION_SUCCESS; };
     int32_t SetSessionEvent(const std::string &event, const OHOS::AAFwk::WantParams &args) override { return 0; };
     int32_t UpdateAVQueueInfo(const AVQueueInfo& info) override { return 0; };
 

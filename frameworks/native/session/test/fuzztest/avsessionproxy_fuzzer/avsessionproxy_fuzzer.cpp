@@ -148,7 +148,7 @@ void OHOS::AVSession::AvsessionProxyTest()
     avSessionProxy.GetController();
     avSessionProxy.Activate();
     avSessionProxy.Deactivate();
-    avSessionProxy.Occupy();
+    avSessionProxy.Occupy("test");
     avSessionProxy.IsActive();
     avSessionProxy.Destroy();
 }

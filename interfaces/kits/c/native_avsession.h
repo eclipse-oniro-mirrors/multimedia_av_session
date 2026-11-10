@@ -134,7 +134,8 @@ typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnToggleFavorite)(OH_AVS
 typedef AVSessionCallback_Result (*OH_AVSessionCallback_OutputDeviceChange)(OH_AVSession* session,
     AVSession_ConnectionState state, AVSession_OutputDeviceInfo *outputDeviceInfo);
 
-typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnOccupiedLost)(OH_AVSession* session, void* userData);
+typedef AVSessionCallback_Result (*OH_AVSessionCallback_SessionOccupiedLost)(OH_AVSession* session,
+    const char* moduleName);
 
 /**
  * @brief Request to create the avsession.
@@ -550,47 +551,43 @@ AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession
  * When multiple modules in an application multiplex a session, this interface is used for preemption.
  *
  * @param avsession The avsession instance pointer
+ * @param moduleName The module name of the caller, used to notify the preempted module.
  * @return Function result code：
  *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
  *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The session does not exist.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. moduleName is nullptr.
  * @since 26
  */
-AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession);
+AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession, const char* moduleName);
 
 /**
  * @brief Register occupiedLost callback to listen for session preemption events.
  * When multiple modules in an application share a session, the listener needs to be registered.
  *
  * @param avsession The avsession instance pointer
- * @param callback the {@link OH_AVSessionCallback_OnOccupiedLost} to be registered.
- * @param userData User data which is passed by user.
+ * @param callback the {@link OH_AVSessionCallback_SessionOccupiedLost} to be registered.
  * @return Function result code：
  *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The session does not exist.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
- *                                                 1. The param of avsession is nullptr.
- *                                                 2. The param of callback is nullptr.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. callback is nullptr.
  * @since 26
  */
-AVSession_ErrCode OH_AVSession_RegisterOccupiedLostCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnOccupiedLost callback, void* userData);
+AVSession_ErrCode OH_AVSession_RegisterOccupiedLost(OH_AVSession* avsession,
+    OH_AVSessionCallback_SessionOccupiedLost callback);
 
 /**
  * @brief Unregister occupiedLost callback.
  *
  * @param avsession The avsession instance pointer
- * @param callback the {@link OH_AVSessionCallback_OnOccupiedLost} to be unregistered.
+ * @param callback the {@link OH_AVSessionCallback_SessionOccupiedLost} to be unregistered.
  * @return Function result code：
  *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The session does not exist.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER}
- *                                                 1. The param of avsession is nullptr.
- *                                                 2. The param of callback is nullptr.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. callback is nullptr.
  * @since 26
  */
-AVSession_ErrCode OH_AVSession_UnregisterOccupiedLostCallback(OH_AVSession* avsession,
-    OH_AVSessionCallback_OnOccupiedLost callback);
+AVSession_ErrCode OH_AVSession_UnRegisterOccupiedLost(OH_AVSession* avsession,
+    OH_AVSessionCallback_SessionOccupiedLost callback);
 
 /**
  * @brief Request to acquire an AVSession instance if already created.

@@ -1436,12 +1436,12 @@ int32_t AVSessionItem::RegisterCallbackInner(const sptr<IAVSessionCallback>& cal
 }
 // LCOV_EXCL_STOP
 
-int32_t AVSessionItem::Occupy()
+int32_t AVSessionItem::Occupy(const std::string& moduleName)
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST, "session is destroyed");
     std::lock_guard callbackLockGuard(callbackLock_);
     if (callback_ != nullptr) {
-        callback_->OnOccupiedLost();
+        callback_->OnOccupiedLost(moduleName);
         callback_.clear();
     }
     return AVSESSION_SUCCESS;

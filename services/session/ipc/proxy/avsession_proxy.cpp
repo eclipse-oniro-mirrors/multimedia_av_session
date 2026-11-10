@@ -1169,7 +1169,7 @@ int32_t AVSessionProxy::SetBackgroundPlayMode(int32_t mode)
     return reply.ReadInt32(ret) ? ret : ERR_UNMARSHALLING;
 }
 
-int32_t AVSessionProxy::Occupy()
+int32_t AVSessionProxy::Occupy(const std::string& moduleName)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionProxy::Occupy");
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(!isDestroyed_, ERR_SESSION_NOT_EXIST,
@@ -1179,6 +1179,8 @@ int32_t AVSessionProxy::Occupy()
     MessageParcel data;
     CHECK_AND_RETURN_RET_LOG(data.WriteInterfaceToken(GetDescriptor()),
         ERR_MARSHALLING, "write interface token failed");
+    CHECK_AND_RETURN_RET_LOG(data.WriteString(moduleName),
+        ERR_MARSHALLING, "write moduleName failed");
     MessageParcel reply;
     MessageOption option;
     auto remote = Remote();

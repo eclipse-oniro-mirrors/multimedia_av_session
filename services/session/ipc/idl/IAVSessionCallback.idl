@@ -72,5 +72,5 @@ interface OHOS.AVSession.IAVSessionCallback {
 
     [oneway] void OnDesktopLyricStateChanged([in] DesktopLyricState state);
 
-    [oneway] void OnOccupiedLost();
+    [oneway] void OnOccupiedLost([in] String moduleName);
 }

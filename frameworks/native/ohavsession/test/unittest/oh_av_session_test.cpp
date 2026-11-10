@@ -1523,7 +1523,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_Occupy_001, TestSize.Level0)
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_occupy_001",
         "com.xxx.hmxx", "ndkxx", &avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_Occupy(avsession);
+    ret = OH_AVSession_Occupy(avsession, "testModule");
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
@@ -1537,44 +1537,44 @@ HWTEST(OHAVSessionTest, OH_AVSession_Occupy_001, TestSize.Level0)
  */
 HWTEST(OHAVSessionTest, OH_AVSession_Occupy_002, TestSize.Level0)
 {
-    AVSession_ErrCode ret = OH_AVSession_Occupy(nullptr);
+    AVSession_ErrCode ret = OH_AVSession_Occupy(nullptr, nullptr);
     EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
 }
 
 /**
- * @tc.name: OH_AVSession_RegisterOccupiedLostCallback_001
- * @tc.desc: RegisterOccupiedLostCallback from the class of ohavsession
+ * @tc.name: OH_AVSession_RegisterOccupiedLost_001
+ * @tc.desc: RegisterOccupiedLost from the class of ohavsession
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLostCallback_001, TestSize.Level0)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLost_001, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "oh_av_session_occupy_lost_001",
         "com.xxx.hmxx", "ndkxx", &avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    OH_AVSessionCallback_OnOccupiedLost callback = [](OH_AVSession* session, void* userData)
-        -> AVSessionCallback_Result
+    OH_AVSessionCallback_SessionOccupiedLost callback = [](OH_AVSession* session,
+        const char* moduleName) -> AVSessionCallback_Result
     {
         return AVSESSION_CALLBACK_RESULT_SUCCESS;
     };
-    ret = OH_AVSession_RegisterOccupiedLostCallback(avsession, callback, nullptr);
+    ret = OH_AVSession_RegisterOccupiedLost(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_UnregisterOccupiedLostCallback(avsession, callback);
+    ret = OH_AVSession_UnRegisterOccupiedLost(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
 }
 
 /**
- * @tc.name: OH_AVSession_RegisterOccupiedLostCallback_002
- * @tc.desc: RegisterOccupiedLostCallback with nullptr
+ * @tc.name: OH_AVSession_RegisterOccupiedLost_002
+ * @tc.desc: RegisterOccupiedLost with nullptr
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLostCallback_002, TestSize.Level0)
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLost_002, TestSize.Level0)
 {
-    AVSession_ErrCode ret = OH_AVSession_RegisterOccupiedLostCallback(nullptr, nullptr, nullptr);
+    AVSession_ErrCode ret = OH_AVSession_RegisterOccupiedLost(nullptr, nullptr);
     EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
 }
 }

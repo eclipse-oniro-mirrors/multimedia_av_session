@@ -301,13 +301,13 @@ ErrCode AVSessionCallbackClient::OnDesktopLyricStateChanged(const DesktopLyricSt
     return AVSESSION_SUCCESS;
 }
 
-ErrCode AVSessionCallbackClient::OnOccupiedLost()
+ErrCode AVSessionCallbackClient::OnOccupiedLost(const std::string& moduleName)
 {
     CHECK_AND_RETURN_RET_LOG(callback_ != nullptr, AVSESSION_ERROR, "callback is null");
 
     auto callback = callback_;
     CHECK_AND_PRINT_LOG(AVSessionEventHandler::GetInstance()
-        .AVSessionPostTask([callback]() { callback->OnOccupiedLost(); }, EVENT_NAME),
+        .AVSessionPostTask([callback, moduleName]() { callback->OnOccupiedLost(moduleName); }, EVENT_NAME),
         "AVSessionCallbackClient handler postTask failed");
     return AVSESSION_SUCCESS;
 }

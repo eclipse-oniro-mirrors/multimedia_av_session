@@ -937,25 +937,25 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnOutputDeviceChange001, TestSize.Level0)
 }
 
 /**
- * @tc.name: RegisterOccupiedLostCallback001
- * @tc.desc: test RegisterOccupiedLostCallback
+ * @tc.name: RegisterOccupiedLost001
+ * @tc.desc: test RegisterOccupiedLost
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST_F(OHAVSessionCallbackImplTest, RegisterOccupiedLostCallback001, TestSize.Level0)
+HWTEST_F(OHAVSessionCallbackImplTest, RegisterOccupiedLost001, TestSize.Level0)
 {
-    SLOGI("RegisterOccupiedLostCallback001 Begin");
+    SLOGI("RegisterOccupiedLost001 Begin");
     OH_AVSession* avsession = nullptr;
-    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterOccupiedLostCallback001", "com.xxx.hmxx", "ndkxx", &avsession);
-    OH_AVSessionCallback_OnOccupiedLost callback = [](OH_AVSession* session, void* userData)
-        -> AVSessionCallback_Result {
+    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterOccupiedLost001", "com.xxx.hmxx", "ndkxx", &avsession);
+    OH_AVSessionCallback_SessionOccupiedLost callback = [](OH_AVSession* session,
+        const char* moduleName) -> AVSessionCallback_Result {
         return AVSESSION_CALLBACK_RESULT_SUCCESS;
     };
     g_ohAVSessionCallbackImpl.avsession_ = avsession;
-    auto ret = g_ohAVSessionCallbackImpl.RegisterOccupiedLostCallback(avsession, callback, nullptr);
+    auto ret = g_ohAVSessionCallbackImpl.RegisterOccupiedLost(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     EXPECT_TRUE(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size() > 0);
-    SLOGI("RegisterOccupiedLostCallback001 End");
+    SLOGI("RegisterOccupiedLost001 End");
 }
 
 /**
@@ -969,15 +969,15 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnOccupiedLost001, TestSize.Level0)
     SLOGI("OnOccupiedLost001 Begin");
     OH_AVSession* avsession = nullptr;
     OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnOccupiedLost001", "com.xxx.hmxx", "ndkxx", &avsession);
-    OH_AVSessionCallback_OnOccupiedLost callback = [](OH_AVSession* session, void* userData)
-        -> AVSessionCallback_Result {
+    OH_AVSessionCallback_SessionOccupiedLost callback = [](OH_AVSession* session,
+        const char* moduleName) -> AVSessionCallback_Result {
         return AVSESSION_CALLBACK_RESULT_SUCCESS;
     };
     g_ohAVSessionCallbackImpl.avsession_ = avsession;
-    g_ohAVSessionCallbackImpl.RegisterOccupiedLostCallback(avsession, callback, nullptr);
-    g_ohAVSessionCallbackImpl.OnOccupiedLost();
+    g_ohAVSessionCallbackImpl.RegisterOccupiedLost(avsession, callback);
+    g_ohAVSessionCallbackImpl.OnOccupiedLost("testModule");
     EXPECT_TRUE(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size() > 0);
-    g_ohAVSessionCallbackImpl.UnregisterOccupiedLostCallback(avsession, callback);
+    g_ohAVSessionCallbackImpl.UnRegisterOccupiedLost(avsession, callback);
     EXPECT_EQ(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size(), 0);
     SLOGI("OnOccupiedLost001 End");
 }

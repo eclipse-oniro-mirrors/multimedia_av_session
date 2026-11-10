@@ -52,7 +52,7 @@ public:
     ErrCode OnCustomData(const AAFwk::WantParams& extras) override;
     ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override;
     ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override;
-    ErrCode OnOccupiedLost() override;
+    ErrCode OnOccupiedLost(const std::string& moduleName) override;
 
 private:
     std::shared_ptr<AVSessionCallback> callback_;

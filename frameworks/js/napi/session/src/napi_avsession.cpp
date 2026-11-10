@@ -2700,14 +2700,24 @@ napi_value NapiAVSession::SetBackgroundPlayMode(napi_env env, napi_callback_info
 
 napi_value NapiAVSession::Occupy(napi_env env, napi_callback_info info)
 {
-    auto context = std::make_shared<ContextBase>();
+    struct ConcreteContext : public ContextBase {
+        std::string moduleName_;
+    };
+    auto context = std::make_shared<ConcreteContext>();
     if (context == nullptr) {
         SLOGE("Occupy failed : no memory");
         NapiUtils::ThrowError(env, "Occupy failed : no memory", NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
         return NapiUtils::GetUndefinedValue(env);
     }
 
-    context->GetCbInfo(env, info);
+    auto inputParser = [env, context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->moduleName_);
+        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get moduleName_ failed",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
         auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
         if (napiSession == nullptr || napiSession->session_ == nullptr) {
@@ -2716,7 +2726,7 @@ napi_value NapiAVSession::Occupy(napi_env env, napi_callback_info info)
             ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "Occupy", context->errMessage);
             return;
         }
-        int32_t ret = napiSession->session_->Occupy();
+        int32_t ret = napiSession->session_->Occupy(context->moduleName_);
         if (ret != AVSESSION_SUCCESS) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ret];

@@ -90,11 +90,13 @@ public:
     ErrCode OnCustomData(const OHOS::AAFwk::WantParams& data) override { return AVSESSION_SUCCESS; };
     ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override { return AVSESSION_SUCCESS; };
     ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override { return AVSESSION_SUCCESS; };
-    ErrCode OnOccupiedLost() override { occupiedLostCalled_ = true; return AVSESSION_SUCCESS; };
+    ErrCode OnOccupiedLost(const std::string& moduleName) override
+    { occupiedLostCalled_ = true; occupiedModuleName_ = moduleName; return AVSESSION_SUCCESS; };
 
     AVSessionCallbackImpl() = default;
     ~AVSessionCallbackImpl() = default;
     bool occupiedLostCalled_ = false;
+    std::string occupiedModuleName_;
 };
 
 class MockIAVCastControllerProxy : public OHOS::AVSession::IAVCastControllerProxy {
@@ -1844,9 +1846,10 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_001, TestSize.Level0)
     sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
     g_AVSessionItem->RegisterCallbackInner(sessionCallback);
     sessionCallback->occupiedLostCalled_ = false;
-    int32_t result = g_AVSessionItem->Occupy();
+    int32_t result = g_AVSessionItem->Occupy("testModule");
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     EXPECT_EQ(sessionCallback->occupiedLostCalled_, true);
+    EXPECT_EQ(sessionCallback->occupiedModuleName_, "testModule");
     SLOGD("AVSessionItem_Occupy_001 end!");
 }
 
@@ -1860,7 +1863,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_002, TestSize.Level0)
     SLOGD("AVSessionItem_Occupy_002 begin!");
     ASSERT_NE(g_AVSessionItem, nullptr);
     g_AVSessionItem->isDestroyed_ = true;
-    int32_t result = g_AVSessionItem->Occupy();
+    int32_t result = g_AVSessionItem->Occupy("testModule");
     EXPECT_EQ(result, ERR_SESSION_NOT_EXIST);
     g_AVSessionItem->isDestroyed_ = false;
     SLOGD("AVSessionItem_Occupy_002 end!");
@@ -1876,7 +1879,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_003, TestSize.Level0)
     SLOGD("AVSessionItem_Occupy_003 begin!");
     ASSERT_NE(g_AVSessionItem, nullptr);
     g_AVSessionItem->callback_ = nullptr;
-    int32_t result = g_AVSessionItem->Occupy();
+    int32_t result = g_AVSessionItem->Occupy("testModule");
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_Occupy_003 end!");
 }

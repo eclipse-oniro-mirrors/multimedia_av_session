@@ -1011,7 +1011,7 @@ void AVSessionImpl::SetBackgroundPlayModeSync(BackgroundPlayMode mode)
     }
 }
 
-void AVSessionImpl::OccupySync()
+void AVSessionImpl::OccupySync(string_view moduleName)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::Occupy");
     if (session_ == nullptr) {
@@ -1019,7 +1019,7 @@ void AVSessionImpl::OccupySync()
             "Occupy failed : session is nullptr");
         return;
     }
-    int32_t ret = session_->Occupy();
+    int32_t ret = session_->Occupy(std::string(moduleName));
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage;
         ErrCodeToMessage(ret, "Occupy", errMessage);
@@ -1452,7 +1452,7 @@ void AVSessionImpl::OnDesktopLyricStateChanged(callback_view<void(DesktopLyricSt
     }
 }
 
-void AVSessionImpl::OnOccupiedLost(callback_view<void()> callback)
+void AVSessionImpl::OnOccupiedLost(callback_view<void(string_view)> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
     if (OnEvent("occupiedLost", this) == OHOS::AVSession::AVSESSION_SUCCESS) {
@@ -1919,7 +1919,7 @@ void AVSessionImpl::OffDesktopLyricStateChanged(optional_view<callback<void(Desk
     }
 }
 
-void AVSessionImpl::OffOccupiedLost(optional_view<callback<void()>> callback)
+void AVSessionImpl::OffOccupiedLost(optional_view<callback<void(string_view)>> callback)
 {
     std::shared_ptr<uintptr_t> cacheCallback;
     if (callback.has_value()) {

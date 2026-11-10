@@ -547,7 +547,7 @@ HWTEST_F(AVSessionCallbackClientTest, OnOccupiedLost001, TestSize.Level1)
     std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
         std::make_shared<AVSessionCallbackClient>(sessionCallback);
     EXPECT_NE(sessionCallbackClient, nullptr);
-    ErrCode ret = sessionCallbackClient->OnOccupiedLost();
+    ErrCode ret = sessionCallbackClient->OnOccupiedLost("testModule");
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
 }
 } // namespace AVSession

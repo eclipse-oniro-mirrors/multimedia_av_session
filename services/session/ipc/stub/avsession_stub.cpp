@@ -479,7 +479,8 @@ int32_t AVSessionStub::HandleSetBackgroundPlayMode(MessageParcel &data, MessageP
 
 int32_t AVSessionStub::HandleOccupy(MessageParcel& data, MessageParcel& reply)
 {
-    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Occupy()), ERR_NONE, "write int32_t failed");
+    std::string moduleName = data.ReadString();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Occupy(moduleName)), ERR_NONE, "write int32_t failed");
     return ERR_NONE;
 }
 

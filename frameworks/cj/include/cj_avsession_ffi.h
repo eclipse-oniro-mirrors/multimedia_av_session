@@ -48,7 +48,6 @@ FFI_EXPORT int32_t FfiMultimediaAVSessionGetOutputDevice(int64_t sessionId, COut
 FFI_EXPORT int32_t FfiMultimediaAVSessionGetAllCastDisplays(int64_t sessionId, CArray* infos);
 FFI_EXPORT int32_t FfiMultimediaAVSessionActivate(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionDeactivate(int64_t sessionId);
-FFI_EXPORT int32_t FfiMultimediaAVSessionOccupy(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionDestroy(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionStopCasting(int64_t sessionId);
 FFI_EXPORT int32_t FfiMultimediaAVSessionDispatchSessionEvent(int64_t sessionId, char** event, CArray* args);

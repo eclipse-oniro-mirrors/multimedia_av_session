@@ -406,14 +406,14 @@ void TaiheAVSessionCallback::OnDesktopLyricStateChanged(const OHOS::AVSession::D
     HandleEvent(EVENT_DESKTOP_LYRIC_STATE_CHANGED, execute);
 }
 
-void TaiheAVSessionCallback::OnOccupiedLost()
+void TaiheAVSessionCallback::OnOccupiedLost(const std::string& moduleName)
 {
     OHOS::AVSession::AVSessionTrace trace("TaiheAVSessionCallback::OnOccupiedLost");
-    auto execute = [](std::shared_ptr<uintptr_t> method) {
-        std::shared_ptr<taihe::callback<void()>> cacheCallback =
-            std::reinterpret_pointer_cast<taihe::callback<void()>>(method);
+    auto execute = [moduleName](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(string_view)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(string_view)>>(method);
         CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
-        (*cacheCallback)();
+        (*cacheCallback)(string_view(moduleName));
     };
     HandleEvent(EVENT_OCCUPIED_LOST, execute);
 }
