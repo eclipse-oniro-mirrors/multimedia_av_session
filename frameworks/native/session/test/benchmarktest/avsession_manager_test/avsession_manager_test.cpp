@@ -58,6 +58,19 @@ public:
         SLOGI("uid=%{public}d checked", uid);
     }
 
+    void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s added for audio zone", descriptor.sessionId_.c_str());
+    };
+    void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s removed for audio zone", descriptor.sessionId_.c_str());
+    };
+    void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
+    {
+        SLOGI("sessionId=%{public}s be top session for audio zone", descriptor.sessionId_.c_str());
+    };
+
     std::string GetSessionId() const
     {
         return descriptor_.sessionId_;

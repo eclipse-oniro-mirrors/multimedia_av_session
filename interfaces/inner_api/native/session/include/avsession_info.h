@@ -150,7 +150,7 @@ public:
      * @since 26.0.1 dynamic&static
     */
 
-    virtual void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
+    virtual void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) = 0;
 
     /**
      * @brief Listen for session release events for audio zone.
@@ -159,7 +159,7 @@ public:
      * @param descriptor Session related description callback.
      * @since 26.0.1 dynamic&static
     */
-    virtual void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
+    virtual void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) = 0;
 
     /**
      * @brief Listen for changes in the latest session for audio zone.
@@ -168,7 +168,7 @@ public:
      * @param descriptor Session related description callback.
      * @since 26.0.1 dynamic&static
     */
-    virtual void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) {};
+    virtual void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) = 0;
 };
 
 #ifndef CLIENT_LITE

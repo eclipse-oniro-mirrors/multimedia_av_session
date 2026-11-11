@@ -71,7 +71,7 @@ public:
     */
     virtual std::shared_ptr<AVSession> CreateSession(const std::string& tag, int32_t type,
                                                      const AppExecFwk::ElementName& elementName,
-                                                     int32_t userId);
+                                                     int32_t userId) = 0;
 
     /**
      * Create Session Object.
@@ -97,7 +97,7 @@ public:
      * @return Returns result of creating session
     */
     virtual int32_t CreateSession(const std::string& tag, int32_t type, const AppExecFwk::ElementName& elementName,
-                                  std::shared_ptr<AVSession>& session, int32_t userId);
+                                  std::shared_ptr<AVSession>& session, int32_t userId) = 0;
 #endif
 
     /**
@@ -128,7 +128,7 @@ public:
      * @since 26.0.1 dynamic&static
      */
     virtual int32_t GetSessionDescriptorsForAudioZone(int32_t userId,
-        std::vector<AVSessionDescriptor>& descriptors) { return AVSESSION_SUCCESS; };
+        std::vector<AVSessionDescriptor>& descriptors) = 0;
     /**
      * Send the key command to get the descriptor of activated sessions.
      *
@@ -199,7 +199,7 @@ public:
      * @since 26.0.1
     */
     virtual int32_t RegisterSessionListenerForUser(int32_t userId,
-        const std::shared_ptr<SessionListener>& listener) { return AVSESSION_SUCCESS; };
+        const std::shared_ptr<SessionListener>& listener) = 0;
 
     /**
      * @brief Listen for sessionListener callback event for all users.

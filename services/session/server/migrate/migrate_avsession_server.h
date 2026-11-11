@@ -67,6 +67,9 @@ public:
     void OnSessionRelease(const AVSessionDescriptor &descriptor) override;
     void OnTopSessionChange(const AVSessionDescriptor &descriptor) override;
     void OnAudioSessionChecked(const int32_t uid) override {}
+    void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
+    void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
+    void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
 
     void OnHistoricalRecordChange() override;
 

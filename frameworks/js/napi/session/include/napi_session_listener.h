@@ -58,6 +58,9 @@ public:
     void OnDeviceStateChange(const DeviceState& deviceState) override;
     void OnActiveSessionChanged(const std::vector<AVSessionDescriptor> &descriptors) override;
     void OnSystemCommonEvent(const std::string& commonEvent, const std::string& args) override;
+    void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
+    void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
+    void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
 
     napi_status AddCallback(napi_env env, int32_t event, napi_value callback);
     napi_status RemoveCallback(napi_env env, int32_t event, napi_value callback);

@@ -41,6 +41,9 @@ public:
     void OnAudioSessionChecked(const int32_t uid) override {}
     void OnRemoteDistributedSessionChange(
         const std::vector<sptr<IRemoteObject>>& sessionControllers) override {};
+    void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
+    void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
+    void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
 
     void Init(AVSessionService *ptr);
 
