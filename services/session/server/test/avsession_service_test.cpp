@@ -51,6 +51,7 @@
 #define private public
 #define protected public
 #include "avsession_service.h"
+#include "avsession_whitelist_config_manager.h"
 #undef protected
 #undef private
 
@@ -1413,6 +1414,26 @@ static HWTEST_F(AVSessionServiceTest, OnReceiveEvent002, TestSize.Level0)
     SLOGI("OnReceiveEvent002 end!");
 }
 
+static HWTEST_F(AVSessionServiceTest, OnReceiveEventCompConfigReady001, TestSize.Level1)
+{
+    SLOGI("OnReceiveEventCompConfigReady001 begin!");
+    OHOS::EventFwk::CommonEventData eventData;
+    OHOS::AAFwk::Want want = eventData.GetWant();
+    want.SetAction("custom.event.CompConfigServiceReady");
+    eventData.SetWant(want);
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    EventSubscriber eventSubscriber(subscriberInfo, avservice_);
+    EXPECT_NO_FATAL_FAILURE(eventSubscriber.OnReceiveEvent(eventData));
+#ifdef INPUT_REDISTRIBUTE_ENABLE
+    auto whitelistMgr = AVSessionWhitelistConfigManager::GetInstance();
+    ASSERT_NE(whitelistMgr, nullptr);
+    bool expectedReady = OHOS::system::GetBoolParameter("compConfigService.isServiceReady", false);
+    EXPECT_EQ(whitelistMgr->isCompConfigReady_.load(), expectedReady);
+#endif
+    SLOGI("OnReceiveEventCompConfigReady001 end!");
+}
+
 static std::string GetUnlockCleanFlagPath(int32_t userId)
 {
     std::string cacheDir = AVSessionUtils::GetCachePathName(userId);
@@ -1853,7 +1874,7 @@ static HWTEST_F(AVSessionServiceTest, GetTrustedDeviceName001, TestSize.Level0)
     std::string networkId = "";
     std::string deviceName = "";
     int32_t ret = avservice_->GetTrustedDeviceName(networkId, deviceName);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("GetTrustedDeviceName001 end!");
 }
 

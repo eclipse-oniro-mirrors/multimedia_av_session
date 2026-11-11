@@ -40,7 +40,7 @@ void AVSessionWhitelistConfigManagerTest::TearDownTestCase(void)
 
 void AVSessionWhitelistConfigManagerTest::SetUp(void)
 {
-    avsessionWhitelistConfigManager = DelayedSingleton<AVSessionWhitelistConfigManager>::GetInstance();
+    avsessionWhitelistConfigManager = AVSessionWhitelistConfigManager::GetInstance();
 }
 
 void AVSessionWhitelistConfigManagerTest::TearDown(void)
@@ -61,7 +61,7 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_001, TestSize.
 
 /**
  * @tc.name: IsKeyEventSupported_002
- * @tc.desc: IsKeyEventSupported test
+ * @tc.desc: IsKeyEventSupported test with a bundle that has no config entry
  * @tc.type: FUNC
  */
 HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_002, TestSize.Level1)
@@ -72,131 +72,52 @@ HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_002, TestSize.
 }
 
 /**
- * @tc.name: IsKeyEventSupported_003
- * @tc.desc: IsKeyEventSupported test
+ * @tc.name: GetSupportKeyEventFromConfig_001
+ * @tc.desc: GetSupportKeyEventFromConfig test with empty bundleName
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_003, TestSize.Level1)
-{
-    std::string bundleName = "testBundle";
-    avsessionWhitelistConfigManager->isSettingsDataLoaded_ = true;
-    bool ret = avsessionWhitelistConfigManager->IsKeyEventSupported(bundleName);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: IsKeyEventSupported_004
- * @tc.desc: IsKeyEventSupported test
- * @tc.type: FUNC
- */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, IsKeyEventSupported_004, TestSize.Level1)
-{
-    std::string bundleName = "testBundle";
-    avsessionWhitelistConfigManager->isSettingsDataLoaded_ = false;
-    bool ret = avsessionWhitelistConfigManager->IsKeyEventSupported(bundleName);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: GetSupportKeyEventFromSettings_001
- * @tc.desc: GetSupportKeyEventFromSettings test
- * @tc.type: FUNC
- */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, GetSupportKeyEventFromSettings_001, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, GetSupportKeyEventFromConfig_001, TestSize.Level1)
 {
     std::string bundleName = "";
-    bool ret = avsessionWhitelistConfigManager->GetSupportKeyEventFromSettings(bundleName);
+    bool ret = avsessionWhitelistConfigManager->GetSupportKeyEventFromConfig(bundleName);
     EXPECT_EQ(ret, false);
 }
 
 /**
- * @tc.name: GetSupportKeyEventFromSettings_002
- * @tc.desc: GetSupportKeyEventFromSettings test
+ * @tc.name: GetSupportKeyEventFromConfig_002
+ * @tc.desc: GetSupportKeyEventFromConfig test with a bundle that has no config entry
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, GetSupportKeyEventFromSettings_002, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, GetSupportKeyEventFromConfig_002, TestSize.Level1)
 {
     std::string bundleName = "testBundle";
-    bool ret = avsessionWhitelistConfigManager->GetSupportKeyEventFromSettings(bundleName);
+    bool ret = avsessionWhitelistConfigManager->GetSupportKeyEventFromConfig(bundleName);
     EXPECT_EQ(ret, false);
 }
 
 /**
- * @tc.name: CreateDataShareHelper_001
- * @tc.desc: CreateDataShareHelper test
+ * @tc.name: ResetReader_001
+ * @tc.desc: ResetReader test on a manager without a reader
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, CreateDataShareHelper_001, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, ResetReader_001, TestSize.Level1)
 {
     EXPECT_NE(avsessionWhitelistConfigManager, nullptr);
-    std::shared_ptr<DataShare::DataShareHelper> helper = avsessionWhitelistConfigManager->CreateDataShareHelper();
-    EXPECT_NE(helper, nullptr);
+    EXPECT_NO_FATAL_FAILURE(avsessionWhitelistConfigManager->ResetReader());
+    EXPECT_EQ(avsessionWhitelistConfigManager->readerHandle_, nullptr);
 }
 
 /**
- * @tc.name: ReleaseDataShareHelper_001
- * @tc.desc: ReleaseDataShareHelper test
+ * @tc.name: LoadConfigReaderLib_001
+ * @tc.desc: LoadConfigReaderLib test, repeated load returns the cached handle state
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, ReleaseDataShareHelper_001, TestSize.Level1)
+HWTEST_F(AVSessionWhitelistConfigManagerTest, LoadConfigReaderLib_001, TestSize.Level1)
 {
-    std::shared_ptr<DataShare::DataShareHelper> helper =  nullptr;
-    bool ret = avsessionWhitelistConfigManager->ReleaseDataShareHelper(helper);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: ReleaseDataShareHelper_002
- * @tc.desc: ReleaseDataShareHelper test
- * @tc.type: FUNC
- */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, ReleaseDataShareHelper_002, TestSize.Level1)
-{
-    std::shared_ptr<DataShare::DataShareHelper> helper =  avsessionWhitelistConfigManager->CreateDataShareHelper();
-    bool ret = avsessionWhitelistConfigManager->ReleaseDataShareHelper(helper);
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: ParseJsonToMap_001
- * @tc.desc: ParseJsonToMap test
- * @tc.type: FUNC
- */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, ParseJsonToMap_001, TestSize.Level1)
-{
-    std::string jsonStr = "";
-    std::map<std::string, bool> compatibleInfoMap;
-    bool ret = avsessionWhitelistConfigManager->ParseJsonToMap(jsonStr, compatibleInfoMap);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: ParseJsonToMap_002
- * @tc.desc: ParseJsonToMap test
- * @tc.type: FUNC
- */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, ParseJsonToMap_002, TestSize.Level1)
-{
-    std::string jsonStr = "{\"testBundle1\":true,\"testBundle2\":true}";
-    std::map<std::string, bool> compatibleInfoMap;
-    bool ret = avsessionWhitelistConfigManager->ParseJsonToMap(jsonStr, compatibleInfoMap);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(compatibleInfoMap.size(), 2);
-    EXPECT_EQ(compatibleInfoMap["testBundle1"], true);
-    EXPECT_EQ(compatibleInfoMap["testBundle2"], true);
-}
-
-/**
- * @tc.name: ParseJsonToMap_003
- * @tc.desc: ParseJsonToMap test
- * @tc.type: FUNC
- */
-HWTEST_F(AVSessionWhitelistConfigManagerTest, ParseJsonToMap_003, TestSize.Level1)
-{
-    std::string jsonStr = "jsonstr";
-    std::map<std::string, bool> compatibleInfoMap;
-    bool ret = avsessionWhitelistConfigManager->ParseJsonToMap(jsonStr, compatibleInfoMap);
-    EXPECT_EQ(ret, false);
+    EXPECT_NE(avsessionWhitelistConfigManager, nullptr);
+    bool first = avsessionWhitelistConfigManager->LoadConfigReaderLib();
+    bool second = avsessionWhitelistConfigManager->LoadConfigReaderLib();
+    EXPECT_EQ(first, second);
 }
 #endif
 

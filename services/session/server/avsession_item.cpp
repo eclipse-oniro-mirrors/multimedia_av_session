@@ -1782,7 +1782,7 @@ bool AVSessionItem::IsKeyEventSupported(const std::string &bundleName)
         SLOGE("bundleName is empty");
         return false;
     }
-    auto manager = DelayedSingleton<AVSessionWhitelistConfigManager>::GetInstance();
+    auto manager = AVSessionWhitelistConfigManager::GetInstance();
     if (manager == nullptr) {
         SLOGE("failed, manager is nullptr");
         return false;

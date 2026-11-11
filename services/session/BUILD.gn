@@ -250,6 +250,10 @@ av_session_ohos_library("avsession_service") {
     "window_manager:libdm_lite",
   ]
 
+  if (av_session_enable_input_redistribute) {
+    defines += [ "INPUT_REDISTRIBUTE_ENABLE" ]
+  }
+  
   if (multimedia_av_session_enable_device_manager) {
     defines += [ "DEVICE_MANAGER_ENABLE" ]
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -709,7 +713,6 @@ av_session_ohos_library("avsession_item") {
 
   if (av_session_enable_input_redistribute) {
     defines += [ "INPUT_REDISTRIBUTE_ENABLE" ]
-    external_deps += [ "data_share:datashare_consumer" ]
   }
 
   if (multimedia_av_session_enable_device_manager) {

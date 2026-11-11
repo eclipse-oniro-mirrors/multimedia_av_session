@@ -56,6 +56,7 @@
 #include "audio_system_manager.h"
 #include "stream_dfx_manager.h"
 #include "audio_errors.h"
+#include "avsession_whitelist_config_manager.h"
 #ifdef CAR_FEATURE_ENABLE
 #include "audio_zone_manager.h"
 #include "os_account_manager.h"
@@ -108,6 +109,10 @@ enum DESKTOP_LYRICS_ABILITY_STATE {
     DESKTOP_LYRICS_ABILITY_DISCONNECTING = 3,
     DESKTOP_LYRICS_ABILITY_DISCONNECTED = 4,
 };
+
+static const std::string COMP_CONFIG_SERVICE_READY_EVENT = "custom.event.CompConfigServiceReady";
+static const std::string COMP_CONFIG_SERVICE_READY_PARAM = "compConfigService.isServiceReady";
+static const int32_t COMP_CONFIG_PUBLISHER_UID = 6703;
 
 const std::map<int, int32_t> keyCodeToCommandMap_ = {
     {MMI::KeyEvent::KEYCODE_MEDIA_PLAY_PAUSE, AVControlCommand::SESSION_CMD_PLAY},
@@ -228,6 +233,7 @@ void AVSessionService::OnStartProcess()
 #endif
 
     AVSessionUtils::PublishCommonEvent("usual.event.AVSESSION_START");
+    InitWhitelistConfigReadyState();
 }
 
 void AVSessionService::OnDump()
@@ -361,6 +367,9 @@ void EventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
             servicePtr_->HotSwitchReportCastDisplay();
         }
 #endif
+    } else if (action.compare(COMP_CONFIG_SERVICE_READY_EVENT) == 0) {
+        SLOGI("OnReceiveEvent comp config service ready");
+        servicePtr_->InitWhitelistConfigReadyState();
     }
 }
 
@@ -585,6 +594,20 @@ void AVSessionService::HandleFirstUnlockCleanup(int32_t userId)
     }
 }
 
+void AVSessionService::InitWhitelistConfigReadyState()
+{
+    // The ready event is not sticky and is published only once per config service lifetime, so a
+    // service restart after that publish would never receive it. Seed the state from the parameter
+    // the config service sets together with the event.
+    bool isCompConfigReady = system::GetBoolParameter(COMP_CONFIG_SERVICE_READY_PARAM.c_str(), false);
+    SLOGI("compConfig ready param:%{public}d", isCompConfigReady);
+#ifdef INPUT_REDISTRIBUTE_ENABLE
+    auto whitelistManager = AVSessionWhitelistConfigManager::GetInstance();
+    CHECK_AND_RETURN_LOG(whitelistManager != nullptr, "whitelistConfigManager not ready");
+    whitelistManager->NotifyCompConfigReady(isCompConfigReady);
+#endif
+}
+
 bool AVSessionService::SubscribeCommonEvent()
 {
     const std::vector<std::string> systemEvents = {
@@ -630,6 +653,23 @@ bool AVSessionService::SubscribeCommonEvent()
             "SubscribeCommonEvent custom event %{public}s failed!", event.c_str());
         customSubscribers_.push_back(customSubscriber);
     }
+    return ret && SubscribeCompConfigReadyEvent();
+}
+
+bool AVSessionService::SubscribeCompConfigReadyEvent()
+{
+    // The compatibility config service publishes this custom event without a permission, so no
+    // SetPermission is applied here. Restrict the publisher by UID instead, so that only the
+    // compatibility_config_center SA can drive the whitelist ready state.
+    EventFwk::MatchingSkills compConfigSkills;
+    compConfigSkills.AddEvent(COMP_CONFIG_SERVICE_READY_EVENT);
+    EventFwk::CommonEventSubscribeInfo compConfigSubscribeInfo(compConfigSkills);
+    compConfigSubscribeInfo.SetPublisherUid(COMP_CONFIG_PUBLISHER_UID);
+    auto compConfigSubscriber = std::make_shared<EventSubscriber>(compConfigSubscribeInfo, this);
+    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(compConfigSubscriber);
+    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(ret, false, UnSubscribeCommonEvent(),
+        "SubscribeCommonEvent custom event %{public}s failed!", COMP_CONFIG_SERVICE_READY_EVENT.c_str());
+    customSubscribers_.push_back(compConfigSubscriber);
     return ret;
 }
 
