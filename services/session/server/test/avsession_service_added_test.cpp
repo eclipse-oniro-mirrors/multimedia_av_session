@@ -296,6 +296,7 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast002, TestSize.Level0)
     sessionToken.pid = 1234;
     sessionToken.uid = 5678;
     g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
+    AVRouter::GetInstance().Init(g_AVSessionService.get());
     auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo);
     EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
 #endif
