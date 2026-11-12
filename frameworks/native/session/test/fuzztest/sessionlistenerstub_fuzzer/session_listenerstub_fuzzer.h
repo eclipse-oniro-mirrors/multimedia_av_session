@@ -55,19 +55,6 @@ class TestSessionListener : public SessionListener {
     {
         SLOGI("Enter into TestISessionListener::OnRemoteDistributedSessionChange.");
     }
-
-    void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
-    {
-        SLOGI("Enter into TestSessionListener::OnSessionAddForAudioZone.");
-    };
-    void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
-    {
-        SLOGI("Enter into TestSessionListener::OnSessionRemoveForAudioZone.");
-    };
-    void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override
-    {
-        SLOGI("Enter into TestSessionListener::OnTopSessionChangeForAudioZone.");
-    };
 };
 void SessionListenerStubTest(uint8_t* data, size_t size);
 

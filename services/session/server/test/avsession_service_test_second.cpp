@@ -145,9 +145,6 @@ class TestSessionListener : public SessionListener {
     void OnDeviceOffline(const std::string& deviceId) override {};
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override {};
-    void OnSessionAddForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
-    void OnSessionRemoveForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
-    void OnTopSessionChangeForAudioZone(int32_t userId, const AVSessionDescriptor& descriptor) override {};
 };
 
 void TestSessionListener::OnSessionCreate(const AVSessionDescriptor& descriptor)
