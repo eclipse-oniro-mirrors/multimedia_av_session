@@ -61,6 +61,12 @@ public:
     void OnRemoteDistributedSessionChange(
         const std::vector<OHOS::sptr<IRemoteObject>>& sessionControllers) override;
     void OnActiveSessionChanged(const std::vector<OHOS::AVSession::AVSessionDescriptor> &descriptors) override;
+    void OnSessionAddForAudioZone(int32_t userId,
+        const OHOS::AVSession::AVSessionDescriptor& descriptor) override {};
+    void OnSessionRemoveForAudioZone(int32_t userId,
+        const OHOS::AVSession::AVSessionDescriptor& descriptor) override {};
+    void OnTopSessionChangeForAudioZone(int32_t userId,
+        const OHOS::AVSession::AVSessionDescriptor& descriptor) override {};
 
     int32_t AddCallback(int32_t event, std::shared_ptr<uintptr_t> ref);
     int32_t RemoveCallback(int32_t event, std::shared_ptr<uintptr_t> ref);
