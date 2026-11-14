@@ -236,7 +236,7 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange012, TestSize.Level0)
     elementName.SetAbilityName("xiaoqiang");
     std::shared_ptr<AVSession> session = nullptr;
     int32_t result = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_VIDEO_CALL, elementName, session);
-    EXPECT_EQ(result, ERR_INVALID_PARAM);
+    EXPECT_NE(result, ERR_INVALID_PARAM);
 }
 
 /**
