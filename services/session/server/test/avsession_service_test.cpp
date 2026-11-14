@@ -1166,14 +1166,15 @@ static HWTEST_F(AVSessionServiceTest, HandleColdStartPlayback001, TestSize.Level
 {
     SLOGI("HandleColdStartPlayback001 begin");
     ASSERT_TRUE(avservice_ != nullptr);
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     AVControlCommand command;
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY);
-    avservice_->HandleColdStartPlayback(command, "");
-    avservice_->HandleColdStartPlayback(command, "deviceId");
+    avservice_->HandleColdStartPlayback(command, "", userId);
+    avservice_->HandleColdStartPlayback(command, "deviceId", userId);
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_NEXT);
-    avservice_->HandleColdStartPlayback(command, "");
+    avservice_->HandleColdStartPlayback(command, "", userId);
     command.SetCommand(AVControlCommand::SESSION_CMD_PLAY_PREVIOUS);
-    avservice_->HandleColdStartPlayback(command, "deviceId");
+    avservice_->HandleColdStartPlayback(command, "deviceId", userId);
     SLOGI("HandleColdStartPlayback001 end");
 }
 
@@ -1181,11 +1182,12 @@ static HWTEST_F(AVSessionServiceTest, HandleColdStartPlayback002, TestSize.Level
 {
     SLOGI("HandleColdStartPlayback002 begin");
     ASSERT_TRUE(avservice_ != nullptr);
+    int32_t userId = avservice_->GetUsersManager().GetCurrentUserId();
     AVControlCommand command;
     command.SetCommand(AVControlCommand::SESSION_CMD_PAUSE);
-    avservice_->HandleColdStartPlayback(command, "");
+    avservice_->HandleColdStartPlayback(command, "", userId);
     command.SetCommand(AVControlCommand::SESSION_CMD_STOP);
-    avservice_->HandleColdStartPlayback(command, "deviceId");
+    avservice_->HandleColdStartPlayback(command, "deviceId", userId);
     SLOGI("HandleColdStartPlayback002 end");
 }
 
@@ -1741,7 +1743,8 @@ static HWTEST_F(AVSessionServiceTest, GetHistoricalSessionDescriptorsFromFile001
 {
     SLOGI("GetHistoricalSessionDescriptorsFromFile001 begin!");
     std::vector<AVSessionDescriptor> descriptors;
-    int32_t ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors);
+    int32_t ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors,
+        avservice_->GetUsersManager().GetCurrentUserId());
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetHistoricalSessionDescriptorsFromFile001 end!");
 }
@@ -1760,10 +1763,12 @@ static HWTEST_F(AVSessionServiceTest, GetHistoricalSessionDescriptorsFromFile002
         "audio", elementName);
     avservice_->isAudioBrokerStart_ = false;
     std::vector<AVSessionDescriptor> descriptors;
-    auto ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors);
+    auto ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors,
+        avservice_->GetUsersManager().GetCurrentUserId());
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     avservice_->isAudioBrokerStart_ = true;
-    ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors);
+    ret = avservice_->GetHistoricalSessionDescriptorsFromFile(descriptors,
+        avservice_->GetUsersManager().GetCurrentUserId());
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     avsessionHere_->Destroy();
     SLOGI("GetHistoricalSessionDescriptorsFromFile002 end!");

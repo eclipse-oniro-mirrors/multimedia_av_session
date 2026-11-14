@@ -25,6 +25,7 @@
 #include "system_ability_definition.h"
 #include "securec.h"
 #include "session_listener_client.h"
+#include "string_wrapper.h"
 #include <fuzzer/FuzzedDataProvider.h>
 
 using namespace std;
@@ -326,6 +327,31 @@ void RegisterAncoMediaSessionListenerFuzzTest(FuzzedDataProvider& provider)
     avServiceProxy->RegisterAncoMediaSessionListener(listenerPtr);
 }
 
+void StartCastWithArgsFuzzTest(FuzzedDataProvider& provider)
+{
+    auto mgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    CHECK_AND_RETURN(mgr != nullptr);
+    auto object = mgr->GetSystemAbility(AVSESSION_SERVICE_ID);
+    CHECK_AND_RETURN(object != nullptr);
+    std::shared_ptr<AVSessionServiceProxyFuzzerTest> avServiceProxy =
+        std::make_shared<AVSessionServiceProxyFuzzerTest>(object);
+    CHECK_AND_RETURN(avServiceProxy != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    SessionToken sessionToken;
+    sessionToken.sessionId = GetString();
+    sessionToken.pid = GetData<int32_t>();
+    sessionToken.uid = GetData<int32_t>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = GetString();
+    deviceInfo.supportedProtocols_ = GetData<int32_t>();
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    AAFwk::WantParams wantParam;
+    wantParam.SetParam("connect_type", AAFwk::String::Box(GetString()));
+    avServiceProxy->StartCast(sessionToken, outputDeviceInfo, wantParam);
+#endif
+}
+
 static bool FuzzTest(const uint8_t* rawData, size_t size)
 {
     // initialize data
@@ -338,6 +364,7 @@ static bool FuzzTest(const uint8_t* rawData, size_t size)
         GetSessionFuzzTest,
         GetSessionInnerFuzzTest,
         RegisterAncoMediaSessionListenerFuzzTest,
+        StartCastWithArgsFuzzTest,
     };
     OHOS::AVSession::AVServiceProxySendRequestTest();
     uint32_t code = provider.ConsumeIntegral<uint32_t>();

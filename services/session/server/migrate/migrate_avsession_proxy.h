@@ -63,6 +63,7 @@ public:
     void GetDistributedSessionControllerList(std::vector<sptr<IRemoteObject>>& controllerList);
     int32_t GetControllerListForSuper(std::vector<sptr<IRemoteObject>>& controllerList);
     void GetControllerListForNext(std::vector<sptr<IRemoteObject>>& controllerList);
+    void GetAllMigrateSessions(std::vector<sptr<AVSessionItem>>& sessions);
     bool CheckMediaAlive();
     void NotifyControllerGone(pid_t pid);
 

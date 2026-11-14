@@ -121,6 +121,16 @@ int32_t MigrateAVSessionProxy::GetControllerListForSuper(std::vector<sptr<IRemot
     return AVSESSION_SUCCESS;
 }
 
+void MigrateAVSessionProxy::GetAllMigrateSessions(std::vector<sptr<AVSessionItem>>& sessions)
+{
+    std::lock_guard lockGuard(migrateProxySessionIdLock_);
+    for (const auto& pair : sessionStackForMigrateIn_) {
+        if (pair.second != nullptr) {
+            sessions.push_back(pair.second);
+        }
+    }
+}
+
 int32_t MigrateAVSessionProxy::OnConnectForSuper()
 {
     SLOGI("OnConnectForSuper in");
@@ -353,9 +363,10 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue, bool
     descriptor.sessionType_ = AVSession::SESSION_TYPE_AUDIO;
     descriptor.elementName_.SetBundleName(bundleName);
     descriptor.elementName_.SetAbilityName(DEFAULT_STRING);
+    descriptor.userId_ = userId_;
     descriptor.isThirdPartyApp_ = false;
 
-    sptr<AVSessionItem> sessionItem = new(std::nothrow) AVSessionItem(descriptor);
+    sptr<AVSessionItem> sessionItem = new(std::nothrow) AVSessionItem(descriptor, userId_);
     CHECK_AND_RETURN_RET_LOG(sessionItem != nullptr, AVSESSION_ERROR, "get avsession nullptr");
     sessionItem->SetPid(DEFAULT_NUM);
     sessionItem->SetUid(DEFAULT_NUM);
@@ -365,7 +376,8 @@ int32_t MigrateAVSessionProxy::ProcessSessionInfoForSuper(cJSON* jsonValue, bool
     std::shared_ptr<AVSessionObserver> callback = std::make_shared<AVSessionObserver>(sessionId, migrateProxyWeak);
     sessionItem->RegisterAVSessionCallback(callback);
     sessionStackForMigrateIn_[sessionId] = sessionItem;
-    SLOGI("ProcessSessionInfoForSuper:%{public}s done", SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str());
+    SLOGI("ProcessSessionInfoForSuper:%{public}s done userId:%{public}d",
+        SoftbusSessionUtils::AnonymizeDeviceId(sessionId).c_str(), userId_);
     CHECK_AND_RETURN_RET_LOG(ProcessControllerInfoForSuper(jsonValue) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "controller get fail");
 
@@ -564,6 +576,9 @@ int32_t MigrateAVSessionProxy::ProcessPlaybackStateForSuper(cJSON* jsonValue)
         AVSESSION_ERROR, "ParsePlaybackStateFromParcel fail");
     CHECK_AND_RETURN_RET_LOG(sessionItem->SetAVPlaybackState(playbackState) == AVSESSION_SUCCESS,
         AVSESSION_ERROR, "SetAVPlaybackState fail:%{public}d.", playbackState.GetState());
+    if (playbackState.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY && servicePtr_ != nullptr) {
+        servicePtr_->UpdateSessionTimestamp(sessionItem);
+    }
     SLOGI("ProcessPlaybackStateForSuper set state:%{public}d|%{public}d|%{public}d",
         playbackState.GetState(), playbackState.GetFavorite(), playbackState.GetLoopMode());
     return AVSESSION_SUCCESS;

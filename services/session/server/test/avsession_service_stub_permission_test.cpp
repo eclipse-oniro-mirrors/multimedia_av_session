@@ -177,6 +177,11 @@ public:
     {
         return 0;
     };
+    int32_t StartCast(const SessionToken &sessionToken, const OutputDeviceInfo &outputDeviceInfo,
+        const OHOS::AAFwk::WantParams& commandArgs) override
+    {
+        return 0;
+    };
     int32_t StopCast(const SessionToken &sessionToken) override { return 0; };
     int32_t checkEnableCast(bool enable) override { return 0; };
 #endif

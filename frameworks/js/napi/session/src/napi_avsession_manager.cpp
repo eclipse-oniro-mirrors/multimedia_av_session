@@ -1891,15 +1891,12 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
 {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     AVSESSION_TRACE_SYNC_START("NapiAVSessionManager::StartCast");
-    struct ConcreteContext : public ContextBase {
-        SessionToken sessionToken_ {};
-        OutputDeviceInfo outputdeviceInfo_;
-    };
-    auto context = std::make_shared<ConcreteContext>();
+    auto context = std::make_shared<StartCastContext>();
     auto input = [env, context](size_t argc, napi_value* argv) {
         int32_t napiInvalidParamErr = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
-        CheckStartCastReportRadar(argc == ARGC_TWO, ERR_INVALID_PARAM);
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO, "invalid arguments", napiInvalidParamErr);
+        CheckStartCastReportRadar(argc == ARGC_TWO || argc == ARGC_THREE, ERR_INVALID_PARAM);
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_TWO || argc == ARGC_THREE, "invalid arguments",
+            napiInvalidParamErr);
 
         napi_valuetype type = napi_undefined;
         context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
@@ -1916,13 +1913,15 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
         condition = (context->status == napi_ok) && (context->outputdeviceInfo_.deviceInfos_.size() > 0);
         CheckStartCastReportRadar(condition, ERR_INVALID_PARAM);
         CHECK_ARGS_RETURN_VOID(context, condition, "invalid outputdeviceInfo", napiInvalidParamErr);
+
+        ProcessStartCastCommandArgs(env, context, argc, argv);
     };
     context->GetCbInfo(env, info, input);
     context->taskId = NAPI_START_CAST_TASK_ID;
 
     auto executor = [context]() {
         int32_t ret = AVSESSION_ERROR;
-        ret = AVSessionManager::GetInstance().StartCast(context->sessionToken_, context->outputdeviceInfo_);
+        ret = StartCastWithArgs(context);
         if (ret != AVSESSION_SUCCESS) {
             context->errMessage = GetStartCastErrMsg(ret);
             context->status = napi_generic_failure;
@@ -1938,6 +1937,34 @@ napi_value NapiAVSessionManager::StartCast(napi_env env, napi_callback_info info
     return nullptr;
 #endif
 }
+
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+void NapiAVSessionManager::ProcessStartCastCommandArgs(napi_env env,
+    std::shared_ptr<StartCastContext> context, size_t argc, napi_value* argv)
+{
+    if (argc != ARGC_THREE) {
+        return;
+    }
+    napi_valuetype type = napi_undefined;
+    context->status = napi_typeof(env, argv[ARGV_THIRD], &type);
+    if (context->status != napi_ok || type != napi_object) {
+        return;
+    }
+    context->status = NapiUtils::GetValue(env, argv[ARGV_THIRD], context->commandArgs_);
+    CheckStartCastReportRadar(context->status == napi_ok, ERR_INVALID_PARAM);
+    CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "invalid commandArgs",
+        NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+}
+
+int32_t NapiAVSessionManager::StartCastWithArgs(std::shared_ptr<StartCastContext> context)
+{
+    if (context->commandArgs_.IsEmpty()) {
+        return AVSessionManager::GetInstance().StartCast(context->sessionToken_, context->outputdeviceInfo_);
+    }
+    return AVSessionManager::GetInstance().StartCast(context->sessionToken_, context->outputdeviceInfo_,
+        context->commandArgs_);
+}
+#endif
 
 napi_value NapiAVSessionManager::StopCast(napi_env env, napi_callback_info info)
 {

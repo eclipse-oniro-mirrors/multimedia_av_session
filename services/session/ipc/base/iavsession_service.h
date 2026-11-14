@@ -112,6 +112,9 @@ public:
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo) = 0;
 
+    virtual int32_t StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo,
+        const AAFwk::WantParams& commandArgs) = 0;
+
     virtual int32_t StopCast(const SessionToken& sessionToken) = 0;
 
     virtual int32_t checkEnableCast(bool enable) = 0;

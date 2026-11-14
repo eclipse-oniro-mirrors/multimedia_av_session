@@ -710,7 +710,7 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateSessionStackForAudioZone_001, TestSize
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t zoneId = 1;
     
-    manager.sessionStackMapForAudioZone_[zoneId] = std::vector<AVSessionDescriptor>();
+    manager.sessionStackMapForAudioZone_[zoneId] = std::vector<sptr<AVSessionItem>>();
     
     auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
     EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
@@ -732,49 +732,51 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateSessionStackForAudioZone_002, TestSize
     AVSessionDescriptor desc2;
     desc2.sessionId_ = "session2";
     
-    manager.sessionStackMapForAudioZone_[zoneId] = {desc1};
-    manager.sessionStackMapForAudioZone_[zoneId] = {desc1, desc2};
+    sptr<AVSessionItem> item1 = new AVSessionItem(desc1, 100);
+    sptr<AVSessionItem> item2 = new AVSessionItem(desc2, 100);
+    manager.sessionStackMapForAudioZone_[zoneId] = {item1};
+    manager.sessionStackMapForAudioZone_[zoneId] = {item1, item2};
     
     auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
     EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
     EXPECT_EQ(iter->second.size(), 2);
-    EXPECT_EQ(iter->second[0].sessionId_, "session1");
-    EXPECT_EQ(iter->second[1].sessionId_, "session2");
+    EXPECT_EQ(iter->second[0]->GetDescriptor().sessionId_, "session1");
+    EXPECT_EQ(iter->second[1]->GetDescriptor().sessionId_, "session2");
     SLOGI("UpdateSessionStackForAudioZone_002 end!");
 }
 
 /**
- * @tc.name: GetSessionStackForAudioZone_001
- * @tc.desc: Test GetSessionStackForAudioZone returns cached descriptors
+ * @tc.name: GetSessionDescriptorForAudioZone_001
+ * @tc.desc: Test GetSessionDescriptorForAudioZone returns cached descriptors
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionUsersManagerTest, GetSessionStackForAudioZone_001, TestSize.Level0)
+HWTEST_F(AVSessionUsersManagerTest, GetSessionDescriptorForAudioZone_001, TestSize.Level0)
 {
-    SLOGI("GetSessionStackForAudioZone_001 begin!");
+    SLOGI("GetSessionDescriptorForAudioZone_001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t zoneId = 1;
     
-    manager.sessionStackMapForAudioZone_[zoneId] = std::vector<AVSessionDescriptor>();
+    manager.sessionStackMapForAudioZone_[zoneId] = std::vector<sptr<AVSessionItem>>();
     
     auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
     EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
-    SLOGI("GetSessionStackForAudioZone_001 end!");
+    SLOGI("GetSessionDescriptorForAudioZone_001 end!");
 }
 
 /**
- * @tc.name: GetSessionStackForAudioZone_002
- * @tc.desc: Test GetSessionStackForAudioZone with non-existent zone
+ * @tc.name: GetSessionDescriptorForAudioZone_002
+ * @tc.desc: Test GetSessionDescriptorForAudioZone with non-existent zone
  * @tc.type: FUNC
  */
-HWTEST_F(AVSessionUsersManagerTest, GetSessionStackForAudioZone_002, TestSize.Level0)
+HWTEST_F(AVSessionUsersManagerTest, GetSessionDescriptorForAudioZone_002, TestSize.Level0)
 {
-    SLOGI("GetSessionStackForAudioZone_002 begin!");
+    SLOGI("GetSessionDescriptorForAudioZone_002 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t zoneId = 999999;
     
     auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
     EXPECT_TRUE(iter == manager.sessionStackMapForAudioZone_.end());
-    SLOGI("GetSessionStackForAudioZone_002 end!");
+    SLOGI("GetSessionDescriptorForAudioZone_002 end!");
 }
 
 /**
@@ -802,7 +804,7 @@ HWTEST_F(AVSessionUsersManagerTest, CollectLocalSessionsForAudioZone_002, TestSi
     SLOGI("CollectLocalSessionsForAudioZone_002 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t zoneId = 999999;
-    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>> sessionWithTime;
     manager.CollectLocalSessionsForAudioZone(zoneId, sessionWithTime);
     EXPECT_TRUE(sessionWithTime.empty());
     SLOGI("CollectLocalSessionsForAudioZone_002 end!");
@@ -818,7 +820,7 @@ HWTEST_F(AVSessionUsersManagerTest, CollectDistributedSessionsForAudioZone_001, 
     SLOGI("CollectDistributedSessionsForAudioZone_001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t zoneId = 999999;
-    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>> sessionWithTime;
     manager.CollectDistributedSessionsForAudioZone(zoneId, sessionWithTime);
     EXPECT_TRUE(sessionWithTime.empty());
     SLOGI("CollectDistributedSessionsForAudioZone_001 end!");
@@ -834,23 +836,25 @@ HWTEST_F(AVSessionUsersManagerTest, SortAndCacheSessionStack_001, TestSize.Level
     SLOGI("SortAndCacheSessionStack_001 begin!");
     auto& manager = AVSessionUsersManager::GetInstance();
     int32_t zoneId = 1;
-    std::vector<std::pair<AVSessionDescriptor, int64_t>> sessionWithTime;
+    std::vector<std::pair<sptr<AVSessionItem>, int64_t>> sessionWithTime;
     
     AVSessionDescriptor desc1;
     desc1.sessionId_ = "session1";
     AVSessionDescriptor desc2;
     desc2.sessionId_ = "session2";
     
-    sessionWithTime.push_back({desc1, 100});
-    sessionWithTime.push_back({desc2, 200});
+    sptr<AVSessionItem> item1 = new AVSessionItem(desc1, 100);
+    sptr<AVSessionItem> item2 = new AVSessionItem(desc2, 100);
+    sessionWithTime.push_back({item1, 100});
+    sessionWithTime.push_back({item2, 200});
     
     manager.SortAndCacheSessionStack(zoneId, sessionWithTime);
     
     auto iter = manager.sessionStackMapForAudioZone_.find(zoneId);
     EXPECT_TRUE(iter != manager.sessionStackMapForAudioZone_.end());
     EXPECT_EQ(iter->second.size(), 2);
-    EXPECT_EQ(iter->second[0].sessionId_, "session2");
-    EXPECT_EQ(iter->second[1].sessionId_, "session1");
+    EXPECT_EQ(iter->second[0]->GetDescriptor().sessionId_, "session2");
+    EXPECT_EQ(iter->second[1]->GetDescriptor().sessionId_, "session1");
     SLOGI("SortAndCacheSessionStack_001 end!");
 }
 

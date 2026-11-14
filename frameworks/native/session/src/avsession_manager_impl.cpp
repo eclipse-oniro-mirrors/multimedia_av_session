@@ -619,6 +619,14 @@ int32_t AVSessionManagerImpl::StartCast(const SessionToken& sessionToken, const 
     return service ? service->StartCast(sessionToken, outputDeviceInfo) : ERR_SERVICE_NOT_EXIST;
 }
 
+int32_t AVSessionManagerImpl::StartCast(const SessionToken& sessionToken, const OutputDeviceInfo& outputDeviceInfo,
+    const AAFwk::WantParams& commandArgs)
+{
+    AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StartCast");
+    auto service = GetService();
+    return service ? service->StartCast(sessionToken, outputDeviceInfo, commandArgs) : ERR_SERVICE_NOT_EXIST;
+}
+
 int32_t AVSessionManagerImpl::StopCast(const SessionToken& sessionToken)
 {
     AVSESSION_TRACE_SYNC_START("AVSessionManagerImpl::StopCast");
