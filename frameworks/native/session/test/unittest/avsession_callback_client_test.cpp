@@ -59,6 +59,14 @@ public:
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
     void OnCustomData(const OHOS::AAFwk::WantParams& data) override {};
 
+    void OnOccupiedLost(const std::string& moduleName) override
+    {
+        occupiedLostCalled_ = true;
+        occupiedModuleName_ = moduleName;
+    }
+    bool occupiedLostCalled_ = false;
+    std::string occupiedModuleName_;
+
     ~AVSessionCallbackImpl() override {};
 };
  
@@ -549,6 +557,43 @@ HWTEST_F(AVSessionCallbackClientTest, OnOccupiedLost001, TestSize.Level1)
     EXPECT_NE(sessionCallbackClient, nullptr);
     ErrCode ret = sessionCallbackClient->OnOccupiedLost("testModule");
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+}
+
+/**
+* @tc.name: OnOccupiedLost002
+* @tc.desc: test OnOccupiedLost with null callback
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionCallbackClientTest, OnOccupiedLost002, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    std::shared_ptr<AVSessionCallback> sessionCallback = nullptr;
+    std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
+        std::make_shared<AVSessionCallbackClient>(sessionCallback);
+    EXPECT_NE(sessionCallbackClient, nullptr);
+    ErrCode ret = sessionCallbackClient->OnOccupiedLost("testModule");
+    EXPECT_EQ(ret, AVSESSION_ERROR);
+}
+
+/**
+* @tc.name: OnOccupiedLost003
+* @tc.desc: test OnOccupiedLost verify callback is dispatched with correct moduleName
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionCallbackClientTest, OnOccupiedLost003, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallback);
+    auto sessionCallback = std::make_shared<AVSessionCallbackImpl>();
+    std::shared_ptr<AVSessionCallbackClient> sessionCallbackClient =
+        std::make_shared<AVSessionCallbackClient>(sessionCallback);
+    EXPECT_NE(sessionCallbackClient, nullptr);
+    ErrCode ret = sessionCallbackClient->OnOccupiedLost("testModule");
+    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_EQ(sessionCallback->occupiedLostCalled_, true);
+    EXPECT_EQ(sessionCallback->occupiedModuleName_, "testModule");
 }
 } // namespace AVSession
 } // namespace OHOS
