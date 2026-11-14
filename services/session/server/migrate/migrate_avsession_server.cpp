@@ -1109,9 +1109,11 @@ std::string MigrateAVSessionServer::RebuildPlayState(const AVPlaybackState &play
         && parcel.WriteInt64(playbackState.GetActiveItemId())
         && parcel.WriteInt32(1)
         && parcel.WriteCString("")
-        && parcel.WriteInt32(-1)
-        && parcel.WriteBool(playbackState.GetFavorite())
-        && parcel.WriteInt32(playbackState.GetLoopMode());
+        && parcel.WriteInt32(-1);
+    if (writeOk && isSinkHarmonyOsNext_) {
+        writeOk = parcel.WriteBool(playbackState.GetFavorite())
+            && parcel.WriteInt32(playbackState.GetLoopMode());
+    }
     if (!writeOk) {
         SLOGE("RebuildPlayState: parcel write failed");
         return "";
