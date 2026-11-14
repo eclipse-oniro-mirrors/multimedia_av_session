@@ -236,7 +236,108 @@ HWTEST_F(AVSessionManagerImplTest, OnPlaybackStateChange012, TestSize.Level0)
     elementName.SetAbilityName("xiaoqiang");
     std::shared_ptr<AVSession> session = nullptr;
     int32_t result = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_VIDEO_CALL, elementName, session);
-    EXPECT_NE(result, ERR_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+}
+
+/**
+* @tc.name: CreateSession001
+* @tc.desc: create session with empty tag and userId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, CreateSession001, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("xiaoming");
+    elementName.SetAbilityName("xiaoqiang");
+    int32_t userId = 100;
+    std::shared_ptr<AVSession> ptr = impl.CreateSession("", AVSession::SESSION_TYPE_AUDIO, elementName, userId);
+    EXPECT_EQ(ptr, nullptr);
+}
+
+/**
+* @tc.name: CreateSession002
+* @tc.desc: create session with empty bundleName and userId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, CreateSession002, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    AppExecFwk::ElementName elementName;
+    int32_t userId = 100;
+    std::shared_ptr<AVSession> ptr = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_AUDIO, elementName, userId);
+    EXPECT_EQ(ptr, nullptr);
+}
+
+/**
+* @tc.name: CreateSession003
+* @tc.desc: create session with valid params but service not available
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, CreateSession003, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("xiaoming");
+    elementName.SetAbilityName("xiaoqiang");
+    int32_t userId = 100;
+    std::shared_ptr<AVSession> ptr = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_AUDIO, elementName, userId);
+    EXPECT_EQ(ptr, nullptr);
+}
+
+/**
+* @tc.name: CreateSession004
+* @tc.desc: create session with empty tag, session out param and userId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, CreateSession004, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("xiaoming");
+    elementName.SetAbilityName("xiaoqiang");
+    std::shared_ptr<AVSession> session = nullptr;
+    int32_t userId = 100;
+    int32_t result = impl.CreateSession("", AVSession::SESSION_TYPE_AUDIO, elementName, session, userId);
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+}
+
+/**
+* @tc.name: CreateSession005
+* @tc.desc: create session with empty bundleName, session out param and userId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, CreateSession005, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    AppExecFwk::ElementName elementName;
+    std::shared_ptr<AVSession> session = nullptr;
+    int32_t userId = 100;
+    int32_t result = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_AUDIO, elementName, session, userId);
+    EXPECT_EQ(result, ERR_INVALID_PARAM);
+}
+
+/**
+* @tc.name: CreateSession006
+* @tc.desc: create session with valid params but service not available, session out param and userId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(AVSessionManagerImplTest, CreateSession006, TestSize.Level1)
+{
+    AVSessionManagerImpl impl;
+    AppExecFwk::ElementName elementName;
+    elementName.SetBundleName("xiaoming");
+    elementName.SetAbilityName("xiaoqiang");
+    std::shared_ptr<AVSession> session = nullptr;
+    int32_t userId = 100;
+    int32_t result = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_AUDIO, elementName, session, userId);
+    EXPECT_EQ(result, ERR_SERVICE_NOT_EXIST);
 }
 
 /**
