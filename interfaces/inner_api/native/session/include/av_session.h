@@ -362,7 +362,7 @@ public:
      * @return Return whether the occupy is successful.
      * @since 26
      */
-    virtual int32_t Occupy(const std::string& moduleName) = 0;
+    virtual int32_t Occupy(const std::string& moduleName) { return AVSESSION_SUCCESS; };
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**

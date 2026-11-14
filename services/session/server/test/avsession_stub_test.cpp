@@ -137,8 +137,6 @@ public:
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo> &castDisplays) override { return 0; };
 #endif
 
-    int32_t Occupy(const std::string& moduleName) override { return AVSESSION_SUCCESS; };
-
 protected:
     int32_t RegisterCallbackInner(const OHOS::sptr<IAVSessionCallback> &callback) override { return 0; };
     OHOS::sptr<IRemoteObject> GetControllerInner() override { return nullptr; };

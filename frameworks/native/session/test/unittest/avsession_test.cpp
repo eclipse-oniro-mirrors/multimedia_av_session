@@ -172,7 +172,6 @@ public:
     int32_t StopCastDisplayListener() override;
     int32_t GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisplays) override;
 #endif
-    int32_t Occupy(const std::string& moduleName) override;
 };
 
 std::string AVSessionDemo::GetSessionId()
@@ -321,11 +320,6 @@ int32_t AVSessionDemo::GetAllCastDisplays(std::vector<CastDisplayInfo>& castDisp
     return 0;
 }
 #endif
-
-int32_t AVSessionDemo::Occupy(const std::string& moduleName)
-{
-    return AVSESSION_SUCCESS;
-}
 
 class AVSessionCallbackImpl : public AVSessionCallback {
 public:
