@@ -101,7 +101,7 @@ public:
         OH_AVSessionCallback_OutputDeviceChange callback);
     AVSession_ErrCode RegisterOccupiedLost(OH_AVSession* session,
         OH_AVSessionCallback_SessionOccupiedLost callback);
-    AVSession_ErrCode UnRegisterOccupiedLost(OH_AVSession* session,
+    AVSession_ErrCode UnregisterOccupiedLost(OH_AVSession* session,
         OH_AVSessionCallback_SessionOccupiedLost callback);
 
 private:

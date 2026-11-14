@@ -1011,7 +1011,7 @@ void AVSessionImpl::SetBackgroundPlayModeSync(BackgroundPlayMode mode)
     }
 }
 
-void AVSessionImpl::OccupySync(string_view moduleName)
+void AVSessionImpl::OccupySync(optional_view<string> moduleName)
 {
     OHOS::AVSession::AVSessionTrace trace("AVSessionImpl::Occupy");
     if (session_ == nullptr) {
@@ -1019,7 +1019,8 @@ void AVSessionImpl::OccupySync(string_view moduleName)
             "Occupy failed : session is nullptr");
         return;
     }
-    int32_t ret = session_->Occupy(std::string(moduleName));
+    std::string moduleNameStr = moduleName.has_value() ? std::string(moduleName.value()) : std::string("");
+    int32_t ret = session_->Occupy(moduleNameStr);
     if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
         std::string errMessage;
         ErrCodeToMessage(ret, "Occupy", errMessage);

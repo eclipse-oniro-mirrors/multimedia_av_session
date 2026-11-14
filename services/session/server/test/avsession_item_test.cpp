@@ -1836,7 +1836,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_GetAllCastDisplays_002, TestSize.Level
 
 /**
  * @tc.name: AVSessionItem_Occupy_001
- * @tc.desc: Test Occupy with valid callback, verify OnOccupiedLost is called and callback cleared.
+ * @tc.desc: Test Occupy with valid callback, verify OnOccupiedLost is called with correct moduleName.
  * @tc.type: FUNC
  */
 HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_001, TestSize.Level0)
@@ -1882,6 +1882,26 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_003, TestSize.Level0)
     int32_t result = g_AVSessionItem->Occupy("testModule");
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGD("AVSessionItem_Occupy_003 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_Occupy_004
+ * @tc.desc: Test Occupy with empty moduleName, verify callback receives empty string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_004, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_Occupy_004 begin!");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
+    g_AVSessionItem->RegisterCallbackInner(sessionCallback);
+    sessionCallback->occupiedLostCalled_ = false;
+    sessionCallback->occupiedModuleName_ = "init";
+    int32_t result = g_AVSessionItem->Occupy("");
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_EQ(sessionCallback->occupiedLostCalled_, true);
+    EXPECT_EQ(sessionCallback->occupiedModuleName_, "");
+    SLOGD("AVSessionItem_Occupy_004 end!");
 }
 } //AVSession
 } //OHOS

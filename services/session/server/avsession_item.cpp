@@ -1442,7 +1442,7 @@ int32_t AVSessionItem::Occupy(const std::string& moduleName)
     std::lock_guard callbackLockGuard(callbackLock_);
     if (callback_ != nullptr) {
         callback_->OnOccupiedLost(moduleName);
-        callback_.clear();
+        SLOGI("Occupy success, %{public}s has taken over the session", moduleName.c_str());
     }
     return AVSESSION_SUCCESS;
 }

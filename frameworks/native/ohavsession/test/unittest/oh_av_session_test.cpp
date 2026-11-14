@@ -1560,7 +1560,7 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLost_001, TestSize.Level0)
     };
     ret = OH_AVSession_RegisterOccupiedLost(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
-    ret = OH_AVSession_UnRegisterOccupiedLost(avsession, callback);
+    ret = OH_AVSession_UnregisterOccupiedLost(avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     ret = OH_AVSession_Destroy(avsession);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);

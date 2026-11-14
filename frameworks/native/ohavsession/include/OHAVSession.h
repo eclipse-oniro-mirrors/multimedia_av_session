@@ -68,7 +68,7 @@ public:
     AVSession_ErrCode RegisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback);
     AVSession_ErrCode UnregisterOutputDeviceChangeCallback(OH_AVSessionCallback_OutputDeviceChange callback);
     AVSession_ErrCode RegisterOccupiedLost(OH_AVSessionCallback_SessionOccupiedLost callback);
-    AVSession_ErrCode UnRegisterOccupiedLost(OH_AVSessionCallback_SessionOccupiedLost callback);
+    AVSession_ErrCode UnregisterOccupiedLost(OH_AVSessionCallback_SessionOccupiedLost callback);
 
     AVSession_ErrCode GetAVCastController(OHAVCastController **avcastController);
     AVSession_ErrCode StopCasting();

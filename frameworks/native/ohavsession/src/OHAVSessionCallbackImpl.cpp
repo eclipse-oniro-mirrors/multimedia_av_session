@@ -476,7 +476,7 @@ AVSession_ErrCode OHAVSessionCallbackImpl::RegisterOccupiedLost(OH_AVSession* se
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSessionCallbackImpl::UnRegisterOccupiedLost(OH_AVSession* session,
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOccupiedLost(OH_AVSession* session,
     OH_AVSessionCallback_SessionOccupiedLost callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);

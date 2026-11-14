@@ -68,7 +68,6 @@ std::map<std::string, NapiAVSession::OnEventHandlerType> NapiAVSession::onEventH
     { "playWithAssetId", OnPlayWithAssetId },
     { "castDisplayChange", OnCastDisplayChange },
     { "customDataChange", OnCustomData },
-    { "occupiedLost", OnOccupiedLost },
 };
 std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEventHandlers_ = {
     { "play", OffPlay },
@@ -94,7 +93,6 @@ std::map<std::string, NapiAVSession::OffEventHandlerType> NapiAVSession::offEven
     { "playWithAssetId", OffPlayWithAssetId },
     { "castDisplayChange", OffCastDisplayChange },
     { "customDataChange", OffCustomData },
-    { "occupiedLost", OffOccupiedLost },
 };
 std::list<int32_t> registerEventList_;
 std::map<std::string, int32_t> convertEventType_ = {
@@ -199,6 +197,8 @@ napi_value NapiAVSession::Init(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("offDesktopLyricVisibilityChanged", OffDesktopLyricVisibilityChanged),
         DECLARE_NAPI_FUNCTION("onDesktopLyricStateChanged", OnDesktopLyricStateChanged),
         DECLARE_NAPI_FUNCTION("offDesktopLyricStateChanged", OffDesktopLyricStateChanged),
+        DECLARE_NAPI_FUNCTION("onOccupiedLost", OnOccupiedLost),
+        DECLARE_NAPI_FUNCTION("offOccupiedLost", OffOccupiedLost),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor {};
@@ -795,6 +795,59 @@ napi_value NapiAVSession::OnDesktopLyricStateChanged(napi_env env, napi_callback
     return NapiUtils::GetUndefinedValue(env);
 }
 
+napi_value NapiAVSession::OnOccupiedLost(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OnOccupiedLost failed : no memory");
+        return ThrowErrorAndReturn(env, "OnOccupiedLost failed : no memory", ERR_NO_MEMORY);
+    }
+
+    napi_value callback {};
+    auto input = [&callback, env, &context](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                               "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        SLOGE("OnOccupiedLost failed : session is nullptr");
+        return ThrowErrorAndReturn(env, "OnOccupiedLost failed : session is nullptr",
+            ERR_SESSION_NOT_EXIST);
+    }
+
+    {
+        std::lock_guard lockGuard(destroyLock_);
+        if (napiSession->callback_ == nullptr) {
+            napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
+            if (napiSession->callback_ == nullptr) {
+                return ThrowErrorAndReturn(env, "OnOccupiedLost failed : no memory", ERR_NO_MEMORY);
+            }
+            int32_t ret = napiSession->session_->RegisterCallback(napiSession->callback_);
+            if (ret != AVSESSION_SUCCESS) {
+                return ThrowErrorAndReturnByErrCode(env, "OnOccupiedLost", ret);
+            }
+        }
+    }
+
+    if (napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OCCUPIED_LOST,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
 napi_value NapiAVSession::ThrowErrorAndReturn(napi_env env, const std::string& message, int32_t errCode)
 {
     std::string tempMessage = message;
@@ -1197,6 +1250,53 @@ napi_value NapiAVSession::OffDesktopLyricStateChanged(napi_env env, napi_callbac
     }
 
     if (napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_DESKTOP_LYRIC_STATE_CHANGED,
+        callback) != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+    }
+
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVSession::OffOccupiedLost(napi_env env, napi_callback_info info)
+{
+    auto context = std::make_shared<ContextBase>();
+    if (context == nullptr) {
+        SLOGE("OffOccupiedLost failed : no memory");
+        NapiUtils::ThrowError(env, "OffOccupiedLost failed : no memory",
+            NapiAVSessionManager::errcode_[ERR_NO_MEMORY]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    napi_value callback = nullptr;
+    auto input = [&context, &callback](size_t argc, napi_value *argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc <= ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
+    if (napiSession == nullptr) {
+        SLOGE("OffOccupiedLost failed : napiSession is nullptr");
+        NapiUtils::ThrowError(env, "OffOccupiedLost failed : napiSession is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->callback_ == nullptr) {
+        SLOGE("OffOccupiedLost failed : callback is nullptr");
+        NapiUtils::ThrowError(env, "OffOccupiedLost failed : callback is nullptr",
+            NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+
+    if (napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OCCUPIED_LOST,
         callback) != napi_ok) {
         NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
     }
@@ -2711,11 +2811,13 @@ napi_value NapiAVSession::Occupy(napi_env env, napi_callback_info info)
     }
 
     auto inputParser = [env, context](size_t argc, napi_value *argv) {
-        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid arguments",
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE, "invalid arguments",
             NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
-        context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->moduleName_);
-        CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get moduleName_ failed",
-            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->moduleName_);
+            CHECK_ARGS_RETURN_VOID(context, context->status == napi_ok, "get moduleName_ failed",
+                NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        }
     };
     context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
@@ -2919,13 +3021,6 @@ napi_status NapiAVSession::OnOutputDeviceChange(napi_env env, NapiAVSession* nap
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
-}
-
-napi_status NapiAVSession::OnOccupiedLost(napi_env env, NapiAVSession* napiSession, napi_value callback)
-{
-    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
-        "NapiAVSessionCallback object is nullptr");
-    return napiSession->callback_->AddCallback(env, NapiAVSessionCallback::EVENT_OCCUPIED_LOST, callback);
 }
 
 napi_status NapiAVSession::OnCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)
@@ -3235,14 +3330,6 @@ napi_status NapiAVSession::OffOutputDeviceChange(napi_env env, NapiAVSession* na
     CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
         "NapiAVSessionCallback object is nullptr");
     return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OUTPUT_DEVICE_CHANGE, callback);
-}
-
-napi_status NapiAVSession::OffOccupiedLost(napi_env env, NapiAVSession* napiSession, napi_value callback)
-{
-    CHECK_AND_RETURN_RET_LOG(napiSession != nullptr, napi_generic_failure, "input param is nullptr");
-    CHECK_AND_RETURN_RET_LOG(napiSession->callback_ != nullptr, napi_generic_failure,
-        "NapiAVSessionCallback object is nullptr");
-    return napiSession->callback_->RemoveCallback(env, NapiAVSessionCallback::EVENT_OCCUPIED_LOST, callback);
 }
 
 napi_status NapiAVSession::OffCommonCommand(napi_env env, NapiAVSession* napiSession, napi_value callback)

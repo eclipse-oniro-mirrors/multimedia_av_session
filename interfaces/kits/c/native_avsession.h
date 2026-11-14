@@ -552,10 +552,11 @@ AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession
  *
  * @param avsession The avsession instance pointer
  * @param moduleName The module name of the caller, used to notify the preempted module.
+ *                   This parameter is optional. If nullptr is passed, an empty string is used.
  * @return Function result code：
  *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
- *         {@link AV_SESSION_ERR_CODE_SESSION_NOT_EXIST} The session does not exist.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. moduleName is nullptr.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
  * @since 26
  */
 AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession, const char* moduleName);
@@ -586,7 +587,7 @@ AVSession_ErrCode OH_AVSession_RegisterOccupiedLost(OH_AVSession* avsession,
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. callback is nullptr.
  * @since 26
  */
-AVSession_ErrCode OH_AVSession_UnRegisterOccupiedLost(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterOccupiedLost(OH_AVSession* avsession,
     OH_AVSessionCallback_SessionOccupiedLost callback);
 
 /**

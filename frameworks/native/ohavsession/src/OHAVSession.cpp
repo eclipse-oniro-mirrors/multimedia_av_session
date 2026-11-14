@@ -455,7 +455,7 @@ AVSession_ErrCode OHAVSession::UnregisterOutputDeviceChangeCallback(OH_AVSession
 AVSession_ErrCode OHAVSession::Occupy(const std::string& moduleName)
 {
     if (IsAVSessionNull()) {
-        return AV_SESSION_ERR_CODE_SESSION_NOT_EXIST;
+        return AV_SESSION_ERR_SERVICE_EXCEPTION;
     }
     int32_t ret = avSession_->Occupy(moduleName);
     return GetEncodeErrcode(ret);
@@ -464,18 +464,20 @@ AVSession_ErrCode OHAVSession::Occupy(const std::string& moduleName)
 AVSession_ErrCode OHAVSession::RegisterOccupiedLost(OH_AVSessionCallback_SessionOccupiedLost callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
-    CheckAndRegister();
+    AVSession_ErrCode cbRet = CheckAndRegister();
+    CHECK_AND_RETURN_RET_LOG(cbRet == AV_SESSION_ERR_SUCCESS, cbRet, "CheckAndRegister failed");
     ohAVSessionCallbackImpl_->RegisterOccupiedLost((OH_AVSession*)this, callback);
     return AV_SESSION_ERR_SUCCESS;
 }
 
-AVSession_ErrCode OHAVSession::UnRegisterOccupiedLost(OH_AVSessionCallback_SessionOccupiedLost callback)
+AVSession_ErrCode OHAVSession::UnregisterOccupiedLost(OH_AVSessionCallback_SessionOccupiedLost callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    ohAVSessionCallbackImpl_->UnRegisterOccupiedLost((OH_AVSession*)this, callback);
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
+    ohAVSessionCallbackImpl_->UnregisterOccupiedLost((OH_AVSession*)this, callback);
     return AV_SESSION_ERR_SUCCESS;
 }
 
@@ -1090,13 +1092,10 @@ AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession, const char* modul
         OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "AVSession is null", true),
         "AVSession is null");
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(moduleName != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
-        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
-        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "moduleName is null", true),
-        "moduleName is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->Occupy(std::string(moduleName));
+    std::string moduleNameStr = (moduleName != nullptr) ? std::string(moduleName) : std::string("");
+    return oh_avsession->Occupy(moduleNameStr);
 }
 
 AVSession_ErrCode OH_AVSession_RegisterOccupiedLost(OH_AVSession* avsession,
@@ -1115,7 +1114,7 @@ AVSession_ErrCode OH_AVSession_RegisterOccupiedLost(OH_AVSession* avsession,
     return oh_avsession->RegisterOccupiedLost(callback);
 }
 
-AVSession_ErrCode OH_AVSession_UnRegisterOccupiedLost(OH_AVSession* avsession,
+AVSession_ErrCode OH_AVSession_UnregisterOccupiedLost(OH_AVSession* avsession,
     OH_AVSessionCallback_SessionOccupiedLost callback)
 {
     CHECK_AND_CALL_FUNC_RETURN_RET_LOG(avsession != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
@@ -1128,7 +1127,7 @@ AVSession_ErrCode OH_AVSession_UnRegisterOccupiedLost(OH_AVSession* avsession,
         "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
-    return oh_avsession->UnRegisterOccupiedLost(callback);
+    return oh_avsession->UnregisterOccupiedLost(callback);
 }
 
 AVSession_ErrCode OH_AVSession_AcquireSession(const char* sessionTag, const char* bundleName, const char* abilityName,

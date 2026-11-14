@@ -977,7 +977,7 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnOccupiedLost001, TestSize.Level0)
     g_ohAVSessionCallbackImpl.RegisterOccupiedLost(avsession, callback);
     g_ohAVSessionCallbackImpl.OnOccupiedLost("testModule");
     EXPECT_TRUE(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size() > 0);
-    g_ohAVSessionCallbackImpl.UnRegisterOccupiedLost(avsession, callback);
+    g_ohAVSessionCallbackImpl.UnregisterOccupiedLost(avsession, callback);
     EXPECT_EQ(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size(), 0);
     SLOGI("OnOccupiedLost001 End");
 }

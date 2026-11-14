@@ -460,7 +460,7 @@ interface AVSession {
   SetBackgroundPlayModeSync(mode: BackgroundPlayMode): void;
 
   @gen_promise("occupy")
-  OccupySync(moduleName: String): void;
+  OccupySync(moduleName: Optional<String>): void;
 
   @gen_async("setMediaCenterControlType")
   @gen_promise("setMediaCenterControlType")

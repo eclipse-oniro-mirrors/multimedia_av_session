@@ -79,7 +79,7 @@ public:
     void SetDesktopLyricStateSync(DesktopLyricState const& state);
     DesktopLyricState GetDesktopLyricStateSync();
     void SetBackgroundPlayModeSync(BackgroundPlayMode mode);
-    void OccupySync(string_view moduleName);
+    void OccupySync(optional_view<string> moduleName);
     void SetMediaCenterControlTypeSync(array_view<string> controlTypes);
     void SetSupportedPlaySpeedsSync(array_view<double> speeds);
     void SetSupportedLoopModesSync(array_view<LoopMode> loopModes);
