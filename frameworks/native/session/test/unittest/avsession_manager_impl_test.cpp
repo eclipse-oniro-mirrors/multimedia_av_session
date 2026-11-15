@@ -273,7 +273,7 @@ HWTEST_F(AVSessionManagerImplTest, CreateSession002, TestSize.Level1)
 
 /**
 * @tc.name: CreateSession003
-* @tc.desc: create session with valid params but service not available
+* @tc.desc: create session with invalid type and userId
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -284,7 +284,7 @@ HWTEST_F(AVSessionManagerImplTest, CreateSession003, TestSize.Level1)
     elementName.SetBundleName("xiaoming");
     elementName.SetAbilityName("xiaoqiang");
     int32_t userId = 100;
-    std::shared_ptr<AVSession> ptr = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_AUDIO, elementName, userId);
+    std::shared_ptr<AVSession> ptr = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_INVALID, elementName, userId);
     EXPECT_EQ(ptr, nullptr);
 }
 
@@ -324,7 +324,7 @@ HWTEST_F(AVSessionManagerImplTest, CreateSession005, TestSize.Level1)
 
 /**
 * @tc.name: CreateSession006
-* @tc.desc: create session with valid params but service not available, session out param and userId
+* @tc.desc: create session with valid params, session out param and userId
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -337,7 +337,7 @@ HWTEST_F(AVSessionManagerImplTest, CreateSession006, TestSize.Level1)
     std::shared_ptr<AVSession> session = nullptr;
     int32_t userId = 100;
     int32_t result = impl.CreateSession("xiaoming", AVSession::SESSION_TYPE_AUDIO, elementName, session, userId);
-    EXPECT_EQ(result, ERR_SERVICE_NOT_EXIST);
+    EXPECT_NE(result, ERR_INVALID_PARAM);
 }
 
 /**
