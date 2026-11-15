@@ -1843,6 +1843,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_Occupy_001, TestSize.Level0)
 {
     SLOGD("AVSessionItem_Occupy_001 begin!");
     ASSERT_NE(g_AVSessionItem, nullptr);
+    g_AVSessionItem->isDestroyed_ = false;
     sptr<AVSessionCallbackImpl> sessionCallback = new AVSessionCallbackImpl();
     g_AVSessionItem->RegisterCallbackInner(sessionCallback);
     sessionCallback->occupiedLostCalled_ = false;
