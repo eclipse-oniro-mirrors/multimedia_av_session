@@ -91,7 +91,11 @@ public:
     ErrCode OnDesktopLyricVisibilityChanged(bool isVisible) override { return AVSESSION_SUCCESS; };
     ErrCode OnDesktopLyricStateChanged(const DesktopLyricState &state) override { return AVSESSION_SUCCESS; };
     ErrCode OnOccupiedLost(const std::string& moduleName) override
-    { occupiedLostCalled_ = true; occupiedModuleName_ = moduleName; return AVSESSION_SUCCESS; };
+    {
+        occupiedLostCalled_ = true;
+        occupiedModuleName_ = moduleName;
+        return AVSESSION_SUCCESS;
+    };
 
     AVSessionCallbackImpl() = default;
     ~AVSessionCallbackImpl() = default;
