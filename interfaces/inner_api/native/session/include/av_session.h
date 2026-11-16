@@ -353,11 +353,8 @@ public:
     virtual int32_t SetBackgroundPlayMode(int32_t mode) {return 0;};
 
     /**
-     * @brief Occupy the current AVSession for multi-module concurrent usage within one application.
-     *
+     * @brief Sets whether to preempt the current AVSession object.
      * When multiple modules in an application multiplex a session, this interface is used for preemption.
-     * The server notifies the current occupier via OnOccupiedLost and switches the callback routing to
-     * the new caller, so that subsequent control commands are delivered to the new occupier.
      *
      * @return Return whether the occupy is successful.
      * @since 26
