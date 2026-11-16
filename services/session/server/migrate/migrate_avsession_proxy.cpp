@@ -39,9 +39,20 @@ static std::string GetStringOrDefault(cJSON* json, const char* key)
     return value.empty() ? DEFAULT_STRING : std::move(value);
 }
 
+static std::string GetStringOrEmpty(cJSON* json, const char* key)
+{
+    if (json == nullptr || key == nullptr) {
+        return "";
+    }
+    return SoftbusSessionUtils::GetStringFromJson(json, key);
+}
+
 static const std::pair<const char*, MetaDataSetter> kMetadataSetters[] = {
-    {METADATA_TITLE,        &AVMetaData::SetTitle},
-    {METADATA_ARTIST,       &AVMetaData::SetArtist},
+    {METADATA_TITLE,  &AVMetaData::SetTitle},
+    {METADATA_ARTIST, &AVMetaData::SetArtist},
+};
+
+static const std::pair<const char*, MetaDataSetter> kQueueMetadataSetters[] = {
     {METADATA_AVQUEUE_ID,   &AVMetaData::SetAVQueueId},
     {METADATA_AVQUEUE_NAME, &AVMetaData::SetAVQueueName},
 };
@@ -620,6 +631,11 @@ void MigrateAVSessionProxy::ProcessMetaData(cJSON* jsonValue)
     for (const auto& [key, setter] : kMetadataSetters) {
         if (cJSON_HasObjectItem(jsonValue, key)) {
             (metaData.*setter)(GetStringOrDefault(jsonValue, key));
+        }
+    }
+    for (const auto& [key, setter] : kQueueMetadataSetters) {
+        if (cJSON_HasObjectItem(jsonValue, key)) {
+            (metaData.*setter)(GetStringOrEmpty(jsonValue, key));
         }
     }
     sessionItem->SetAVMetaData(metaData);
