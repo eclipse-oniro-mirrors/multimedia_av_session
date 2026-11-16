@@ -661,7 +661,11 @@ private:
 
     bool SubscribeCommonEvent();
 
+    bool SubscribeCompConfigReadyEvent();
+
     bool UnSubscribeCommonEvent();
+
+    void InitWhitelistConfigReadyState();
 
     void ReportSessionInfo(const sptr <AVSessionItem>& session, int res, const std::string& callerBundleName,
         const std::string& apiName);

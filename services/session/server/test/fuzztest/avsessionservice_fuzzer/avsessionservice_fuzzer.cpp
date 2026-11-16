@@ -957,6 +957,7 @@ void OnReceiveEventTest(sptr<AVSessionService> service)
         "usual.event.CAST_SESSION_CREATE",
         "usual.event.MEDIA_NTF_SWITCH",
         "HYBRID_MODE_SWITCH",
+        "custom.event.CompConfigServiceReady",
         GetString()
     };
     FuzzSessionListener listener;

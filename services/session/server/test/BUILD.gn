@@ -253,6 +253,7 @@ ohos_unittest("AVSessionWhitelistConfigManagerTest") {
     "data_share:datashare_consumer",
     "ipc:ipc_single",
     "cJSON:cjson",
+    "eventhandler:libeventhandler",
   ]
 }
 
@@ -2186,6 +2187,10 @@ ohos_unittest("AVSessionServiceTest") {
   ]
 
   configs = [ ":module_private_config" ]
+
+  if (av_session_enable_input_redistribute) {
+    defines = [ "INPUT_REDISTRIBUTE_ENABLE" ]
+  }
 
   cflags_cc = [
     "--coverage",
