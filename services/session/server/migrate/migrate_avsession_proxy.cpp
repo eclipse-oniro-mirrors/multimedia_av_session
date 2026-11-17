@@ -41,9 +41,6 @@ static std::string GetStringOrDefault(cJSON* json, const char* key)
 
 static std::string GetStringOrEmpty(cJSON* json, const char* key)
 {
-    if (json == nullptr || key == nullptr) {
-        return "";
-    }
     return SoftbusSessionUtils::GetStringFromJson(json, key);
 }
 
