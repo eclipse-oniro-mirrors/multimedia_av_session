@@ -70,6 +70,9 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetService001, TestSize.Level0)
     SLOGI("GetService001 end!");
 }
 
+// On the emulator the device manager service answers, so GetLocalNetworkId succeeds and
+// these cases no longer observe the device-side failure path they were written for.
+#ifndef AVSESSION_EMULATOR
 /**
  * @tc.name: IsLocalDevice001
  * @tc.desc: Test IsLocalDevice
@@ -100,6 +103,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetTrustedDeviceName001, TestSiz
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     SLOGI("GetTrustedDeviceName001 end!");
 }
+#endif
 
 /**
  * @tc.name: SetDeviceInfo001

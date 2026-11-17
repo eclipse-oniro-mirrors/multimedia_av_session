@@ -392,6 +392,28 @@ ohos_unittest("AVDumperTest") {
 
   configs = [ ":module_private_config" ]
 
+  # The emulator runs a working device manager service, which these device-side cases
+  # do not expect. Record every candidate build identity so the test can log which one
+  # the TDD build actually uses.
+  defines = []
+  if (is_emulator) {
+    defines += [
+      "AVSESSION_EMULATOR",
+      "AVSESSION_IS_EMULATOR=1",
+    ]
+  } else {
+    defines += [ "AVSESSION_IS_EMULATOR=0" ]
+  }
+  if (target_cpu == "x86_64") {
+    defines += [ "target_cpu_x86_64" ]
+  }
+  if (target_cpu == "x86_64_virt") {
+    defines += [ "target_cpu_x86_64_virt" ]
+  }
+  if (defined(product_name) && product_name == "x86_64_virt") {
+    defines += [ "product_x86_64_virt" ]
+  }
+
   sanitize = {
     cfi = true
     cfi_cross_dso = true
