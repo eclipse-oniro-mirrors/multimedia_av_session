@@ -280,6 +280,74 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ProcessMetaData003
+ * @tc.desc: test avQueueId/avQueueName parse from json
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData003, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        FAIL();
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ASSET_ID, "test_asset") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "queueId_001") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_NAME, "queueName_001")) {
+        SLOGE("AddStringToJson fail");
+        cJSON_Delete(jsonValue);
+        jsonValue = nullptr;
+        FAIL();
+    }
+
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    ASSERT_NE(g_MigrateAVSessionProxy->remoteSession_, nullptr);
+    g_MigrateAVSessionProxy->ProcessMetaData(jsonValue);
+
+    AVMetaData metaData;
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_->GetAVMetaData(metaData), AVSESSION_SUCCESS);
+    EXPECT_EQ(metaData.GetAVQueueId(), "queueId_001");
+    EXPECT_EQ(metaData.GetAVQueueName(), "queueName_001");
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMetaData004
+ * @tc.desc: test avQueueId/avQueueName empty value reset to default
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData004, TestSize.Level0)
+{
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue == nullptr) {
+        SLOGE("create jsonvalue nullptr");
+        FAIL();
+    }
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ASSET_ID, "test_asset") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_NAME, "")) {
+        SLOGE("AddStringToJson fail");
+        cJSON_Delete(jsonValue);
+        jsonValue = nullptr;
+        FAIL();
+    }
+
+    g_MigrateAVSessionProxy->PrepareSessionFromRemote();
+    ASSERT_NE(g_MigrateAVSessionProxy->remoteSession_, nullptr);
+    g_MigrateAVSessionProxy->ProcessMetaData(jsonValue);
+
+    AVMetaData metaData;
+    EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_->GetAVMetaData(metaData), AVSESSION_SUCCESS);
+    EXPECT_EQ(metaData.GetAVQueueId(), DEFAULT_STRING);
+    EXPECT_EQ(metaData.GetAVQueueName(), DEFAULT_STRING);
+    cJSON_Delete(jsonValue);
+}
+
+/**
  * @tc.name: ProcessPlaybackState001
  * @tc.desc: test the member of ProcessPlaybackState
  * @tc.type: FUNC
