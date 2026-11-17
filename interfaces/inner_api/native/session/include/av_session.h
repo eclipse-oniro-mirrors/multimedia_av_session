@@ -357,7 +357,7 @@ public:
      * When multiple modules in an application multiplex a session, this interface is used for preemption.
      *
      * @return Return whether the occupy is successful.
-     * @since 26
+     * @since 26.1.0
      */
     virtual int32_t Occupy(const std::string& moduleName) { return AVSESSION_SUCCESS; };
 

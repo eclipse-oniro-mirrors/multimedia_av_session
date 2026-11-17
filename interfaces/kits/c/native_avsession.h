@@ -134,6 +134,12 @@ typedef AVSessionCallback_Result (*OH_AVSessionCallback_OnToggleFavorite)(OH_AVS
 typedef AVSessionCallback_Result (*OH_AVSessionCallback_OutputDeviceChange)(OH_AVSession* session,
     AVSession_ConnectionState state, AVSession_OutputDeviceInfo *outputDeviceInfo);
 
+/**
+ * @brief Declaring the callback for session occupied lost event.
+ *
+ * @since 26.1.0
+ * @version 1.0
+ */
 typedef AVSessionCallback_Result (*OH_AVSessionCallback_SessionOccupiedLost)(OH_AVSession* session,
     const char* moduleName);
 
@@ -557,7 +563,7 @@ AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession
  *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
  *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
- * @since 26
+ * @since 26.1.0
  */
 AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession, const char* moduleName);
 
@@ -571,7 +577,7 @@ AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession, const char* modul
  *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
  *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
  *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. callback is nullptr.
- * @since 26
+ * @since 26.1.0
  */
 AVSession_ErrCode OH_AVSession_RegisterOccupiedLost(OH_AVSession* avsession,
     OH_AVSessionCallback_SessionOccupiedLost callback);
@@ -581,11 +587,12 @@ AVSession_ErrCode OH_AVSession_RegisterOccupiedLost(OH_AVSession* avsession,
  *
  * @param avsession The avsession instance pointer
  * @param callback the {@link OH_AVSessionCallback_SessionOccupiedLost} to be unregistered.
+ *                 This parameter is optional. If nullptr is passed, all registered callbacks are removed.
  * @return Function result code：
  *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
  *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
- *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. callback is nullptr.
- * @since 26
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
+ * @since 26.1.0
  */
 AVSession_ErrCode OH_AVSession_UnregisterOccupiedLost(OH_AVSession* avsession,
     OH_AVSessionCallback_SessionOccupiedLost callback);

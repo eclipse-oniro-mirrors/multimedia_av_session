@@ -480,6 +480,10 @@ AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOccupiedLost(OH_AVSession* 
     OH_AVSessionCallback_SessionOccupiedLost callback)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callback == nullptr) {
+        occupiedLostCallbacks_.clear();
+        return AV_SESSION_ERR_SUCCESS;
+    }
     auto it = std::find(occupiedLostCallbacks_.begin(), occupiedLostCallbacks_.end(), callback);
     if (it != occupiedLostCallbacks_.end()) {
         occupiedLostCallbacks_.erase(it);

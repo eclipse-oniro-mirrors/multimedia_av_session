@@ -476,7 +476,7 @@ AVSession_ErrCode OHAVSession::UnregisterOccupiedLost(OH_AVSessionCallback_Sessi
     if (ohAVSessionCallbackImpl_ == nullptr) {
         return AV_SESSION_ERR_SUCCESS;
     }
-    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "avSession_ is nullptr");
+    CHECK_AND_RETURN_RET_LOG(!IsAVSessionNull(), AV_SESSION_ERR_SERVICE_EXCEPTION, "session is nullptr");
     ohAVSessionCallbackImpl_->UnregisterOccupiedLost((OH_AVSession*)this, callback);
     return AV_SESSION_ERR_SUCCESS;
 }
@@ -1121,10 +1121,6 @@ AVSession_ErrCode OH_AVSession_UnregisterOccupiedLost(OH_AVSession* avsession,
         OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
         OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "AVSession is null", true),
         "AVSession is null");
-    CHECK_AND_CALL_FUNC_RETURN_RET_LOG(callback != nullptr, AV_SESSION_ERR_INVALID_PARAMETER,
-        OHOS::AudioStandard::StreamDfxManager::GetInstance().SendAudioErrorEvent(static_cast<int32_t>(getuid()),
-        OHOS::AudioStandard::AVSESSION_CONTROL_INVALID_PARAM_LOCAL_SET, "callback is null", true),
-        "callback is null");
 
     OHOS::AVSession::OHAVSession *oh_avsession = (OHOS::AVSession::OHAVSession *)avsession;
     return oh_avsession->UnregisterOccupiedLost(callback);
