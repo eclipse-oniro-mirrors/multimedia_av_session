@@ -663,5 +663,8 @@ static HWTEST(AVSessionStubTest, HandleOccupy001, TestSize.Level0)
     OHOS::MessageParcel reply;
     int ret = avSessionStub.HandleOccupy(data, reply);
     EXPECT_EQ(ret, OHOS::ERR_NONE);
+    int32_t result = AVSESSION_ERROR;
+    reply.ReadInt32(result);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
     SLOGI("HandleOccupy001 end!");
 }

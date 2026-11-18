@@ -1577,4 +1577,56 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLost_002, TestSize.Level0)
     AVSession_ErrCode ret = OH_AVSession_RegisterOccupiedLost(nullptr, nullptr);
     EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
 }
+
+/**
+ * @tc.name: OH_AVSession_RegisterOccupiedLost_003
+ * @tc.desc: RegisterOccupiedLost with valid avsession but null callback
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLost_003, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "register_003",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_RegisterOccupiedLost(avsession, nullptr);
+    EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
+    OH_AVSession_Destroy(avsession);
+}
+
+namespace {
+std::string g_occupyModuleName;
+bool g_occupyCallbackCalled = false;
+}
+
+/**
+ * @tc.name: OH_AVSession_Occupy_001
+ * @tc.desc: Occupy with registered callback, verify callback is triggered with correct moduleName.
+ * @tc.type: FUNC
+ * @tc.require: none
+ */
+HWTEST(OHAVSessionTest, OH_AVSession_Occupy_001, TestSize.Level0)
+{
+    OH_AVSession* avsession = nullptr;
+    AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "occupy_001",
+        "com.xxx.hmxx", "ndkxx", &avsession);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    g_occupyModuleName = "";
+    g_occupyCallbackCalled = false;
+    OH_AVSessionCallback_SessionOccupiedLost callback = [](OH_AVSession*,
+        const char* moduleName) -> AVSessionCallback_Result {
+        g_occupyModuleName = moduleName;
+        g_occupyCallbackCalled = true;
+        return AVSESSION_CALLBACK_RESULT_SUCCESS;
+    };
+    ret = OH_AVSession_RegisterOccupiedLost(avsession, callback);
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    ret = OH_AVSession_Occupy(avsession, "testModule");
+    EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    EXPECT_EQ(g_occupyCallbackCalled, true);
+    EXPECT_EQ(g_occupyModuleName, "testModule");
+    OH_AVSession_Destroy(avsession);
+}
 }

@@ -958,6 +958,10 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterOccupiedLost001, TestSize.Level0)
     SLOGI("RegisterOccupiedLost001 End");
 }
 
+namespace {
+std::string g_capturedModuleName;
+}
+
 /**
  * @tc.name: OnOccupiedLost001
  * @tc.desc: test OnOccupiedLost
@@ -971,12 +975,15 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnOccupiedLost001, TestSize.Level0)
     OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnOccupiedLost001", "com.xxx.hmxx", "ndkxx", &avsession);
     OH_AVSessionCallback_SessionOccupiedLost callback = [](OH_AVSession* session,
         const char* moduleName) -> AVSessionCallback_Result {
+        g_capturedModuleName = moduleName;
         return AVSESSION_CALLBACK_RESULT_SUCCESS;
     };
+    g_capturedModuleName = "";
     g_ohAVSessionCallbackImpl.avsession_ = avsession;
     g_ohAVSessionCallbackImpl.RegisterOccupiedLost(avsession, callback);
     g_ohAVSessionCallbackImpl.OnOccupiedLost("testModule");
     EXPECT_TRUE(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size() > 0);
+    EXPECT_EQ(g_capturedModuleName, "testModule");
     g_ohAVSessionCallbackImpl.UnregisterOccupiedLost(avsession, callback);
     EXPECT_EQ(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size(), 0);
     SLOGI("OnOccupiedLost001 End");
