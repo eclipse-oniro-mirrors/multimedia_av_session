@@ -1600,12 +1600,12 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLost_003, TestSize.Level0)
 }
 
 /**
- * @tc.name: OH_AVSession_Occupy_001
+ * @tc.name: OH_AVSession_Occupy_003
  * @tc.desc: Occupy with registered callback, verify callback is triggered with correct moduleName.
  * @tc.type: FUNC
  * @tc.require: none
  */
-HWTEST(OHAVSessionTest, OH_AVSession_Occupy_001, TestSize.Level0)
+HWTEST(OHAVSessionTest, OH_AVSession_Occupy_003, TestSize.Level0)
 {
     OH_AVSession* avsession = nullptr;
     AVSession_ErrCode ret = OH_AVSession_Create(SESSION_TYPE_AUDIO, "occupy_001",
