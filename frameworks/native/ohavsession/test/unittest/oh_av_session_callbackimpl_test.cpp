@@ -25,6 +25,9 @@ using namespace testing::ext;
 
 namespace OHOS::AVSession {
 static OHAVSessionCallbackImpl g_ohAVSessionCallbackImpl;
+namespace {
+std::string g_capturedModuleName;
+}
 
 class OHAVSessionCallbackImplTest : public testing::Test {
 public:
@@ -956,10 +959,6 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterOccupiedLost001, TestSize.Level0)
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     EXPECT_TRUE(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size() > 0);
     SLOGI("RegisterOccupiedLost001 End");
-}
-
-namespace {
-std::string g_capturedModuleName;
 }
 
 /**

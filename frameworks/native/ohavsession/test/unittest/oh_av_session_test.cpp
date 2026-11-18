@@ -22,6 +22,10 @@
 using namespace testing::ext;
 
 namespace OHOS::AVSession {
+namespace {
+std::string g_occupyModuleName;
+bool g_occupyCallbackCalled = false;
+}
 
 class OHAVSessionTest : public testing::Test {
 public:
@@ -1593,11 +1597,6 @@ HWTEST(OHAVSessionTest, OH_AVSession_RegisterOccupiedLost_003, TestSize.Level0)
     ret = OH_AVSession_RegisterOccupiedLost(avsession, nullptr);
     EXPECT_EQ(ret, AV_SESSION_ERR_INVALID_PARAMETER);
     OH_AVSession_Destroy(avsession);
-}
-
-namespace {
-std::string g_occupyModuleName;
-bool g_occupyCallbackCalled = false;
 }
 
 /**
