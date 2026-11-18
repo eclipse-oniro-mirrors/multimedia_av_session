@@ -507,6 +507,15 @@ public:
     */
     virtual int32_t PcmCastSessionReleasePlayer() = 0;
 
+    /**
+     * @brief Query valid (discovered and online) cast device info by deviceId.
+     *
+     * @param { std::string } deviceId - The deviceId to query.
+     * @return { DeviceInfo } Matched device info; deviceId_ is empty if not found.
+     * @since 26
+    */
+    virtual DeviceInfo GetValidDeviceInfo(const std::string& deviceId) = 0;
+
 struct CastHandleInfo {
     OutputDeviceInfo outputDeviceInfo_;
     std::string sessionId_ = "-1";

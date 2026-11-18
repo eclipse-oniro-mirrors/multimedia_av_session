@@ -1424,7 +1424,8 @@ export class AVCastPicker extends ViewPU {
                             Flex.pop();
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 If.create();
-                                if ((x8.isConnected || x8.castUid !== 0) && x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
+                                if (((x8.isConnected && x8.isPcmCast) || x8.castUid !== 0) &&
+                                    x8.supportCastMode === HiPlayCastMode.DEVICE_LEVEL) {
                                     this.ifElseBranchUpdateFunction(0, () => {
                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                                             Flex.create({

@@ -42,6 +42,7 @@ public:
         const SessionToken& sessionToken, const AAFwk::WantParams& commandArgs);
 
     OutputDeviceInfo ConstructConnectOutputDeviceInfo(const OutputDeviceInfo& outputDeviceInfo, bool isNotScreen);
+    void EnrichDeviceInfo(OutputDeviceInfo& outputDeviceInfo);
 
     void StopCast(const DeviceRemoveAction deviceRemoveAction = DeviceRemoveAction::ACTION_DISCONNECT);
 
