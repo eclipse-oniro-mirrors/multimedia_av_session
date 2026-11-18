@@ -5097,7 +5097,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSession001, TestSize.Level1)
 
 /**
 * @tc.name: CreateSession002
-* @tc.desc: create session with a different userId and type, verify GetUserId returns the same value
+* @tc.desc: create session with non-active userId, verify GetUserId falls back to current user
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -5113,14 +5113,14 @@ static HWTEST_F(AVSessionServiceTest, CreateSession002, TestSize.Level1)
         AVSession::SESSION_TYPE_VIDEO, false, elementName, avsessionItem, userId);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     EXPECT_TRUE(avsessionItem != nullptr);
-    EXPECT_EQ(avsessionItem->GetUserId(), userId);
+    EXPECT_EQ(avsessionItem->GetUserId(), avservice_->GetUsersManager().GetCurrentUserId());
     avsessionItem->Destroy();
     SLOGD("CreateSession002 end!");
 }
 
 /**
 * @tc.name: CreateSession003
-* @tc.desc: create session with userId <= 0, verify GetUserId falls back to a valid value
+* @tc.desc: create session with userId <= 0, verify GetUserId falls back to current user
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -5135,7 +5135,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSession003, TestSize.Level1)
         AVSession::SESSION_TYPE_AUDIO, false, elementName, avsessionItem, -1);
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     EXPECT_TRUE(avsessionItem != nullptr);
-    EXPECT_GT(avsessionItem->GetUserId(), 0);
+    EXPECT_EQ(avsessionItem->GetUserId(), avservice_->GetUsersManager().GetCurrentUserId());
     avsessionItem->Destroy();
     SLOGD("CreateSession003 end!");
 }
