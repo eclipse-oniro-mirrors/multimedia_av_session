@@ -1155,6 +1155,12 @@ ohos_unittest("AVSessionServiceSupplementTest") {
 
   cflags_cc = [ "-fno-access-control" ]
 
+  # The emulator runs a working device manager service, which these device-side cases
+  # do not expect. Exclude them from the emulator build.
+  if (is_emulator) {
+    defines = [ "AVSESSION_EMULATOR" ]
+  }
+
   deps = common_deps
 
   deps += [
