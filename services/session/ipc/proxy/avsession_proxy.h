@@ -140,6 +140,7 @@ private:
     std::mutex setPlaybackLock_;
     std::mutex setCommandLock_;
     std::mutex callbackLock_;
+    std::mutex controllerLock_;
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     std::shared_ptr<AVCastController> castController_;
