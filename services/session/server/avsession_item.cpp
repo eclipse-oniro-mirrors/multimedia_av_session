@@ -469,23 +469,19 @@ bool AVSessionItem::CheckTitleChange(const AVMetaData& meta)
 void AVSessionItem::CheckUseAVMetaData(const AVMetaData& meta)
 {
     bool hasPixelMap = (meta.GetMediaImage() != nullptr);
-    {
-        std::lock_guard lockGuard(avsessionItemLock_);
-        SLOGI("MediaCapsule addLocalCapsule hasImage_:%{public}d isMediaChange_:%{public}d", 
-            hasPixelMap, isMediaChange_);
-        if (isMediaChange_) {
-            if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
-                SLOGI("photo MediaChange");
+    SLOGI("MediaCapsule addLocalCapsule hasImage_:%{public}d isMediaChange_:%{public}d", hasPixelMap, isMediaChange_);
+    if (isMediaChange_) {
+        if (descriptor_.sessionType_ == AVSession::SESSION_TYPE_PHOTO) {
+            SLOGI("photo MediaChange");
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
-                if (serviceCallbackForPhotoCast_ && IsCasting()) {
-                    serviceCallbackForPhotoCast_(GetSessionId(), true);
-                    isMediaChange_ = false;
-                }
-#endif
-            } else if (serviceCallbackForNtf_ && hasPixelMap) {
-                serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
+            if (serviceCallbackForPhotoCast_ && IsCasting()) {
+                serviceCallbackForPhotoCast_(GetSessionId(), true);
                 isMediaChange_ = false;
             }
+#endif
+        } else if (serviceCallbackForNtf_ && hasPixelMap) {
+            serviceCallbackForNtf_(GetSessionId(), isMediaChange_);
+            isMediaChange_ = false;
         }
     }
     ProcessFrontSession("SetAVMetaData");
@@ -746,7 +742,6 @@ void AVSessionItem::CheckIfSendCapsule(const AVPlaybackState& state)
     if (GetUid() != audioBrokerUid) {
         return;
     }
-    std::lock_guard lockGuard(avsessionItemLock_);
     if (state.GetState() == AVPlaybackState::PLAYBACK_STATE_PLAY && (!isPlayingState_.load() || isMediaChange_)) {
         isPlayingState_.store(true);
         {

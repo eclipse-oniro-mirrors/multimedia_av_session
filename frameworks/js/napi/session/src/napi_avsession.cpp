@@ -297,10 +297,7 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
         napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
         napiAVSession_->sessionTag_ = tag;
         napiAVSession_->elementName_ = elementName;
-        {
-            std::lock_guard<std::mutex> lockGuard(downloadAVQImgMutex_);
-            bundleName_ = elementName.GetBundleName();
-        }
+        bundleName_ = elementName.GetBundleName();
         SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
             napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
             napiAVSession_->sessionType_.c_str());
@@ -390,14 +387,11 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
         return ThrowErrorAndReturn(env, "event name invalid", ERR_INVALID_PARAM);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr) {
+    if (napiSession == nullptr || napiSession->session_ == nullptr) {
         return ThrowErrorAndReturn(env, "OnEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
     {
         std::lock_guard lockGuard(destroyLock_);
-        if (napiSession->session_ == nullptr) {
-            return ThrowErrorAndReturn(env, "OnEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
-        }
         if (napiSession->callback_ == nullptr) {
             napiSession->callback_ = std::make_shared<NapiAVSessionCallback>();
             if (napiSession->callback_ == nullptr) {
@@ -1368,10 +1362,7 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
     } else if (isRepeatDownload) {
         SLOGI("do metadata set with repeat uriSize:%{public}d.", static_cast<int>(uri.size()));
     } else if (data.GetMediaImage() == nullptr) {
-        {
-            std::lock_guard<std::mutex> lockGuard(NapiAVSession::downloadAVQImgMutex_);
-            ret = DoDownload(data, uri);
-        }
+        ret = DoDownload(data, uri);
         SLOGI("DoDownload uriSize:%{public}d complete with ret:%{public}d|%{public}d",
             static_cast<int>(uri.size()), ret, data.GetMediaImageTopic());
         CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, false, "doMetaDataSet without session");

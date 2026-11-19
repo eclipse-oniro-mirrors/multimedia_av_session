@@ -378,7 +378,6 @@ int32_t AVSessionService::checkEnableCast(bool enable)
 void AVSessionService::setInCast(bool isInCast)
 {
     SLOGI("setInCast, isInCast:%{public}d", isInCast);
-    std::lock_guard lockGuard(checkEnableCastLock_);
     isInCast_.store(isInCast);
 }
 

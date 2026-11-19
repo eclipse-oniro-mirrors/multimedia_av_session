@@ -145,7 +145,6 @@ int32_t AVSessionProxy::Destroy()
         return AVSESSION_ERROR;
     }
     if (ret == AVSESSION_SUCCESS) {
-        std::lock_guard lockGuard(sessionLock_);
         isDestroyed_.store(true);
         controller_ = nullptr;
     }
@@ -686,23 +685,13 @@ sptr<IRemoteObject> AVSessionProxy::GetControllerInner()
 std::shared_ptr<AVSessionController> AVSessionProxy::GetController()
 {
     CHECK_AND_RETURN_RET_LOG(!isDestroyed_, nullptr, "session is destroyed");
-    {
-        std::lock_guard lockGuard(sessionLock_);
-        if (controller_ != nullptr && !controller_->IsDestroy()) {
-            SLOGE("controller already exist");
-            return controller_;
-        }
-    }
+    CHECK_AND_RETURN_RET_LOG(controller_ == nullptr || controller_->IsDestroy(), controller_,
+        "controller already exist");
     sptr <IRemoteObject> object = GetControllerInner();
     CHECK_AND_RETURN_RET_LOG(object != nullptr, nullptr, "get object failed");
     auto controller = iface_cast<IAVSessionController>(object);
-    auto newController = std::shared_ptr<AVSessionController>(controller.GetRefPtr(),
-        [holder = controller](const auto*) {});
-    {
-        std::lock_guard lockGuard(sessionLock_);
-        controller_ = newController;
-    }
-    return newController;
+    controller_ = std::shared_ptr<AVSessionController>(controller.GetRefPtr(), [holder = controller](const auto*) {});
+    return controller_;
 }
 
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE

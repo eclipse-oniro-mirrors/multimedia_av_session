@@ -126,10 +126,9 @@ void AVSessionManagerImpl::OnServiceStateChange(bool isAddSystemAbility)
 void AVSessionManagerImpl::OnServiceDie()
 {
     SLOGI("OnServiceDie enter");
-    DeathCallback callback;
+    auto callback = deathCallback_;
     {
         std::lock_guard<std::mutex> lockGuard(lock_);
-        callback = deathCallback_;
         if (!serviceStartCallback_) {
             SLOGI("OnServiceDie not register ServiceStartCallback");
             service_.clear();
@@ -462,14 +461,12 @@ int32_t AVSessionManagerImpl::RegisterSessionListenerForAllUsers(const std::shar
 
 int32_t AVSessionManagerImpl::RegisterServiceDeathCallback(const DeathCallback& callback)
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
     deathCallback_ = callback;
     return AVSESSION_SUCCESS;
 }
 
 int32_t AVSessionManagerImpl::UnregisterServiceDeathCallback()
 {
-    std::lock_guard<std::mutex> lockGuard(lock_);
     deathCallback_ = nullptr;
     return AVSESSION_SUCCESS;
 }
@@ -565,21 +562,15 @@ int32_t AVSessionManagerImpl::Close(void)
     auto service = GetService();
     if (service) {
         sptr<IAVSessionService> serviceBase = service;
-        {
-            std::lock_guard<std::mutex> lockGuard(lock_);
-            serviceBase->AsObject()->RemoveDeathRecipient(serviceDeathRecipient_);
-            serviceDeathRecipient_ = nullptr;
-        }
+        serviceBase->AsObject()->RemoveDeathRecipient(serviceDeathRecipient_);
+        serviceDeathRecipient_ = nullptr;
         ret = service->Close();
     }
     SLOGI("manager impl close with listener clear");
-    {
-        std::lock_guard<std::mutex> lockGuard(lock_);
-        listenerMapByUserId_.clear();
+    listenerMapByUserId_.clear();
 #ifdef CAR_FEATURE_ENABLE
-        listenerMapByUserIdForAudioZone_.clear();
+    listenerMapByUserIdForAudioZone_.clear();
 #endif
-    }
     AVSessionEventHandler::GetInstance().AVSessionRemoveHandler();
     return ret;
 }
