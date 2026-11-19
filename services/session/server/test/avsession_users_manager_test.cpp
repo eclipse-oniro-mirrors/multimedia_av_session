@@ -396,20 +396,26 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForUserChange_002, TestSize.Lev
     OHOS::sptr<AVSessionItem> item =
         avSessionService->CreateSessionInner("updateUserChange", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     ASSERT_TRUE(item != nullptr);
-
+    
+    const std::string sessionId = item->GetSessionId();
     int32_t oldUserId = item->GetUserId();
     if (oldUserId <= 0) {
-        oldUserId = manager.GetCurrentUserId();
+        oldUserId = avSessionService->GetUsersManager().GetCurrentUserId();
     }
     int32_t newUserId = oldUserId + 1;
 
-    int32_t ret = manager.UpdateSessionForUserChange(oldUserId, newUserId, item);
+    int32_t ret = avSessionService->GetUsersManager().UpdateSessionForUserChange(oldUserId, newUserId, item);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(item->GetUserId(), newUserId);
 
-    avSessionService->HandleSessionRelease(item->GetSessionId());
+    avSessionService->HandleSessionRelease(sessionId);
+    manager.GetContainerFromAll().RemoveSession(sessionId);
+    manager.GetContainerFromUser(newUserId).RemoveSession(sessionId);
+    manager.GetContainerFromUser(oldUserId).RemoveSession(sessionId);
     manager.sessionStackMapByUserId_.erase(oldUserId);
     manager.sessionStackMapByUserId_.erase(newUserId);
+    item = nullptr;
+    
     SLOGI("UpdateSessionForUserChange_002 end!");
 }
 
@@ -431,6 +437,7 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForUserChange_003, TestSize.Lev
         avSessionService->CreateSessionInner("sameUser", AVSession::SESSION_TYPE_AUDIO, false, elementName);
     ASSERT_TRUE(item != nullptr);
 
+    const std::string sessionId = item->GetSessionId();
     int32_t userId = item->GetUserId();
     if (userId <= 0) {
         userId = manager.GetCurrentUserId();
@@ -440,8 +447,12 @@ HWTEST_F(AVSessionUsersManagerTest, UpdateSessionForUserChange_003, TestSize.Lev
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
     EXPECT_EQ(item->GetUserId(), userId);
 
-    avSessionService->HandleSessionRelease(item->GetSessionId());
+    avSessionService->HandleSessionRelease(sessionId);
+    manager.GetContainerFromAll().RemoveSession(sessionId);
+    manager.GetContainerFromUser(userId).RemoveSession(sessionId);
     manager.sessionStackMapByUserId_.erase(userId);
+    item = nullptr;
+    
     SLOGI("UpdateSessionForUserChange_003 end!");
 }
 
