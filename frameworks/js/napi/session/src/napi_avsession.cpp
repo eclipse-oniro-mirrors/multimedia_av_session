@@ -124,6 +124,15 @@ std::shared_ptr<NapiAVSession> NapiAVSession::currentNapiSession_;
 std::recursive_mutex NapiAVSession::currentNapiSessionMutex_;
 std::string NapiAVSession::bundleName_;
 
+bool NapiAVSession::HasSession(NapiAVSession* napiSession)
+{
+    if (napiSession == nullptr) {
+        return false;
+    }
+    std::lock_guard<std::recursive_mutex> lockGuard(destroyLock_);
+    return napiSession->session_ != nullptr;
+}
+
 NapiAVSession::NapiAVSession()
 {
     SLOGI("construct");
@@ -297,7 +306,10 @@ napi_status NapiAVSession::NewInstance(napi_env env, std::shared_ptr<AVSession>&
         napiAVSession_->sessionType_ = napiAVSession_->session_->GetSessionType();
         napiAVSession_->sessionTag_ = tag;
         napiAVSession_->elementName_ = elementName;
-        bundleName_ = elementName.GetBundleName();
+        {
+            std::lock_guard<std::mutex> lockGuard(downloadAVQImgMutex_);
+            bundleName_ = elementName.GetBundleName();
+        }
         SLOGI("NapiAVSession NewInstance sessionId=%{public}s***, sessionType:%{public}s",
             napiAVSession_->sessionId_.substr(0, UNMASK_CHAR_NUM).c_str(),
             napiAVSession_->sessionType_.c_str());
@@ -387,7 +399,7 @@ napi_value NapiAVSession::OnEvent(napi_env env, napi_callback_info info)
         return ThrowErrorAndReturn(env, "event name invalid", ERR_INVALID_PARAM);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         return ThrowErrorAndReturn(env, "OnEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
     {
@@ -435,7 +447,7 @@ napi_value NapiAVSession::OnEventPlay(napi_env env, napi_callback_info info)
     }
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OnEventPlay failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnEventPlay failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
@@ -490,7 +502,7 @@ napi_value NapiAVSession::OnEventPlayNext(napi_env env, napi_callback_info info)
     }
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OnEventPlayNext failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnEventPlayNext failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
@@ -545,7 +557,7 @@ napi_value NapiAVSession::OnEventPlayPrevious(napi_env env, napi_callback_info i
     }
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OnEventPlayPrevious failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnEventPlayPrevious failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
@@ -600,7 +612,7 @@ napi_value NapiAVSession::OnEventFastForward(napi_env env, napi_callback_info in
     }
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OnEventFastForward failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnEventFastForward failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
@@ -655,7 +667,7 @@ napi_value NapiAVSession::OnEventRewind(napi_env env, napi_callback_info info)
     }
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OnEventRewind failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnEventRewind failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
@@ -710,7 +722,7 @@ napi_value NapiAVSession::OnDesktopLyricVisibilityChanged(napi_env env, napi_cal
     }
 
     auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OnDesktopLyricVisibilityChanged failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnDesktopLyricVisibilityChanged failed : session is nullptr",
             ERR_SESSION_NOT_EXIST);
@@ -764,7 +776,7 @@ napi_value NapiAVSession::OnDesktopLyricStateChanged(napi_env env, napi_callback
     }
 
     auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OnDesktopLyricStateChanged failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OnDesktopLyricStateChanged failed : session is nullptr",
             ERR_SESSION_NOT_EXIST);
@@ -848,7 +860,7 @@ napi_value NapiAVSession::OffEvent(napi_env env, napi_callback_info info)
         return NapiUtils::GetUndefinedValue(env);
     }
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("OffEvent failed : session is nullptr");
         return ThrowErrorAndReturn(env, "OffEvent failed : session is nullptr", ERR_SESSION_NOT_EXIST);
     }
@@ -1227,7 +1239,7 @@ napi_value NapiAVSession::SetAVCallMetaData(napi_env env, napi_callback_info inf
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVCallMetaData failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1280,7 +1292,7 @@ napi_value NapiAVSession::SetAVCallState(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVCallState failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1362,7 +1374,10 @@ bool doMetaDataSetNapi(std::shared_ptr<ContextBase> context, std::shared_ptr<AVS
     } else if (isRepeatDownload) {
         SLOGI("do metadata set with repeat uriSize:%{public}d.", static_cast<int>(uri.size()));
     } else if (data.GetMediaImage() == nullptr) {
-        ret = DoDownload(data, uri);
+        {
+            std::lock_guard<std::mutex> lockGuard(NapiAVSession::downloadAVQImgMutex_);
+            ret = DoDownload(data, uri);
+        }
         SLOGI("DoDownload uriSize:%{public}d complete with ret:%{public}d|%{public}d",
             static_cast<int>(uri.size()), ret, data.GetMediaImageTopic());
         CHECK_AND_RETURN_RET_LOG(sessionPtr != nullptr, false, "doMetaDataSet without session");
@@ -1547,7 +1562,7 @@ napi_value NapiAVSession::SendCustomData(napi_env env, napi_callback_info info)
     context->taskId = NAPI_SEND_CUSTOM_DATA_TASK_ID;
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SendCustomData failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1591,7 +1606,7 @@ napi_value NapiAVSession::SetMediaCenterControlType(napi_env env, napi_callback_
     context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetMediaCenterControlType failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1627,7 +1642,7 @@ napi_value NapiAVSession::SetSupportedPlaySpeeds(napi_env env, napi_callback_inf
     context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetSupportedPlaySpeeds failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1660,7 +1675,7 @@ napi_value NapiAVSession::SetSupportedLoopModes(napi_env env, napi_callback_info
     context->GetCbInfo(env, info, inputParser);
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetSupportedLoopModes failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1752,7 +1767,7 @@ napi_value NapiAVSession::SetAVQueueItems(napi_env env, napi_callback_info info)
     context->taskId = NAPI_SET_AV_QUEUE_ITEMS_TASK_ID;
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAVQueueItems failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1863,7 +1878,7 @@ napi_value NapiAVSession::SetLaunchAbility(napi_env env, napi_callback_info info
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetLaunchAbility failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -1997,7 +2012,7 @@ napi_value NapiAVSession::SetAudioStreamId(napi_env env, napi_callback_info info
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetAudioStreamId failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2026,7 +2041,7 @@ napi_value NapiAVSession::GetController(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "GetController failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2115,7 +2130,7 @@ napi_value NapiAVSession::GetOutputDevice(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "GetOutputDevice failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2149,7 +2164,7 @@ napi_value NapiAVSession::GetOutputDeviceSync(napi_env env, napi_callback_info i
     context->GetCbInfo(env, info, NapiCbInfoParser(), true);
 
     auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-    if (napiSession == nullptr || napiSession->session_ == nullptr) {
+    if (!NapiAVSession::HasSession(napiSession)) {
         SLOGE("NapiAVSession GetOutputDeviceSync fail:session nullptr");
         NapiUtils::ThrowError(env, "NapiAVSession GetOutputDeviceSync failed : session is nullptr",
             NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST]);
@@ -2331,7 +2346,7 @@ napi_value NapiAVSession::SetSessionEvent(napi_env env, napi_callback_info info)
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "SetSessionEvent failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2413,7 +2428,7 @@ napi_value NapiAVSession::GetAllCastDisplays(napi_env env, napi_callback_info in
 
     auto executor = [context]() {
         auto* napiSession = reinterpret_cast<NapiAVSession*>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errMessage = "GetAllCastDisplays failed : session is nullptr";
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
@@ -2469,7 +2484,7 @@ napi_value NapiAVSession::EnableDesktopLyric(napi_env env, napi_callback_info in
 
     auto executor = [context]() {
         auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "EnableDesktopLyric", context->errMessage);
@@ -2512,7 +2527,7 @@ napi_value NapiAVSession::SetDesktopLyricVisible(napi_env env, napi_callback_inf
 
     auto executor = [context]() {
         auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "SetDesktopLyricVisible", context->errMessage);
@@ -2548,7 +2563,7 @@ napi_value NapiAVSession::IsDesktopLyricVisible(napi_env env, napi_callback_info
 
     auto executor = [context]() {
         auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "IsDesktopLyricVisible", context->errMessage);
@@ -2594,7 +2609,7 @@ napi_value NapiAVSession::SetDesktopLyricState(napi_env env, napi_callback_info 
 
     auto executor = [context]() {
         auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "SetDesktopLyricState", context->errMessage);
@@ -2630,7 +2645,7 @@ napi_value NapiAVSession::GetDesktopLyricState(napi_env env, napi_callback_info 
 
     auto executor = [context]() {
         auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "GetDesktopLyricState", context->errMessage);
@@ -2676,7 +2691,7 @@ napi_value NapiAVSession::SetBackgroundPlayMode(napi_env env, napi_callback_info
 
     auto executor = [context]() {
         auto *napiSession = reinterpret_cast<NapiAVSession *>(context->native);
-        if (napiSession == nullptr || napiSession->session_ == nullptr) {
+        if (!NapiAVSession::HasSession(napiSession)) {
             context->status = napi_generic_failure;
             context->errCode = NapiAVSessionManager::errcode_[ERR_SESSION_NOT_EXIST];
             ErrCodeToMessage(ERR_SESSION_NOT_EXIST, "SetBackgroundPlayMode", context->errMessage);
