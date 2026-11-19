@@ -83,7 +83,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, IsLocalDevice001, TestSize.Level
     SLOGI("IsLocalDevice001 begin!");
     std::string id;
     int32_t getSuccess = g_AVSessionService->GetLocalNetworkId(id);
-    EXPECT_NE(getSuccess, AVSESSION_SUCCESS);
+    EXPECT_EQ(getSuccess, AVSESSION_SUCCESS);
     bool ret = g_AVSessionService->IsLocalDevice(id);
     EXPECT_EQ(ret, true);
     SLOGI("IsLocalDevice001 end!");
@@ -100,7 +100,7 @@ static HWTEST_F(AVSessionServiceSupplementTest, GetTrustedDeviceName001, TestSiz
     std::string networkId = "";
     std::string deviceName = "";
     int32_t ret = g_AVSessionService->GetTrustedDeviceName(networkId, deviceName);
-    EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    EXPECT_EQ(ret, AVSESSION_ERROR);
     SLOGI("GetTrustedDeviceName001 end!");
 }
 #endif

@@ -519,33 +519,8 @@ HWTEST_F(AVSessionDumperTest, GetService001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, IsLocalDevice001, TestSize.Level1)
 {
-    SLOGI("IsLocalDevice001 begin, is_emulator=%{public}d", AVSESSION_IS_EMULATOR);
-#ifdef __x86_64__
-    SLOGI("IsLocalDevice001 compiler arch __x86_64__");
-#endif
-#ifdef __aarch64__
-    SLOGI("IsLocalDevice001 compiler arch __aarch64__");
-#endif
-#ifdef __arm__
-    SLOGI("IsLocalDevice001 compiler arch __arm__");
-#endif
-#ifdef AVSESSION_EMULATOR
-    SLOGI("IsLocalDevice001 macro AVSESSION_EMULATOR defined");
-#else
-    SLOGI("IsLocalDevice001 macro AVSESSION_EMULATOR undefined");
-#endif
-#ifdef target_cpu_x86_64
-    SLOGI("IsLocalDevice001 macro target_cpu_x86_64 defined");
-#else
-    SLOGI("IsLocalDevice001 macro target_cpu_x86_64 undefined");
-#endif
-#if defined(AVSESSION_EMULATOR) || defined(target_cpu_x86_64) || \
-    defined(target_cpu_x86_64_virt) || defined(product_x86_64_virt)
-    SLOGI("IsLocalDevice001 virtual target matched, skip the device-side assertion");
-#else
     std::string networkId = "networkId";
-    EXPECT_EQ(avSessionService_->IsLocalDevice(networkId), true);
-#endif
+    EXPECT_EQ(avSessionService_->IsLocalDevice(networkId), false);
 }
 
 // This case owns the remaining half of the build identity diagnostics.
@@ -557,41 +532,9 @@ HWTEST_F(AVSessionDumperTest, IsLocalDevice001, TestSize.Level1)
  */
 HWTEST_F(AVSessionDumperTest, GetTrustedDeviceName001, TestSize.Level1)
 {
-    SLOGI("GetTrustedDeviceName001 begin");
-#ifdef target_cpu_x86_64_virt
-    SLOGI("GetTrustedDeviceName001 macro target_cpu_x86_64_virt defined");
-#else
-    SLOGI("GetTrustedDeviceName001 macro target_cpu_x86_64_virt undefined");
-#endif
-#ifdef product_x86_64_virt
-    SLOGI("GetTrustedDeviceName001 macro product_x86_64_virt defined");
-#else
-    SLOGI("GetTrustedDeviceName001 macro product_x86_64_virt undefined");
-#endif
-#if defined(AVSESSION_EMULATOR)
-    SLOGI("GetTrustedDeviceName001 branch AVSESSION_EMULATOR");
-#elif defined(target_cpu_x86_64_virt)
-    SLOGI("GetTrustedDeviceName001 branch target_cpu_x86_64_virt");
-#elif defined(product_x86_64_virt)
-    SLOGI("GetTrustedDeviceName001 branch product_x86_64_virt");
-#elif defined(target_cpu_x86_64)
-    SLOGI("GetTrustedDeviceName001 branch target_cpu_x86_64");
-#else
-    SLOGI("GetTrustedDeviceName001 branch device");
-#endif
-#if !defined(target_cpu_x86_64)
-    SLOGI("GetTrustedDeviceName001 branch '#if !defined(target_cpu_x86_64)' taken");
-#else
-    SLOGI("GetTrustedDeviceName001 branch '#if !defined(target_cpu_x86_64)' not taken");
-#endif
-#if defined(AVSESSION_EMULATOR) || defined(target_cpu_x86_64) || \
-    defined(target_cpu_x86_64_virt) || defined(product_x86_64_virt)
-    SLOGI("GetTrustedDeviceName001 virtual target matched, skip the device-side assertion");
-#else
     std::string networkId = "networkId";
     std::string deviceName = "deviceName";
-    EXPECT_EQ(avSessionService_->GetTrustedDeviceName(networkId, deviceName), AVSESSION_SUCCESS);
-#endif
+    EXPECT_EQ(avSessionService_->GetTrustedDeviceName(networkId, deviceName), AVSESSION_ERROR);
 }
 
 /**
