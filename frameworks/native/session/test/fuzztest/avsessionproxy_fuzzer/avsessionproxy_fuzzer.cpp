@@ -148,6 +148,9 @@ void OHOS::AVSession::AvsessionProxyTest()
     avSessionProxy.GetController();
     avSessionProxy.Activate();
     avSessionProxy.Deactivate();
+    int32_t fuzzNum = GetData<int32_t>();
+    std::string fuzzModuleName(std::to_string(fuzzNum));
+    avSessionProxy.Occupy(fuzzModuleName);
     avSessionProxy.IsActive();
     avSessionProxy.Destroy();
 }

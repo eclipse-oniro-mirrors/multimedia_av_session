@@ -86,6 +86,7 @@ private:
     static napi_value SetDesktopLyricState(napi_env env, napi_callback_info info);
     static napi_value GetDesktopLyricState(napi_env env, napi_callback_info info);
     static napi_value SetBackgroundPlayMode(napi_env env, napi_callback_info info);
+    static napi_value Occupy(napi_env env, napi_callback_info info);
     static napi_value OnEventPlay(napi_env env, napi_callback_info info);
     static napi_value OffEventPlay(napi_env env, napi_callback_info info);
     static napi_value OnEventPlayNext(napi_env env, napi_callback_info info);
@@ -100,6 +101,8 @@ private:
     static napi_value OffDesktopLyricVisibilityChanged(napi_env env, napi_callback_info info);
     static napi_value OnDesktopLyricStateChanged(napi_env env, napi_callback_info info);
     static napi_value OffDesktopLyricStateChanged(napi_env env, napi_callback_info info);
+    static napi_value OnOccupiedLost(napi_env env, napi_callback_info info);
+    static napi_value OffOccupiedLost(napi_env env, napi_callback_info info);
 
     struct PlaybackStateSyncContext {
         std::mutex mtx;

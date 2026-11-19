@@ -477,6 +477,13 @@ int32_t AVSessionStub::HandleSetBackgroundPlayMode(MessageParcel &data, MessageP
     return ERR_NONE;
 }
 
+int32_t AVSessionStub::HandleOccupy(MessageParcel& data, MessageParcel& reply)
+{
+    std::string moduleName = data.ReadString();
+    CHECK_AND_RETURN_RET_LOG(reply.WriteInt32(Occupy(moduleName)), ERR_NONE, "write int32_t failed");
+    return ERR_NONE;
+}
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 int32_t AVSessionStub::HandleReleaseCast(MessageParcel& data, MessageParcel& reply)
 {

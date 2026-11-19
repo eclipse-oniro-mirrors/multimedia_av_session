@@ -52,6 +52,8 @@ public:
     void OnPlayFromAssetId(int64_t assetId) override {};
     void OnCastDisplayChange(const CastDisplayInfo& castDisplayInfo) override {};
 
+    void OnOccupiedLost(const std::string& moduleName) override;
+
     AVSession_ErrCode SetPlayCallback(OH_AVSession* avsession, AVSession_ControlCommand command,
         OH_AVSessionCallback_OnCommand callback, void* userData);
     AVSession_ErrCode SetPauseCallback(OH_AVSession* avsession, AVSession_ControlCommand command,
@@ -97,6 +99,10 @@ public:
         OH_AVSessionCallback_OutputDeviceChange callback);
     AVSession_ErrCode UnregisterOutputDeviceChangeCallback(OH_AVSession* session,
         OH_AVSessionCallback_OutputDeviceChange callback);
+    AVSession_ErrCode RegisterOccupiedLost(OH_AVSession* session,
+        OH_AVSessionCallback_SessionOccupiedLost callback);
+    AVSession_ErrCode UnregisterOccupiedLost(OH_AVSession* session,
+        OH_AVSessionCallback_SessionOccupiedLost callback);
 
 private:
     std::mutex lock_;
@@ -112,6 +118,7 @@ private:
     std::vector<std::pair<OH_AVSessionCallback_OnSetLoopMode, void*>> setLoopModeCallbacks_;
     std::vector<std::pair<OH_AVSessionCallback_OnToggleFavorite, void*>> toggleFavoriteCallbacks_;
     std::vector<OH_AVSessionCallback_OutputDeviceChange> outputDeviceChangeCallbacks_;
+    std::vector<OH_AVSessionCallback_SessionOccupiedLost> occupiedLostCallbacks_;
 };
 }
 #endif // OHOS_OHAVSESSION_CALLBACKIMPL_H

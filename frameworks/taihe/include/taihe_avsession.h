@@ -79,6 +79,7 @@ public:
     void SetDesktopLyricStateSync(DesktopLyricState const& state);
     DesktopLyricState GetDesktopLyricStateSync();
     void SetBackgroundPlayModeSync(BackgroundPlayMode mode);
+    void OccupySync(optional_view<string> moduleName);
     void SetMediaCenterControlTypeSync(array_view<string> controlTypes);
     void SetSupportedPlaySpeedsSync(array_view<double> speeds);
     void SetSupportedLoopModesSync(array_view<LoopMode> loopModes);
@@ -108,6 +109,7 @@ public:
     void OnCustomDataChange(callback_view<void(uintptr_t)> callback);
     void OnDesktopLyricVisibilityChanged(callback_view<void(bool)> callback);
     void OnDesktopLyricStateChanged(callback_view<void(DesktopLyricState const&)> callback);
+    void OnOccupiedLost(callback_view<void(string_view)> callback);
 
     void OffPlay(optional_view<callback<void(CommandInfo const& commandInfo)>> callback);
     void OffPause(optional_view<callback<void()>> callback);
@@ -134,6 +136,7 @@ public:
     void OffCustomDataChange(optional_view<callback<void(uintptr_t)>> callback);
     void OffDesktopLyricVisibilityChanged(optional_view<callback<void(bool)>> callback);
     void OffDesktopLyricStateChanged(optional_view<callback<void(DesktopLyricState const&)>> callback);
+    void OffOccupiedLost(optional_view<callback<void(string_view)>> callback);
 
     std::string GetSessionIdInner();
     void SetSessionIdInner(std::string sessionId);

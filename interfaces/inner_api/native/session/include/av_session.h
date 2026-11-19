@@ -352,6 +352,15 @@ public:
      */
     virtual int32_t SetBackgroundPlayMode(int32_t mode) {return 0;};
 
+    /**
+     * @brief Sets whether to preempt the current AVSession object.
+     * When multiple modules in an application multiplex a session, this interface is used for preemption.
+     *
+     * @return Return whether the occupy is successful.
+     * @since 26.1.0
+     */
+    virtual int32_t Occupy(const std::string& moduleName) { return AVSESSION_SUCCESS; };
+
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     /**
      * @brief Get the controller corresponding to this session.

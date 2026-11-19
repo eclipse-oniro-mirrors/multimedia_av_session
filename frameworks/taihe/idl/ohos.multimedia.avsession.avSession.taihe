@@ -459,6 +459,9 @@ interface AVSession {
   @gen_promise("setBackgroundPlayMode")
   SetBackgroundPlayModeSync(mode: BackgroundPlayMode): void;
 
+  @gen_promise("occupy")
+  OccupySync(moduleName: Optional<String>): void;
+
   @gen_async("setMediaCenterControlType")
   @gen_promise("setMediaCenterControlType")
   SetMediaCenterControlTypeSync(controlTypes: Array<String>): void;
@@ -495,6 +498,7 @@ interface AVSession {
   OnCustomDataChange(callback: (data: @sts_type("Record<String, Object>") Opaque) =>void): void;
   OnDesktopLyricVisibilityChanged(callback: (visible: bool) => void): void;
   OnDesktopLyricStateChanged(callback: (state: DesktopLyricState) => void): void;
+  OnOccupiedLost(callback: (moduleName: String) => void): void;
 
   OffPlay(callback: Optional<(commandInfo: CommandInfo) => void>): void;
   OffPause(callback: Optional<() => void>): void;
@@ -520,6 +524,7 @@ interface AVSession {
   OffCustomDataChange(callback: Optional<(data: @sts_type("Record<String, Object>") Opaque) => void>): void;
   OffDesktopLyricVisibilityChanged(callback: Optional<(visible: bool) => void>): void;
   OffDesktopLyricStateChanged(callback: Optional<(state: DesktopLyricState) => void>): void;
+  OffOccupiedLost(callback: Optional<(moduleName: String) => void>): void;
 }
 
 interface AVSessionController {

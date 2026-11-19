@@ -135,6 +135,15 @@ typedef AVSessionCallback_Result (*OH_AVSessionCallback_OutputDeviceChange)(OH_A
     AVSession_ConnectionState state, AVSession_OutputDeviceInfo *outputDeviceInfo);
 
 /**
+ * @brief Declaring the callback for session occupied lost event.
+ *
+ * @since 26.1.0
+ * @version 1.0
+ */
+typedef AVSessionCallback_Result (*OH_AVSessionCallback_SessionOccupiedLost)(OH_AVSession* session,
+    const char* moduleName);
+
+/**
  * @brief Request to create the avsession.
  *
  * @param sessionType The session type to set
@@ -542,6 +551,51 @@ AVSession_ErrCode OH_AVSession_RegisterOutputDeviceChangeCallback(OH_AVSession* 
  */
 AVSession_ErrCode OH_AVSession_UnregisterOutputDeviceChangeCallback(OH_AVSession* avsession,
     OH_AVSessionCallback_OutputDeviceChange callback);
+
+/**
+ * @brief Occupy the current AVSession for multi-module concurrent usage within one application.
+ * When multiple modules in an application multiplex a session, this interface is used for preemption.
+ *
+ * @param avsession The avsession instance pointer
+ * @param moduleName The module name of the caller, used to notify the preempted module.
+ *                   This parameter is optional. If nullptr is passed, an empty string is used.
+ * @return Function result code：
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
+ * @since 26.1.0
+ */
+AVSession_ErrCode OH_AVSession_Occupy(OH_AVSession* avsession, const char* moduleName);
+
+/**
+ * @brief Register occupiedLost callback to listen for session preemption events.
+ * When multiple modules in an application share a session, the listener needs to be registered.
+ *
+ * @param avsession The avsession instance pointer
+ * @param callback the {@link OH_AVSessionCallback_SessionOccupiedLost} to be registered.
+ * @return Function result code：
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} 1. avsession is nullptr. 2. callback is nullptr.
+ * @since 26.1.0
+ */
+AVSession_ErrCode OH_AVSession_RegisterOccupiedLost(OH_AVSession* avsession,
+    OH_AVSessionCallback_SessionOccupiedLost callback);
+
+/**
+ * @brief Unregister occupiedLost callback.
+ *
+ * @param avsession The avsession instance pointer
+ * @param callback the {@link OH_AVSessionCallback_SessionOccupiedLost} to be unregistered.
+ *                 This parameter is optional. If nullptr is passed, all registered callbacks are removed.
+ * @return Function result code：
+ *         {@link AV_SESSION_ERR_SUCCESS} If the execution is successful.
+ *         {@link AV_SESSION_ERR_SERVICE_EXCEPTION} Session service exception.
+ *         {@link AV_SESSION_ERR_INVALID_PARAMETER} The param of avsession is nullptr.
+ * @since 26.1.0
+ */
+AVSession_ErrCode OH_AVSession_UnregisterOccupiedLost(OH_AVSession* avsession,
+    OH_AVSessionCallback_SessionOccupiedLost callback);
 
 /**
  * @brief Request to acquire an AVSession instance if already created.

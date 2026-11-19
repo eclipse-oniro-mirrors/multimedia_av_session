@@ -128,6 +128,15 @@ void OHAVSessionCallbackImpl::OnOutputDeviceChange(const int32_t connectionState
     }
 }
 
+void OHAVSessionCallbackImpl::OnOccupiedLost(const std::string& moduleName)
+{
+    CHECK_AND_CONTINUE_LOG(avsession_ != nullptr, "OnOccupiedLost avsession is nullptr.");
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    for (auto it = occupiedLostCallbacks_.begin(); it != occupiedLostCallbacks_.end(); ++it) {
+        (*it)(avsession_, moduleName.c_str());
+    }
+}
+
 AVSession_ErrCode OHAVSessionCallbackImpl::SetPlayCallback(OH_AVSession* avsession,
     AVSession_ControlCommand command, OH_AVSessionCallback_OnCommand callback, void*userData)
 {
@@ -450,6 +459,35 @@ AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOutputDeviceChangeCallback(
         }
     }
 
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSessionCallbackImpl::RegisterOccupiedLost(OH_AVSession* session,
+    OH_AVSessionCallback_SessionOccupiedLost callback)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (avsession_ == nullptr) {
+        avsession_ = session;
+    }
+    auto it = std::find(occupiedLostCallbacks_.begin(), occupiedLostCallbacks_.end(), callback);
+    if (it == occupiedLostCallbacks_.end()) {
+        occupiedLostCallbacks_.push_back(callback);
+    }
+    return AV_SESSION_ERR_SUCCESS;
+}
+
+AVSession_ErrCode OHAVSessionCallbackImpl::UnregisterOccupiedLost(OH_AVSession* session,
+    OH_AVSessionCallback_SessionOccupiedLost callback)
+{
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callback == nullptr) {
+        occupiedLostCallbacks_.clear();
+        return AV_SESSION_ERR_SUCCESS;
+    }
+    auto it = std::find(occupiedLostCallbacks_.begin(), occupiedLostCallbacks_.end(), callback);
+    if (it != occupiedLostCallbacks_.end()) {
+        occupiedLostCallbacks_.erase(it);
+    }
     return AV_SESSION_ERR_SUCCESS;
 }
 }

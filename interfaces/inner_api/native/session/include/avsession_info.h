@@ -392,6 +392,14 @@ public:
     virtual void OnDesktopLyricVisibilityChanged(bool isVisible) {};
 
     virtual void OnDesktopLyricStateChanged(const DesktopLyricState &state) {};
+
+    /**
+     * @brief Called when the current AVSession is preempted by another module.
+     *
+     * When multiple modules in an application share a session, the listener needs to be registered.
+     * @since 26
+     */
+    virtual void OnOccupiedLost(const std::string& moduleName) {};
 };
 #endif
 
