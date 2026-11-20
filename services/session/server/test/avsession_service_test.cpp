@@ -5081,6 +5081,7 @@ static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone006, TestSize.Le
 static HWTEST_F(AVSessionServiceTest, CreateSession001, TestSize.Level1)
 {
     SLOGD("CreateSession001 begin!");
+    avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -5091,6 +5092,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSession001, TestSize.Level1)
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     EXPECT_TRUE(avsessionItem != nullptr);
     EXPECT_EQ(avsessionItem->GetUserId(), userId);
+    EXPECT_EQ(avsessionItem->GetDescriptor().userId_, userId);
     avsessionItem->Destroy();
     SLOGD("CreateSession001 end!");
 }
@@ -5104,6 +5106,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSession001, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, CreateSession002, TestSize.Level1)
 {
     SLOGD("CreateSession002 begin!");
+    avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -5114,6 +5117,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSession002, TestSize.Level1)
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     EXPECT_TRUE(avsessionItem != nullptr);
     EXPECT_EQ(avsessionItem->GetUserId(), avservice_->GetUsersManager().GetCurrentUserId());
+    EXPECT_EQ(avsessionItem->GetDescriptor().userId_, avservice_->GetUsersManager().GetCurrentUserId());
     avsessionItem->Destroy();
     SLOGD("CreateSession002 end!");
 }
@@ -5127,6 +5131,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSession002, TestSize.Level1)
 static HWTEST_F(AVSessionServiceTest, CreateSession003, TestSize.Level1)
 {
     SLOGD("CreateSession003 begin!");
+    avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
     OHOS::AppExecFwk::ElementName elementName;
     elementName.SetBundleName(g_testAnotherBundleName);
     elementName.SetAbilityName(g_testAnotherAbilityName);
@@ -5136,30 +5141,7 @@ static HWTEST_F(AVSessionServiceTest, CreateSession003, TestSize.Level1)
     EXPECT_EQ(result, AVSESSION_SUCCESS);
     EXPECT_TRUE(avsessionItem != nullptr);
     EXPECT_EQ(avsessionItem->GetUserId(), avservice_->GetUsersManager().GetCurrentUserId());
+    EXPECT_EQ(avsessionItem->GetDescriptor().userId_, avservice_->GetUsersManager().GetCurrentUserId());
     avsessionItem->Destroy();
     SLOGD("CreateSession003 end!");
-}
-
-/**
-* @tc.name: CreateSession004
-* @tc.desc: create session with explicit userId, verify both userId_ and descriptor_.userId_ are set
-* @tc.type: FUNC
-* @tc.require:
-*/
-static HWTEST_F(AVSessionServiceTest, CreateSession004, TestSize.Level1)
-{
-    SLOGD("CreateSession004 begin!");
-    OHOS::AppExecFwk::ElementName elementName;
-    elementName.SetBundleName(g_testAnotherBundleName);
-    elementName.SetAbilityName(g_testAnotherAbilityName);
-    OHOS::sptr<AVSessionItem> avsessionItem;
-    int32_t userId = 100;
-    int32_t result = avservice_->CreateSessionInner(g_testSessionTag,
-        AVSession::SESSION_TYPE_VOICE_CALL, false, elementName, avsessionItem, userId);
-    EXPECT_EQ(result, AVSESSION_SUCCESS);
-    EXPECT_TRUE(avsessionItem != nullptr);
-    EXPECT_EQ(avsessionItem->GetUserId(), userId);
-    EXPECT_EQ(avsessionItem->GetDescriptor().userId_, userId);
-    avsessionItem->Destroy();
-    SLOGD("CreateSession004 end!");
 }
