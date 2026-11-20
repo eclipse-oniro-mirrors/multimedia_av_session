@@ -412,7 +412,7 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast006, TestSize.Level0)
     g_AVSessionService->pcmCastSession_ = nullptr;
     OHOS::AAFwk::WantParams commandArgs;
     auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo, commandArgs);
-    EXPECT_EQ(ret, SESSION_NOT_EXIST);
+    EXPECT_EQ(ret, ERR_SESSION_NOT_EXIST);
     EXPECT_EQ(g_AVSessionService->pcmCastSession_, nullptr);
 #endif
     SLOGD("StartCast006 end!");
