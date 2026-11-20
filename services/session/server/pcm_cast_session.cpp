@@ -32,6 +32,7 @@
 #include <cstdint>
 
 namespace OHOS::AVSession {
+const int32_t HIPLAY_TIMEOUT_MS = 30 * 60 * 1000;   // 30 minutes
 
 void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode)
 {
@@ -40,6 +41,7 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
 
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
         HandleDeviceDisconnect();
+        HandleTimerTask(DISTORY_TIMER);
     }
 
     UpdateDeviceInfo(deviceInfo);
@@ -52,6 +54,9 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         if (needStreamCasting_) {
             needStreamCasting_ = false;
             FindSessionAndStreamCasting();
+        }
+        if (IsAppLevelWithoutSession()) {
+            HandleTimerTask(START_TIMER);
         }
     }
 
@@ -77,6 +82,35 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
 
     if (needHandleTimer_) {
         HandleTimerByCastState(castState);
+    }
+}
+
+void PcmCastSession::HandleTimerTask(TimerState state)
+{
+    SLOGI("state %{public}d", state);
+
+    switch (state) {
+        case START_TIMER:
+            if (scheduleTask_ == nullptr) {
+                std::weak_ptr<PcmCastSession> weakPtr = shared_from_this();
+                scheduleTask_ = std::make_shared<AVSessionTimerTask>([weakPtr](void) {
+                    auto sharedPtr = weakPtr.lock();
+                    CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "PcmCastSession is null");
+                    sharedPtr->StopCast();
+                });
+                scheduleTask_->CreateTimer();
+            }
+            scheduleTask_->StartTimer(HIPLAY_TIMEOUT_MS);
+            break;
+        case DISTORY_TIMER:
+            if (scheduleTask_ != nullptr) {
+                scheduleTask_->DestroyTimer();
+                scheduleTask_ = nullptr;
+            }
+            break;
+        default:
+            SLOGE("TimerState invalid");
+            break;
     }
 }
 
@@ -134,7 +168,7 @@ void PcmCastSession::HandleTimerByCastState(int32_t castState)
                 auto sharedPtr = weakPtr.lock();
                 CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "HandleTimerByCastState null");
                 AVRouter::GetInstance().OnSystemCommonEvent(sharedPtr->STOP_CAST, "");
-            }, "HandleHiPlayStreamCastStateChange", hiPlayHotelTimeoutMs);
+            }, "HandleHiPlayStreamCastStateChange", HIPLAY_TIMEOUT_MS);
     }
 
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED) ||
@@ -901,10 +935,15 @@ void PcmCastSession::SendModeChangeToCast(int32_t screenMode)
     cJSON_Delete(jsonObj);
 }
 
+bool PcmCastSession::IsAppLevelWithoutSession()
+{
+    bool isVaild = descriptor_.sessionId_ == "hiplayDefault" && GetCastMode() == HiPlayCastMode::APP_LEVEL;
+    return isVaild;
+}
+
 void PcmCastSession::UpdatePcmCastSession(const AVSessionDescriptor& descriptor)
 {
-    bool isVaild = descriptor_.sessionId_ == "hiplayDefault" && GetCastMode() == HiPlayCastMode::APP_LEVEL &&
-        descriptor.sessionTag_ != "ancoMediaSession";
+    bool isVaild = IsAppLevelWithoutSession() && descriptor.sessionTag_ != "ancoMediaSession";
     if (isVaild) {
         SLOGI("PcmCastSession update session");
         {
@@ -919,6 +958,7 @@ void PcmCastSession::UpdatePcmCastSession(const AVSessionDescriptor& descriptor)
 
         SessionToken sessionTokenTemp{descriptor_.sessionId_, descriptor.pid_, descriptor.uid_};
         SendStateChangeRequest(sessionTokenTemp);
+        HandleTimerTask(DISTORY_TIMER);
     }
 }
 } // namespace OHOS::AVSession

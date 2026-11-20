@@ -31,7 +31,6 @@
 #include "notification_constant.h"
 #include "parameter.h"
 #include "parameters.h"
-#include "pcm_cast_session.h"
 #include "remote_session_capability_set.h"
 #include "remote_session_source_proxy.h"
 #include "remote_session_sink_proxy.h"

@@ -424,7 +424,7 @@ ohos_unittest("AVSessionServiceAddedTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -602,7 +602,7 @@ ohos_unittest("AVSessionItemTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -707,7 +707,7 @@ ohos_unittest("AVControllerItemTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -795,7 +795,7 @@ ohos_unittest("MigrateAVSessionProxyTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -839,7 +839,7 @@ ohos_unittest("MigrateAVSessionProxyForSuperTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -955,7 +955,7 @@ ohos_unittest("MigrateAVSessionManagerTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -1046,7 +1046,7 @@ ohos_unittest("SoftbusSessionManagerSupplementTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -1135,7 +1135,7 @@ ohos_unittest("MigrateAVSessionServerForNextTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -1177,7 +1177,7 @@ ohos_unittest("AVSessionServiceSupplementTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -1225,7 +1225,7 @@ ohos_unittest("RemoteSessionSinkTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   public_configs = ["../../../session:avsession_ipc_config"]
@@ -1268,7 +1268,7 @@ ohos_unittest("RemoteSessionSourceTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   public_configs = ["../../../session:avsession_ipc_config"]
@@ -1730,7 +1730,7 @@ ohos_unittest("AVSessionProxyTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   public_configs = ["../../../../services/session:avsession_ipc_config"]
@@ -1856,7 +1856,7 @@ ohos_unittest("AVSessionDumperTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -2111,6 +2111,7 @@ ohos_unittest("MigrateAVSessionTest") {
     ]
     external_deps += [
       "cast_engine:cast_engine_client",
+      "time_service:time_client",
       "window_manager:libdm_lite",
       "image_framework:image_native",
     ]
@@ -2273,7 +2274,7 @@ ohos_unittest("AVSessionServiceTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -2364,7 +2365,7 @@ ohos_unittest("AVSessionServiceTestExt") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   if (bluetooth_part_enable) {
@@ -2631,6 +2632,7 @@ ohos_unittest("SessionStackTest") {
     ]
     external_deps += [
       "cast_engine:cast_engine_client",
+      "time_service:time_client",
       "window_manager:libdm_lite",
     ]
   }
@@ -2705,7 +2707,7 @@ ohos_unittest("AVRouterTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   public_configs = ["../../../../services/session:avsession_ipc_config"]
@@ -2795,7 +2797,7 @@ ohos_unittest("AVRouterImplTest") {
       "../../../../services/session:avsession_cast_item_static",
       "../../../../services/session:avsession_router_static",
     ]
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
   }
 
   public_configs = ["../../../../services/session:avsession_ipc_config"]
@@ -2851,6 +2853,7 @@ if (castplus_cast_engine_enable) {
       "cJSON:cjson",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
+      "time_service:time_client",
       "googletest:gtest_main",
       "hilog:libhilog",
       "image_framework:image_native",
@@ -2915,6 +2918,7 @@ if (castplus_cast_engine_enable) {
       "cJSON:cjson",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
+      "time_service:time_client",
       "googletest:gtest_main",
       "hilog:libhilog",
       "image_framework:image_native",
@@ -2982,6 +2986,7 @@ if (castplus_cast_engine_enable) {
       "cJSON:cjson",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
+      "time_service:time_client",
       "googletest:gtest_main",
       "hilog:libhilog",
       "image_framework:image_native",
@@ -3073,7 +3078,7 @@ if (castplus_cast_engine_enable) {
 
     external_deps = common_external_deps_with_third_party
 
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
 
     public_configs = ["../../../../services/session:avsession_ipc_config"]
   }
@@ -3102,7 +3107,7 @@ if (castplus_cast_engine_enable) {
 
     external_deps = common_external_deps_with_third_party
 
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
 
     public_configs = ["../../../../services/session:avsession_ipc_config"]
   }
@@ -3131,7 +3136,7 @@ if (castplus_cast_engine_enable) {
 
     external_deps = common_external_deps_with_third_party
 
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
 
     public_configs = ["../../../../services/session:avsession_ipc_config"]
   }
@@ -3160,7 +3165,7 @@ if (castplus_cast_engine_enable) {
 
     external_deps = common_external_deps_with_third_party
 
-    external_deps += [ "cast_engine:cast_engine_client" ]
+    external_deps += [ "cast_engine:cast_engine_client", "time_service:time_client" ]
 
     public_configs = ["../../../../services/session:avsession_ipc_config"]
   }

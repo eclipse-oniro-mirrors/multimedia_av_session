@@ -19,6 +19,7 @@
 #include "avsession_info.h"
 #include "cJSON.h"
 #include "avsession_users_manager.h"
+#include "avsession_timer_task.h"
 #include <atomic>
 
 namespace OHOS::AVSession {
@@ -216,6 +217,12 @@ private:
         PIN_CODE_NUM = 1,
     };
 
+    enum TimerState {
+        START_TIMER = 0,
+        STOP_TIMER = 1,
+        DISTORY_TIMER = 2,
+    };
+
     const std::map<const std::string, int32_t> DATA_KEY_MAPS = {
         {CAST_SESSION_ID, CAST_SESSION_ID_NUM},
         {PIN_CODE, PIN_CODE_NUM},
@@ -228,11 +235,13 @@ private:
     void CastStateCommandParams(const AAFwk::WantParams& commandArgs);
     void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
     void ReportSessionCast(int32_t castState, int32_t reasonCode);
+    void HandleTimerTask(TimerState state);
+    bool IsAppLevelWithoutSession();
     const std::string PCM_CAST_SESSION = "PCMCast";
     int32_t noReasonCode_ = 0;
     int32_t reasonDeviceIsUntrusted_ = 10014;
 
-    const int32_t hiPlayHotelTimeoutMs = 30 * 60 * 1000;
+    std::shared_ptr<AVSessionTimerTask> scheduleTask_;
 };
 } // namespace OHOS::AVSession
 #endif // OHOS_PCM_CAST_SESSION_H

@@ -457,6 +457,7 @@ ohos_unittest("AVDumperTest") {
     external_deps += [
       "cast_engine:cast_engine_client",
       "window_manager:libdm_lite",
+      "time_service:time_client"
     ]
   }
 
@@ -523,6 +524,7 @@ if (castplus_cast_engine_enable) {
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "cast_engine:cast_engine_client",
+      "time_service:time_client",
       "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",

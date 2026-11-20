@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../castplus_cast_engine_part.gni")
 
 config("avsession_common_config") {
   include_dirs = [ "../../interfaces/inner_api/native/session/include" ]
@@ -64,6 +65,14 @@ ohos_shared_library("avsession_common") {
     "ipc:ipc_core",
     "image_framework:image_native",
   ]
+
+  if (castplus_cast_engine_enable) {
+    sources += [
+      "src/avsession_timer_task.cpp",
+      "src/avsession_timer_info.cpp"
+    ]
+    external_deps += [ "time_service:time_client" ]
+  }
 
   subsystem_name = "multimedia"
   innerapi_tags = [ "platformsdk" ]
