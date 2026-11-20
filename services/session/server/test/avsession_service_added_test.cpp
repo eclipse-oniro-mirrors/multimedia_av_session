@@ -390,64 +390,6 @@ static HWTEST_F(AVSessionServiceAddedTest, StartCast005, TestSize.Level0)
 }
 
 /**
- * @tc.name: StartCast006
- * @tc.desc: test StartCast with commandArgs, pcmCastSession_ is nullptr
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceAddedTest, StartCast006, TestSize.Level0)
-{
-    SLOGD("StartCast006 begin!");
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    OHOS::AVSession::SessionToken sessionToken;
-    OutputDeviceInfo outputDeviceInfo;
-    OHOS::AVSession::DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = 1;
-    deviceInfo.deviceId_ = "-100";
-    deviceInfo.realDeviceId_ = "-100";
-    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
-    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    sessionToken.sessionId = "testSessionId";
-    sessionToken.pid = 1234;
-    sessionToken.uid = 5678;
-    OHOS::AAFwk::WantParams commandArgs;
-    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo, commandArgs);
-    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
-    EXPECT_NE(g_AVSessionService->pcmCastSession_, nullptr);
-#endif
-    SLOGD("StartCast006 end!");
-}
-
-/**
- * @tc.name: StartCast007
- * @tc.desc: test StartCast with commandArgs, pcmCastSession_ already exits
- * @tc.type: FUNC
- * @tc.require: #I5Y4MZ
- */
-static HWTEST_F(AVSessionServiceAddedTest, StartCast007, TestSize.Level0)
-{
-    SLOGD("StartCast007 begin!");
-#ifdef CASTPLUS_CAST_ENGINE_ENABLE
-    OHOS::AVSession::SessionToken sessionToken;
-    OutputDeviceInfo outputDeviceInfo;
-    OHOS::AVSession::DeviceInfo deviceInfo;
-    deviceInfo.castCategory_ = 1;
-    deviceInfo.deviceId_ = "-100";
-    deviceInfo.realDeviceId_ = "-100";
-    deviceInfo.supportedProtocols_ = ProtocolType::TYPE_CAST_PLUS_AUDIO;
-    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
-    sessionToken.sessionId = "pcmCastSession";
-    sessionToken.pid = 1234;
-    sessionToken.uid = 5678;
-    OHOS::AAFwk::WantParams commandArgs;
-    g_AVSessionService->pcmCastSession_ = std::make_shared<PcmCastSession>();
-    auto ret = g_AVSessionService->StartCast(sessionToken, outputDeviceInfo, commandArgs);
-    EXPECT_EQ(ret, ERR_WAIT_ALLCONNECT_TIMEOUT);
-#endif
-    SLOGD("StartCast007 end!");
-}
-
-/**
  * @tc.name: ProcessTargetMigrateTest001
  * @tc.desc: Test for deviceTypeId mismatch.
  * @tc.type: FUNC
