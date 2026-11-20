@@ -220,11 +220,11 @@ static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest002, TestSize.Level
 static HWTEST_F(AVControllerCallbackStubTest, OnRemoteRequest003, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest003 begin!");
-    uint32_t code = 11;
+    uint32_t code = static_cast<uint32_t>(IAVControllerCallbackIpcCode::COMMAND_ON_QUEUE_TITLE_CHANGE);
     AVControllerCallbackStubDemo avControllerCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(OHOS::AVSession::IAVControllerCallback::GetDescriptor());
-    data.WriteString("test");
+    data.WriteString16(Str8ToStr16("test"));
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
     int ret = avControllerCallbackStub.OnRemoteRequest(code, data, reply, option);

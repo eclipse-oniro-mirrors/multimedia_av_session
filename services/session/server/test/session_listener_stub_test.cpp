@@ -179,11 +179,14 @@ static HWTEST_F(SessionListenerStubTest, OnRemoteRequest001, TestSize.Level0)
 static HWTEST_F(SessionListenerStubTest, OnRemoteRequest002, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest002 begin!");
-    uint32_t code = 1;
+    uint32_t code = static_cast<uint32_t>(ISessionListenerIpcCode::COMMAND_ON_SESSION_CREATE);
     SessionListenerStubDemo sessionListenerStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(ISessionListener::GetDescriptor());
     AVSessionDescriptor descriptor;
+    descriptor.sessionId_ = "testSessionId";
+    descriptor.sessionType_ = 0;
+    descriptor.sessionTag_ = "testSessionTag";
     data.WriteParcelable(&descriptor);
     OHOS::MessageParcel reply;
     OHOS::MessageOption option;
