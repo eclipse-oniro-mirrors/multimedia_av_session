@@ -281,7 +281,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData002, TestSize.Level0)
 
 /**
  * @tc.name: ProcessMetaData003
- * @tc.desc: test avQueueId/avQueueName parse from json
+ * @tc.desc: test avQueueId/avQueueName parse from json, assetId is carried by the sync protocol
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -293,7 +293,8 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData003, TestSize.Level0)
         SLOGE("create jsonvalue nullptr");
         FAIL();
     }
-    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "queueId_001") ||
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ASSET_ID, "test_asset") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "queueId_001") ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_NAME, "queueName_001")) {
         SLOGE("AddStringToJson fail");
         cJSON_Delete(jsonValue);
@@ -307,6 +308,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData003, TestSize.Level0)
 
     AVMetaData metaData;
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_->GetAVMetaData(metaData), AVSESSION_SUCCESS);
+    EXPECT_EQ(metaData.GetAssetId(), "test_asset");
     EXPECT_EQ(metaData.GetAVQueueId(), "queueId_001");
     EXPECT_EQ(metaData.GetAVQueueName(), "queueName_001");
     cJSON_Delete(jsonValue);
@@ -314,7 +316,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData003, TestSize.Level0)
 
 /**
  * @tc.name: ProcessMetaData004
- * @tc.desc: test avQueueId/avQueueName empty value
+ * @tc.desc: test avQueueId/avQueueName empty value, keeps empty instead of default value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -326,7 +328,8 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData004, TestSize.Level0)
         SLOGE("create jsonvalue nullptr");
         FAIL();
     }
-    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "") ||
+    if (!SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_ASSET_ID, "test_asset") ||
+        !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_ID, "") ||
         !SoftbusSessionUtils::AddStringToJson(jsonValue, METADATA_AVQUEUE_NAME, "")) {
         SLOGE("AddStringToJson fail");
         cJSON_Delete(jsonValue);
@@ -340,6 +343,7 @@ static HWTEST_F(MigrateAVSessionProxyTest, ProcessMetaData004, TestSize.Level0)
 
     AVMetaData metaData;
     EXPECT_EQ(g_MigrateAVSessionProxy->remoteSession_->GetAVMetaData(metaData), AVSESSION_SUCCESS);
+    EXPECT_EQ(metaData.GetAssetId(), "test_asset");
     EXPECT_EQ(metaData.GetAVQueueId(), "");
     EXPECT_EQ(metaData.GetAVQueueName(), "");
     cJSON_Delete(jsonValue);
