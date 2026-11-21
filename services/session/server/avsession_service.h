@@ -931,6 +931,8 @@ private:
     static constexpr const char *AVQUEUE_FILE_NAME = "avqueueinfo";
     static constexpr const char *sessionCastState_ = "CAST_STATE";
     static constexpr const char *controlListFile = "/data/service/el2/public/av_session/controlList";
+    static constexpr int32_t suspendRegisterRetryCountMax = 5;
+    static constexpr int32_t suspendRegisterRetryIntervalTime = 500;
 
     const std::string MEDIA_CONTROL_BUNDLENAME = "com.ohos.mediacontroller";
     const std::string MEDIA_CONTROL_ABILITYNAME = "com.ohos.mediacontroller.avplayer.mainability";

@@ -1297,10 +1297,19 @@ void AVSessionService::InitSuspendManager()
         g_suspendObserver = new (std::nothrow) SuspendStateObserverImpl(*this);
         CHECK_AND_RETURN_LOG(g_suspendObserver != nullptr, "create suspend state observer failed");
     }
-    ErrCode ret = OHOS::ResourceSchedule::SuspendManagerBaseClient::GetInstance()
-        .RegisterSuspendObserver(g_suspendObserver);
-    CHECK_AND_RETURN_LOG(ret == ERR_OK, "RegisterSuspendObserver failed ret %{public}d", ret);
-    SLOGI("RegisterSuspendObserver success");
+    int32_t retryCount = 0;
+    while (retryCount < suspendRegisterRetryCountMax) {
+        ErrCode ret = OHOS::ResourceSchedule::SuspendManagerBaseClient::GetInstance()
+            .RegisterSuspendObserver(g_suspendObserver);
+        if (ret == ERR_OK) {
+            SLOGI("RegisterSuspendObserver success");
+            return;
+        }
+        retryCount++;
+        SLOGW("RegisterSuspendObserver failed ret %{public}d, retry count %{public}d", ret, retryCount);
+        std::this_thread::sleep_for(std::chrono::milliseconds(suspendRegisterRetryIntervalTime));
+    }
+    SLOGE("RegisterSuspendObserver failed after %{public}d retries", suspendRegisterRetryCountMax);
 #endif
 }
 
