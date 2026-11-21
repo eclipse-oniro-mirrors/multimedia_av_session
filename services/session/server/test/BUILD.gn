@@ -748,6 +748,15 @@ ohos_unittest("MigrateAVSessionProxyTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [
     "../../../../frameworks/common:avsession_common",
     "../../../../frameworks/native/session:avsession_client_static",
@@ -1764,6 +1773,15 @@ ohos_unittest("AVControllerCallbackStubTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = common_deps
 
   deps += [
@@ -1875,6 +1893,15 @@ ohos_unittest("SessionListenerStubTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = common_deps
 
   deps += [
@@ -1902,6 +1929,15 @@ ohos_unittest("AVSessionCallbackStubTest") {
   ]
 
   ldflags = [ "--coverage" ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
 
   deps = common_deps
 
@@ -2521,6 +2557,15 @@ ohos_unittest("AudioAdapterTest") {
 
   ldflags = [ "--coverage" ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
   deps = [
     "../../../session:avsession_server_static",
     "../../../session:libidl_avsession_service_interface_proxy",
@@ -3083,6 +3128,15 @@ if (castplus_cast_engine_enable) {
       "-fno-access-control",
       "-DCASTPLUS_CAST_ENGINE_ENABLE",
     ]
+
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      debug = false
+      integer_overflow = true
+      ubsan = true
+    }
 
     deps = common_deps_without_third_party
 

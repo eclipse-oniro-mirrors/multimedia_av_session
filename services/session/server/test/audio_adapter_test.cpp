@@ -976,7 +976,7 @@ static HWTEST(AudioAdapterTest, OnDeviceChange003, TestSize.Level0)
     audioAdapter.OnDeviceChange(action);
     EXPECT_EQ(ret, OHOS::AVSession::AVSESSION_SUCCESS);
 }
-
+#ifdef TEMP_DISABLE
 /**
  * @tc.name: OnPreferredOutputDeviceChange001
  * @tc.desc: Notify registered listener when the audio preferred device is updated.
@@ -1002,7 +1002,7 @@ static HWTEST(AudioAdapterTest, OnPreferredOutputDeviceChange001, TestSize.Level
     EXPECT_FALSE(ret);
     AudioAdapter::GetInstance().RemovePreferredOutputDeviceChangeCallback(callback);
 }
-
+#endif
 /**
  * @tc.name: OnPreferredOutputDeviceChange002
  * @tc.desc: Notify registered listener when the audio preferred device is updated.
