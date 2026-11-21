@@ -166,7 +166,7 @@ static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest000, TestSize.Level0)
 static HWTEST_F(AVSessionCallbackStubTest, OnRemoteRequest001, TestSize.Level0)
 {
     SLOGI("OnRemoteRequest001 begin!");
-    uint32_t code = static_cast<uint32_t>(IAVSessionCallbackIpcCode::COMMAND_ON_A_V_CALL_HANG_UP);
+    uint32_t code = 2;
     AVSessionCallbackStubDemo avSessionCallbackStub;
     OHOS::MessageParcel data;
     data.WriteInterfaceToken(IAVSessionCallback::GetDescriptor());

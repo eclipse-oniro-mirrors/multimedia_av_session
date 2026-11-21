@@ -588,10 +588,6 @@ public:
             reply.WriteInt32(AVSESSION_SUCCESS);
             reply.WriteInt32(1);
             reply.WriteInt32(ILLEGAL_DISPLAY_STATE);
-            reply.WriteUint64(1);
-            reply.WriteString("testDisplay");
-            reply.WriteInt32(1920);
-            reply.WriteInt32(1080);
         }
         return 0;
     }
