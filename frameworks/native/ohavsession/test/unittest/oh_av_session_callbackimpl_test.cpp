@@ -948,14 +948,16 @@ HWTEST_F(OHAVSessionCallbackImplTest, OnOutputDeviceChange001, TestSize.Level0)
 HWTEST_F(OHAVSessionCallbackImplTest, RegisterOccupiedLost001, TestSize.Level0)
 {
     SLOGI("RegisterOccupiedLost001 Begin");
-    OH_AVSession* avsession = nullptr;
-    OH_AVSession_Create(SESSION_TYPE_AUDIO, "RegisterOccupiedLost001", "com.xxx.hmxx", "ndkxx", &avsession);
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    EXPECT_TRUE(oh_avsession != nullptr);
     OH_AVSessionCallback_SessionOccupiedLost callback = [](OH_AVSession* session,
         const char* moduleName) -> AVSessionCallback_Result {
         return AVSESSION_CALLBACK_RESULT_SUCCESS;
     };
-    g_ohAVSessionCallbackImpl.avsession_ = avsession;
-    auto ret = g_ohAVSessionCallbackImpl.RegisterOccupiedLost(avsession, callback);
+    g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.clear();
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    auto ret = g_ohAVSessionCallbackImpl.RegisterOccupiedLost(oh_avsession, callback);
     EXPECT_EQ(ret, AV_SESSION_ERR_SUCCESS);
     EXPECT_TRUE(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size() > 0);
     SLOGI("RegisterOccupiedLost001 End");
@@ -970,20 +972,22 @@ HWTEST_F(OHAVSessionCallbackImplTest, RegisterOccupiedLost001, TestSize.Level0)
 HWTEST_F(OHAVSessionCallbackImplTest, OnOccupiedLost001, TestSize.Level0)
 {
     SLOGI("OnOccupiedLost001 Begin");
-    OH_AVSession* avsession = nullptr;
-    OH_AVSession_Create(SESSION_TYPE_AUDIO, "OnOccupiedLost001", "com.xxx.hmxx", "ndkxx", &avsession);
+    auto avsession = std::make_shared<OHAVSession>();
+    OH_AVSession* oh_avsession = reinterpret_cast<OH_AVSession*>(avsession.get());
+    EXPECT_TRUE(oh_avsession != nullptr);
     OH_AVSessionCallback_SessionOccupiedLost callback = [](OH_AVSession* session,
         const char* moduleName) -> AVSessionCallback_Result {
         g_capturedModuleName = moduleName;
         return AVSESSION_CALLBACK_RESULT_SUCCESS;
     };
     g_capturedModuleName = "";
-    g_ohAVSessionCallbackImpl.avsession_ = avsession;
-    g_ohAVSessionCallbackImpl.RegisterOccupiedLost(avsession, callback);
+    g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.clear();
+    g_ohAVSessionCallbackImpl.avsession_ = oh_avsession;
+    g_ohAVSessionCallbackImpl.RegisterOccupiedLost(oh_avsession, callback);
     g_ohAVSessionCallbackImpl.OnOccupiedLost("testModule");
     EXPECT_TRUE(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size() > 0);
     EXPECT_EQ(g_capturedModuleName, "testModule");
-    g_ohAVSessionCallbackImpl.UnregisterOccupiedLost(avsession, callback);
+    g_ohAVSessionCallbackImpl.UnregisterOccupiedLost(oh_avsession, callback);
     EXPECT_EQ(g_ohAVSessionCallbackImpl.occupiedLostCallbacks_.size(), 0);
     SLOGI("OnOccupiedLost001 End");
 }
