@@ -1983,10 +1983,30 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_NotifyFrozenDuration_001, TestSize.Lev
     SLOGD("AVSessionItem_NotifyFrozenDuration_001 end!");
 }
 
+static int64_t SteadyNowMs()
+{
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+}
+
+static int64_t ReadFreezeParam(const std::shared_ptr<AVControllerCallbackCapture>& callback,
+    const std::string& key)
+{
+    auto extras = callback->lastPlaybackState_.GetExtras();
+    if (extras == nullptr) {
+        return -1;
+    }
+    auto value = AAFwk::ILong::Query(extras->GetParam(key));
+    if (value == nullptr) {
+        return -1;
+    }
+    return AAFwk::Long::Unbox(value);
+}
+
 /**
  * @tc.name: AVSessionItem_FreezeAccumulation_001
  * @tc.desc: Test freeze accounting: F accumulates across freeze cycles, A keeps
- *           unchanged on unfreeze, SetAVPlaybackState clears A and F.
+ *           unchanged on unfreeze.
  * @tc.type: FUNC
  */
 HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeAccumulation_001, TestSize.Level0)
@@ -1997,6 +2017,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeAccumulation_001, TestSize.Level
     g_AVSessionItem->isDestroyed_ = false;
     g_AVSessionItem->accumulatedFrozenTime_ = 0;
     g_AVSessionItem->freezeStartTimestamp_ = 0;
+    g_AVSessionItem->freezeStartWallTimestamp_ = 0;
 
     auto callback = std::make_shared<AVControllerCallbackCapture>();
     ASSERT_NE(callback, nullptr);
@@ -2005,67 +2026,83 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeAccumulation_001, TestSize.Level
     extrasFilter.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
     g_AVControllerItem->SetPlaybackFilter(extrasFilter);
 
-    auto wallNowMs = []() -> int64_t {
-        auto now = std::chrono::system_clock::now().time_since_epoch();
-        return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-    };
-    auto readFreezeDuration = [&callback]() -> int64_t {
-        auto extras = callback->lastPlaybackState_.GetExtras();
-        if (extras == nullptr) {
-            return -1;
-        }
-        auto value = AAFwk::ILong::Query(extras->GetParam("freezeDuration"));
-        if (value == nullptr) {
-            return -1;
-        }
-        return AAFwk::Long::Unbox(value);
-    };
-    auto readFreezeTimestamp = [&callback]() -> int64_t {
-        auto extras = callback->lastPlaybackState_.GetExtras();
-        if (extras == nullptr) {
-            return -1;
-        }
-        auto value = AAFwk::ILong::Query(extras->GetParam("freezeTimestamp"));
-        if (value == nullptr) {
-            return -1;
-        }
-        return AAFwk::Long::Unbox(value);
-    };
-
-    /* first unfreeze: F = base 50 + frozen interval 100 */
-    int64_t firstFreezeStart = wallNowMs() - 100;
+    /* first unfreeze: F = base 50 + frozen interval 100, wall timestamp reported verbatim */
+    const int64_t firstFreezeStartWall = 1700000000000;
     g_AVSessionItem->accumulatedFrozenTime_ = 50;
-    g_AVSessionItem->freezeStartTimestamp_ = firstFreezeStart;
+    g_AVSessionItem->freezeStartTimestamp_ = SteadyNowMs() - 100;
+    g_AVSessionItem->freezeStartWallTimestamp_ = firstFreezeStartWall;
     callback->playbackStateChangeCount_ = 0;
     g_AVSessionItem->HandleSuspendStateChange(SuspendState::ACTIVE);
     EXPECT_EQ(callback->playbackStateChangeCount_, 1);
-    EXPECT_GE(readFreezeDuration(), 150);
-    EXPECT_EQ(readFreezeTimestamp(), firstFreezeStart);
+    EXPECT_GE(ReadFreezeParam(callback, "freezeDuration"), 150);
+    EXPECT_EQ(ReadFreezeParam(callback, "freezeTimestamp"), firstFreezeStartWall);
 
     /* second freeze cycle: A updated by the freeze, F keeps accumulating */
-    int64_t secondFreezeStart = wallNowMs() - 50;
-    g_AVSessionItem->freezeStartTimestamp_ = secondFreezeStart;
+    const int64_t secondFreezeStartWall = 1700000005000;
+    g_AVSessionItem->freezeStartTimestamp_ = SteadyNowMs() - 50;
+    g_AVSessionItem->freezeStartWallTimestamp_ = secondFreezeStartWall;
     g_AVSessionItem->HandleSuspendStateChange(SuspendState::ACTIVE);
     EXPECT_EQ(callback->playbackStateChangeCount_, 2);
-    EXPECT_GE(readFreezeDuration(), 200);
-    EXPECT_EQ(readFreezeTimestamp(), secondFreezeStart);
+    EXPECT_GE(ReadFreezeParam(callback, "freezeDuration"), 200);
+    EXPECT_EQ(ReadFreezeParam(callback, "freezeTimestamp"), secondFreezeStartWall);
 
-    /* app sets playback state: A and F cleared */
-    AVPlaybackState state;
-    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
-    g_AVSessionItem->SetAVPlaybackState(state);
-    EXPECT_EQ(g_AVSessionItem->accumulatedFrozenTime_, 0);
-    EXPECT_EQ(g_AVSessionItem->freezeStartTimestamp_, 0);
+    g_AVSessionItem->freezeStartTimestamp_ = 0;
+    g_AVSessionItem->freezeStartWallTimestamp_ = 0;
+    g_AVSessionItem->accumulatedFrozenTime_ = 0;
+    SLOGD("AVSessionItem_FreezeAccumulation_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_FreezeClear_001
+ * @tc.desc: Test freeze pushes the current F and the fresh wall clock timestamp,
+ *           a failed SetAVPlaybackState keeps the freeze accounting while a
+ *           successful one clears A (both clocks) and F.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_001, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_FreezeClear_001 begin!");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    ASSERT_NE(g_AVControllerItem, nullptr);
+    g_AVSessionItem->isDestroyed_ = false;
+    g_AVSessionItem->accumulatedFrozenTime_ = 0;
+    g_AVSessionItem->freezeStartTimestamp_ = 0;
+    g_AVSessionItem->freezeStartWallTimestamp_ = 0;
+
+    auto callback = std::make_shared<AVControllerCallbackCapture>();
+    ASSERT_NE(callback, nullptr);
+    g_AVControllerItem->RegisterAVControllerCallback(callback);
+    AVPlaybackState::PlaybackStateMaskType extrasFilter;
+    extrasFilter.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
+    g_AVControllerItem->SetPlaybackFilter(extrasFilter);
 
     /* freeze pushes the current (cleared) F and the fresh wall clock timestamp */
     callback->playbackStateChangeCount_ = 0;
     g_AVSessionItem->HandleSuspendStateChange(SuspendState::FROZEN);
     EXPECT_EQ(callback->playbackStateChangeCount_, 1);
-    EXPECT_EQ(readFreezeDuration(), 0);
-    EXPECT_GT(readFreezeTimestamp(), 0);
+    EXPECT_EQ(ReadFreezeParam(callback, "freezeDuration"), 0);
+    EXPECT_GT(ReadFreezeParam(callback, "freezeTimestamp"), 0);
+
+    /* a failed SetAVPlaybackState (empty mask) does not clear the freeze accounting */
+    g_AVSessionItem->accumulatedFrozenTime_ = 50;
+    AVPlaybackState emptyState;
+    EXPECT_EQ(g_AVSessionItem->SetAVPlaybackState(emptyState), AVSESSION_ERROR);
+    EXPECT_EQ(g_AVSessionItem->accumulatedFrozenTime_, 50);
+    EXPECT_NE(g_AVSessionItem->freezeStartTimestamp_, 0);
+    EXPECT_EQ(callback->playbackStateChangeCount_, 1);
+
+    /* a successful SetAVPlaybackState clears A (both clocks) and F */
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_AVSessionItem->SetAVPlaybackState(state);
+    EXPECT_EQ(g_AVSessionItem->accumulatedFrozenTime_, 0);
+    EXPECT_EQ(g_AVSessionItem->freezeStartTimestamp_, 0);
+    EXPECT_EQ(g_AVSessionItem->freezeStartWallTimestamp_, 0);
 
     g_AVSessionItem->freezeStartTimestamp_ = 0;
-    SLOGD("AVSessionItem_FreezeAccumulation_001 end!");
+    g_AVSessionItem->freezeStartWallTimestamp_ = 0;
+    g_AVSessionItem->accumulatedFrozenTime_ = 0;
+    SLOGD("AVSessionItem_FreezeClear_001 end!");
 }
 } //AVSession
 } //OHOS

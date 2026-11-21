@@ -851,12 +851,13 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     AVPlaybackState::PlaybackStateMaskType changedStateMask;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
-        freezeStartTimestamp_ = 0;
-        accumulatedFrozenTime_ = 0;
         if (recordFilter.any()) {
             changedStateMask = playbackState_.GetChangedStateMask(recordFilter, state);
         }
         CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
+        freezeStartTimestamp_ = 0;
+        freezeStartWallTimestamp_ = 0;
+        accumulatedFrozenTime_ = 0;
     }
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
@@ -905,6 +906,12 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 }
 // LCOV_EXCL_STOP
 
+static int64_t GetSteadyTimeMillis()
+{
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+}
+
 static int64_t GetWallTimeMillis()
 {
     auto now = std::chrono::system_clock::now().time_since_epoch();
@@ -919,17 +926,14 @@ void AVSessionItem::HandleSuspendStateChange(SuspendState state)
     CHECK_AND_RETURN_LOG(!isDestroyed_.load(), "session destroyed, sessionId %{public}s",
         AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
     if (state == SuspendState::FROZEN) {
-        freezeStartTimestamp_ = GetWallTimeMillis();
+        freezeStartTimestamp_ = GetSteadyTimeMillis();
+        freezeStartWallTimestamp_ = GetWallTimeMillis();
     } else {
         CHECK_AND_RETURN_LOG(freezeStartTimestamp_ > 0, "session active without freeze timing, sessionId %{public}s",
             AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
-        int64_t now = GetWallTimeMillis();
-        /* guard against a wall clock step back during the freeze */
-        if (now > freezeStartTimestamp_) {
-            accumulatedFrozenTime_ += now - freezeStartTimestamp_;
-        }
+        accumulatedFrozenTime_ += GetSteadyTimeMillis() - freezeStartTimestamp_;
     }
-    NotifyFrozenDuration(freezeStartTimestamp_, accumulatedFrozenTime_);
+    NotifyFrozenDuration(freezeStartWallTimestamp_, accumulatedFrozenTime_);
 }
 
 void AVSessionItem::NotifyFrozenDuration(int64_t freezeTimestampMs, int64_t freezeDurationMs)

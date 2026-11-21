@@ -49,11 +49,7 @@ class AVControllerItem;
 class RemoteSessionSink;
 class RemoteSessionSource;
 
-enum class SuspendState : int32_t {
-    ACTIVE = 0,
-    DOZE,
-    FROZEN,
-};
+enum class SuspendState : int32_t { ACTIVE, FROZEN };
 
 class AVSessionItem : public AVSessionStub {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
@@ -596,9 +592,8 @@ private:
     friend class AVSessionDumper;
     int64_t playingTime_ = 0;
     std::string lyricTitle_ = "";
-    /* suspend freeze accounting: freeze start timestamp A in wall clock ms, cleared only
-     * by SetAVPlaybackState; accumulated frozen time F in ms */
     int64_t freezeStartTimestamp_ = 0;
+    int64_t freezeStartWallTimestamp_ = 0;
     int64_t accumulatedFrozenTime_ = 0;
     int32_t appIndex_ = 0;
 

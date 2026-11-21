@@ -157,8 +157,7 @@ public:
 
     ErrCode OnDoze(const std::vector<int32_t>& pidList, int32_t uid) override
     {
-        SLOGD("suspend state doze, uid %{public}d pidCount %{public}zu", uid, pidList.size());
-        service_.HandleSuspendStateChange(uid, SuspendState::DOZE);
+        SLOGD("OnDoze uid %{public}d pidCount %{public}zu, no action", uid, pidList.size());
         return ERR_OK;
     }
 
