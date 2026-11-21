@@ -419,6 +419,7 @@ private:
     friend class MigrateAVSessionServer;
     friend class MigrateAVSessionServerForNext;
     friend class PcmCastSession;
+    friend class SuspendStateObserverImpl;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
     void UpdatePcmCastSession(const AVSessionDescriptor& descriptor);
 #endif
@@ -522,6 +523,10 @@ private:
     void InitCommonEventService();
 
     void InitCollaboration();
+
+    void InitSuspendManager();
+
+    void HandleSuspendStateChange(int32_t uid, SuspendState state);
 
     bool SelectFocusSession(const FocusSessionStrategy::FocusSessionChangeInfo& info);
 

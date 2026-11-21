@@ -280,6 +280,7 @@ av_session_ohos_library("avsession_service") {
 
   if (efficiency_manager_enable_in_avsession) {
     cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+    external_deps += [ "resource_schedule_service:ressched_client" ]
   }
 
   if (multimedia_av_session_enable_trace_control) {

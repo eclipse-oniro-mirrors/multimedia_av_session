@@ -37,6 +37,7 @@
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
+#include "long_wrapper.h"
 #include "want_agent_helper.h"
 #include "avsession_hianalytics_report.h"
 #include "avmedia_center_control_type.h"
@@ -90,6 +91,9 @@ enum SendCodeEnum : uint32_t {
 };
 
 constexpr int32_t PROGRESS_ADJUST_VALUE = 5;
+
+const std::string FREEZE_TIMESTAMP_EXTRAS_KEY = "freezeTimestamp";
+const std::string FREEZE_DURATION_EXTRAS_KEY = "freezeDuration";
 
 #ifdef ENABLE_AVSESSION_SYSEVENT_CONTROL
 static const int32_t CONTROL_COLD_START = 2;
@@ -847,6 +851,8 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
     AVPlaybackState::PlaybackStateMaskType changedStateMask;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
+        freezeStartTimestamp_ = 0;
+        accumulatedFrozenTime_ = 0;
         if (recordFilter.any()) {
             changedStateMask = playbackState_.GetChangedStateMask(recordFilter, state);
         }
@@ -898,6 +904,57 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
     return AVSESSION_SUCCESS;
 }
 // LCOV_EXCL_STOP
+
+static int64_t GetWallTimeMillis()
+{
+    auto now = std::chrono::system_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+}
+
+void AVSessionItem::HandleSuspendStateChange(SuspendState state)
+{
+    CHECK_AND_RETURN_LOG(state == SuspendState::FROZEN || state == SuspendState::ACTIVE,
+        "suspend state %{public}d no action", static_cast<int32_t>(state));
+    std::lock_guard lockGuard(avsessionItemLock_);
+    CHECK_AND_RETURN_LOG(!isDestroyed_.load(), "session destroyed, sessionId %{public}s",
+        AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
+    if (state == SuspendState::FROZEN) {
+        freezeStartTimestamp_ = GetWallTimeMillis();
+    } else {
+        CHECK_AND_RETURN_LOG(freezeStartTimestamp_ > 0, "session active without freeze timing, sessionId %{public}s",
+            AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
+        int64_t now = GetWallTimeMillis();
+        /* guard against a wall clock step back during the freeze */
+        if (now > freezeStartTimestamp_) {
+            accumulatedFrozenTime_ += now - freezeStartTimestamp_;
+        }
+    }
+    NotifyFrozenDuration(freezeStartTimestamp_, accumulatedFrozenTime_);
+}
+
+void AVSessionItem::NotifyFrozenDuration(int64_t freezeTimestampMs, int64_t freezeDurationMs)
+{
+    CHECK_AND_RETURN_LOG(freezeTimestampMs > 0, "invalid freeze timestamp %{public}lld",
+        static_cast<long long>(freezeTimestampMs));
+    CHECK_AND_RETURN_LOG(freezeDurationMs >= 0, "invalid freeze duration %{public}lld",
+        static_cast<long long>(freezeDurationMs));
+    AVPlaybackState state;
+    std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>();
+    CHECK_AND_RETURN_LOG(extras != nullptr, "no memory for freeze extras");
+    extras->SetParam(FREEZE_TIMESTAMP_EXTRAS_KEY, AAFwk::Long::Box(static_cast<long>(freezeTimestampMs)));
+    extras->SetParam(FREEZE_DURATION_EXTRAS_KEY, AAFwk::Long::Box(static_cast<long>(freezeDurationMs)));
+    state.SetExtras(extras);
+    AVPlaybackState::PlaybackStateMaskType changedMask {};
+    changedMask.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
+    SLOGI("notify freeze timestamp %{public}lld, duration %{public}lld ms, sessionId %{public}s",
+        static_cast<long long>(freezeTimestampMs), static_cast<long long>(freezeDurationMs),
+        AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
+    std::lock_guard lockGuard(controllersLock_);
+    for (const auto& [pid, controller] : controllers_) {
+        CHECK_AND_CONTINUE(controller != nullptr);
+        controller->HandlePlaybackStateChange(state, changedMask);
+    }
+}
 
 void AVSessionItem::SetDesktopLyricFeatureSupported(bool isSupported)
 {
