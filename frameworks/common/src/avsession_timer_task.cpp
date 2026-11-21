@@ -71,7 +71,7 @@ bool AVSessionTimerTask::StartTimer(int32_t delayTime)
     time += delayTime;
     auto errCode = OHOS::MiscServices::TimeServiceClient::GetInstance()->StartTimerV9(timerId_, time);
     if (errCode == 0) {
-        SLOGI("start timer success");
+        SLOGI("start timer success, delay time %{public}d", delayTime);
         return true;
     }
 

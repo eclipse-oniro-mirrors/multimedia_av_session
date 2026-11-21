@@ -32,16 +32,15 @@
 #include <cstdint>
 
 namespace OHOS::AVSession {
-const int32_t HIPLAY_TIMEOUT_MS = 30 * 60 * 1000;   // 30 minutes
+const int32_t HIPLAY_TIMEOUT_MS = 29 * 60 * 1000;   // 29 minutes
 
 void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo, bool isNeedRemove, int32_t reasonCode)
 {
-    SLOGI("PcmCastSession OnCastStateChange state %{public}d id %{public}s reasonCode %{public}d", castState,
-        AVSessionUtils::GetAnonymousDeviceId(deviceInfo.deviceId_).c_str(), reasonCode);
+    SLOGI("PcmCastSession OnCastStateChange state %{public}d id %{public}s reasonCode %{public}d castScence %{public}d",
+        castState, AVSessionUtils::GetAnonymousDeviceId(deviceInfo.deviceId_).c_str(), reasonCode, castScence_);
 
     if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED)) {
         HandleDeviceDisconnect();
-        HandleTimerTask(DISTORY_TIMER);
     }
 
     UpdateDeviceInfo(deviceInfo);
@@ -54,9 +53,6 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         if (needStreamCasting_) {
             needStreamCasting_ = false;
             FindSessionAndStreamCasting();
-        }
-        if (IsAppLevelWithoutSession()) {
-            HandleTimerTask(START_TIMER);
         }
     }
 
@@ -80,25 +76,34 @@ void PcmCastSession::OnCastStateChange(int32_t castState, DeviceInfo deviceInfo,
         sharedPtr->StopCast();
     });
 
-    if (needHandleTimer_) {
+    if (needHandleTimer_.load()) {
         HandleTimerByCastState(castState);
     }
 }
 
+void PcmCastSession::CreateTimer()
+{
+    std::weak_ptr<PcmCastSession> weakPtr = shared_from_this();
+    scheduleTask_ = std::make_shared<AVSessionTimerTask>([weakPtr](void) {
+        auto sharedPtr = weakPtr.lock();
+        CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "PcmCastSession is null");
+        sharedPtr->StopCast();
+        if (sharedPtr->castScence_ == SCREEN_CAST) {
+            // send "CAST_SESSION_RELEASED" event, notify hiplay to release session.
+            AVRouter::GetInstance().OnSystemCommonEvent("CAST_SESSION_RELEASED", "");
+        }
+    });
+    scheduleTask_->CreateTimer();
+}
+
 void PcmCastSession::HandleTimerTask(TimerState state)
 {
-    SLOGI("state %{public}d", state);
+    SLOGI("state %{public}d castScence %{public}d", state, castScence_);
 
     switch (state) {
         case START_TIMER:
             if (scheduleTask_ == nullptr) {
-                std::weak_ptr<PcmCastSession> weakPtr = shared_from_this();
-                scheduleTask_ = std::make_shared<AVSessionTimerTask>([weakPtr](void) {
-                    auto sharedPtr = weakPtr.lock();
-                    CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "PcmCastSession is null");
-                    sharedPtr->StopCast();
-                });
-                scheduleTask_->CreateTimer();
+                CreateTimer();
             }
             scheduleTask_->StartTimer(HIPLAY_TIMEOUT_MS);
             break;
@@ -106,6 +111,11 @@ void PcmCastSession::HandleTimerTask(TimerState state)
             if (scheduleTask_ != nullptr) {
                 scheduleTask_->DestroyTimer();
                 scheduleTask_ = nullptr;
+            }
+            break;
+        case STOP_TIMER:
+            if (scheduleTask_ != nullptr) {
+                scheduleTask_->StopTimer();
             }
             break;
         default:
@@ -135,7 +145,6 @@ void PcmCastSession::UpdateDeviceInfo(DeviceInfo& deviceInfo)
 void PcmCastSession::HandleDeviceDisconnect()
 {
     ReleaseStreamPlayer();
-    needHandleTimer_ = false;
     AVRouter::GetInstance().UnRegisterCallback(castHandle_, shared_from_this(), "pcmCastSession");
     AVRouter::GetInstance().StopCastSession(castHandle_);
     castHandle_ = -1;
@@ -161,22 +170,50 @@ void PcmCastSession::HandleDeviceDisconnect()
 
 void PcmCastSession::HandleTimerByCastState(int32_t castState)
 {
-    if (castState == static_cast<int32_t>(CastEngine::DeviceState::CONNECTED)) {
-        std::weak_ptr<PcmCastSession> weakPtr = shared_from_this();
-        AVSessionEventHandler::GetInstance().AVSessionPostTask(
-            [weakPtr]() {
-                auto sharedPtr = weakPtr.lock();
-                CHECK_AND_RETURN_LOG(sharedPtr != nullptr, "HandleTimerByCastState null");
-                AVRouter::GetInstance().OnSystemCommonEvent(sharedPtr->STOP_CAST, "");
-            }, "HandleHiPlayStreamCastStateChange", HIPLAY_TIMEOUT_MS);
-    }
-
-    if (castState == static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED) ||
-        castState == static_cast<int32_t>(CastEngine::DeviceState::PLAYING) ||
-        castState == static_cast<int32_t>(CastEngine::DeviceState::STREAM)) {
-        AVSessionEventHandler::GetInstance().AVSessionRemoveTask("HandleHiPlayStreamCastStateChange");
+    switch (castScence_) {
+        case SPEAKER_CAST:
+            HandleTimerByCastStateForSpeaker(castState);
+            break;
+        case SCREEN_CAST:
+            HandleTimerByCastStateForScreen(castState);
+            break;
     }
 }
+
+void PcmCastSession::HandleTimerByCastStateForSpeaker(int32_t castState)
+{
+    switch (castState) {
+        case static_cast<int32_t>(CastEngine::DeviceState::STREAM):
+            HandleTimerTask(START_TIMER);
+            break;
+        case static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED):
+            needHandleTimer_.store(false);
+            HandleTimerTask(DISTORY_TIMER);
+            break;
+        default:
+            break;
+    }
+}
+
+void PcmCastSession::HandleTimerByCastStateForScreen(int32_t castState)
+{
+    switch (castState) {
+        case static_cast<int32_t>(CastEngine::DeviceState::CONNECTED):
+            HandleTimerTask(START_TIMER);
+            break;
+        case static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED):
+            needHandleTimer_.store(false);
+            HandleTimerTask(DISTORY_TIMER);
+            break;
+        case static_cast<int32_t>(CastEngine::DeviceState::PLAYING):
+        case static_cast<int32_t>(CastEngine::DeviceState::STREAM):
+            HandleTimerTask(STOP_TIMER);
+            break;
+        default:
+            break;
+    }
+}
+
 
 void PcmCastSession::ReportSessionCast(int32_t castState, int32_t reasonCode)
 {
@@ -326,7 +363,9 @@ int32_t PcmCastSession::StartCast(const OutputDeviceInfo& outputDeviceInfo,
         ((static_cast<uint32_t>(enrichedInfo.deviceInfos_[0].supportedProtocols_) &
         ProtocolType::TYPE_CAST_PLUS_AUDIO) == 0));
     bool isPcmNfc = (commandArgs.GetStringParam(CONNECT_TYPE) == CONNECT_TO_NFC);
+    castScence_ = SPEAKER_CAST;
     if (isPcmScreen) {
+        castScence_ = SCREEN_CAST;
         AVRouter::GetInstance().OnSystemCommonEvent(QUERY_PINCODE, "");
     }
     if (castHandle_ > 0 && !isPcmScreen) {
@@ -436,7 +475,7 @@ int32_t PcmCastSession::StartScreenCast(const OutputDeviceInfo& outputDeviceInfo
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
         SLOGI("PcmCastSession StartCast castHandleDeviceId_: %{public}s", castHandleDeviceId_.c_str());
         CreateExtraInfo("TV", "hotel");
-        needHandleTimer_ = true;
+        needHandleTimer_.store(true);
     } else {
         DestroyTask();
     }
@@ -518,6 +557,9 @@ int32_t PcmCastSession::SubStartCast(const OutputDeviceInfo& outputDeviceInfo,
         castHandleDeviceId_ = outputDeviceInfo.deviceInfos_[0].deviceId_;
         SLOGI("PcmCastSession StartCast-castHandle_ %{public}lld", static_cast<long long>(castHandle_));
         CreateExtraInfo("SPEAKER", "default");
+        if (IsAppLevelWithoutSession()) {
+            needHandleTimer_.store(true);
+        }
     } else {
         DestroyTask();
     }
@@ -529,7 +571,6 @@ void PcmCastSession::StopCast(const DeviceRemoveAction deviceRemoveAction)
 {
     SLOGI("PcmCastSession StopCast");
     ReleaseStreamPlayer();
-    needHandleTimer_ = false;
     int64_t ret = AVRouter::GetInstance().StopCast(castHandle_, deviceRemoveAction);
     SLOGI("StopCast with unchange castHandle is %{public}lld", static_cast<long long>(castHandle_));
     CHECK_AND_RETURN_LOG(ret != AVSESSION_ERROR, "StopCast failed");
@@ -958,7 +999,7 @@ void PcmCastSession::UpdatePcmCastSession(const AVSessionDescriptor& descriptor)
 
         SessionToken sessionTokenTemp{descriptor_.sessionId_, descriptor.pid_, descriptor.uid_};
         SendStateChangeRequest(sessionTokenTemp);
-        HandleTimerTask(DISTORY_TIMER);
+        HandleTimerByCastState(static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED));  // destory timer
     }
 }
 } // namespace OHOS::AVSession
