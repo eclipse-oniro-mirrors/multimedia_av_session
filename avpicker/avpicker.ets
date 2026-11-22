@@ -340,7 +340,6 @@ export struct AVCastPicker {
   @State timeoutIds: number[] = [];
   @State isSelectProcessing: boolean = false;
   @State isAllCancel: boolean = false;
-  @State @Watch('scanDelayChange') scanDelay: boolean = false;
   @State @Watch('homeMusicPlayTaskIdChange') playTaskIdStr: string = '';
   @State roomIsSelect: boolean[] = [];
   @State isSelectRoomListService: HomeMusicServices[] = [];
@@ -487,10 +486,8 @@ export struct AVCastPicker {
       // 全屋播控扫描中，现有房间显示全部需要pending，等待房间扫描刷新即可
       this.setAllRoomSelectStatusPending();
       this.isAllCancel = true;
-      this.scanDelay = false;
       const timeId = setTimeout(() => {
-        this.scanDelay = true;
-      }, 13000);
+      }, 3000);
       if (typeof timeId === 'number') {
         this.timeoutIds.push(timeId);
       }
@@ -498,15 +495,8 @@ export struct AVCastPicker {
         this.extensionProxy.send({ 'getHomeMusicInfo': 1 });
       }
     } else {
-      this.scanDelayChange();
-    }
-  }
-
-  scanDelayChange() {
-    if (this.scanStatus !== 0 && this.scanDelay) {
       this.roomSelectStatusPendingInit();
       this.isAllCancel = false;
-      this.scanDelay = false;
     }
   }
 
