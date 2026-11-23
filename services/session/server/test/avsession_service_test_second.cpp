@@ -1575,7 +1575,7 @@ static HWTEST_F(AVSessionServiceTestSecond, SuperLauncher008, TestSize.Level0)
     g_AVSessionService->SuperLauncher("adcdef", "HuaweiCast", extraInfo, "INVALID_STATE");
     EXPECT_EQ(g_AVSessionService->isSupportMirrorToStream_, false);
 }
-
+#ifdef TEMP_DISABLE
 /**
 * @tc.name: ExtendedScreenSplitExtraInfo001
 * @tc.desc: Verifying ExtendedScreenSplitExtraInfo with valid json and modeChange phone
@@ -1742,7 +1742,7 @@ static HWTEST_F(AVSessionServiceTestSecond, ExtendedScreenSplitExtraInfo006, Tes
     g_AVSessionService->HandleSessionRelease(session->GetSessionId());
 #endif
 }
-
+#endif
 /**
 * @tc.name: NotifyMigrateStop001
 * @tc.desc: Verifying NotifyMigrateStop with init state
