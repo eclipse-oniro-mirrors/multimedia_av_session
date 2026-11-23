@@ -92,6 +92,7 @@ enum SendCodeEnum : uint32_t {
 
 constexpr int32_t PROGRESS_ADJUST_VALUE = 5;
 
+const std::string FREEZE_STATE_EXTRAS_KEY = "isFrozen";
 const std::string FREEZE_TIMESTAMP_EXTRAS_KEY = "freezeTimestamp";
 const std::string FREEZE_DURATION_EXTRAS_KEY = "freezeDuration";
 
@@ -933,10 +934,10 @@ void AVSessionItem::HandleSuspendStateChange(SuspendState state)
             AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
         accumulatedFrozenTime_ += GetSteadyTimeMillis() - freezeStartTimestamp_;
     }
-    NotifyFrozenDuration(freezeStartWallTimestamp_, accumulatedFrozenTime_);
+    NotifyFrozenDuration(state == SuspendState::FROZEN, freezeStartWallTimestamp_, accumulatedFrozenTime_);
 }
 
-void AVSessionItem::NotifyFrozenDuration(int64_t freezeTimestampMs, int64_t freezeDurationMs)
+void AVSessionItem::NotifyFrozenDuration(bool isFrozen, int64_t freezeTimestampMs, int64_t freezeDurationMs)
 {
     CHECK_AND_RETURN_LOG(freezeTimestampMs > 0, "invalid freeze timestamp %{public}lld",
         static_cast<long long>(freezeTimestampMs));
@@ -945,13 +946,15 @@ void AVSessionItem::NotifyFrozenDuration(int64_t freezeTimestampMs, int64_t free
     AVPlaybackState state;
     std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>();
     CHECK_AND_RETURN_LOG(extras != nullptr, "no memory for freeze extras");
+    extras->SetParam(FREEZE_STATE_EXTRAS_KEY, AAFwk::Boolean::Box(isFrozen));
     extras->SetParam(FREEZE_TIMESTAMP_EXTRAS_KEY, AAFwk::Long::Box(static_cast<long>(freezeTimestampMs)));
     extras->SetParam(FREEZE_DURATION_EXTRAS_KEY, AAFwk::Long::Box(static_cast<long>(freezeDurationMs)));
     state.SetExtras(extras);
     AVPlaybackState::PlaybackStateMaskType changedMask {};
     changedMask.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
-    SLOGI("notify freeze timestamp %{public}lld, duration %{public}lld ms, sessionId %{public}s",
-        static_cast<long long>(freezeTimestampMs), static_cast<long long>(freezeDurationMs),
+    SLOGI("notify frozen %{public}d, freeze timestamp %{public}lld, duration %{public}lld ms, sessionId %{public}s",
+        static_cast<int32_t>(isFrozen), static_cast<long long>(freezeTimestampMs),
+        static_cast<long long>(freezeDurationMs),
         AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
     std::lock_guard lockGuard(controllersLock_);
     for (const auto& [pid, controller] : controllers_) {
