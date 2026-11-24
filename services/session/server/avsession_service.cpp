@@ -85,6 +85,7 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
     
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
+static const int32_t RES_SCHED_SA_ID = 1901;
 static const int32_t AVSESSION_CONTINUE = 1;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 static const int32_t AFTER_SCREEN_ON_TREE = 2;
@@ -142,7 +143,7 @@ const std::map<int32_t, int32_t> cmdToOffsetMap_ = {
 };
 
 #ifdef EFFICIENCY_MANAGER_ENABLE
-/* Receives suspend state changes on binder threads and routes them to the service. */
+// LCOV_EXCL_START
 class SuspendStateObserverImpl : public OHOS::ResourceSchedule::SuspendStateObserverBaseStub {
 public:
     explicit SuspendStateObserverImpl(AVSessionService& service) : service_(service) {}
@@ -170,6 +171,7 @@ public:
 private:
     AVSessionService& service_;
 };
+// LCOV_EXCL_STOP
 
 static sptr<OHOS::ResourceSchedule::ISuspendStateObserverBase> g_suspendObserver;
 #endif
@@ -256,7 +258,7 @@ void AVSessionService::OnStartProcess()
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     AddSystemAbilityListener(ANCO_BROKER_SA_ID);
-    AddSystemAbilityListener(RES_SCHED_SYS_ABILITY_ID);
+    AddSystemAbilityListener(RES_SCHED_SA_ID);
 
     HISYSEVENT_REGITER;
     STORAGE_EVENT_INIT;
@@ -797,7 +799,7 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             SLOGI("audio broker sa start %{public}d", isAudioBrokerStart_);
             break;
         }
-        case RES_SCHED_SYS_ABILITY_ID:
+        case RES_SCHED_SA_ID:
             InitSuspendManager();
             break;
         default:

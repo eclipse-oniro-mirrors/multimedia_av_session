@@ -1958,6 +1958,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_NotifyFrozenDuration_001, TestSize.Lev
     extrasFilter.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
     ret = g_AVControllerItem->SetPlaybackFilter(extrasFilter);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
+    g_AVSessionItem->AddController(g_AVControllerItem->GetPid(), g_AVControllerItem);
 
     const int64_t freezeTimestampMs = 1700000000000;
     const int64_t freezeDurationMs = 1234;
@@ -2043,6 +2044,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeAccumulation_001, TestSize.Level
     AVPlaybackState::PlaybackStateMaskType extrasFilter;
     extrasFilter.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
     g_AVControllerItem->SetPlaybackFilter(extrasFilter);
+    g_AVSessionItem->AddController(g_AVControllerItem->GetPid(), g_AVControllerItem);
 
     /* first unfreeze: F = base 50 + frozen interval 100, wall timestamp reported verbatim */
     const int64_t firstFreezeStartWall = 1700000000000;
@@ -2095,6 +2097,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_001, TestSize.Level0)
     AVPlaybackState::PlaybackStateMaskType extrasFilter;
     extrasFilter.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
     g_AVControllerItem->SetPlaybackFilter(extrasFilter);
+    g_AVSessionItem->AddController(g_AVControllerItem->GetPid(), g_AVControllerItem);
 
     /* freeze pushes the current (cleared) F and the fresh wall clock timestamp */
     callback->playbackStateChangeCount_ = 0;
