@@ -178,7 +178,6 @@ export class AVCastPicker extends ViewPU {
         this.__timeoutIds = new ObservedPropertyObjectPU([], this, 'timeoutIds');
         this.__isSelectProcessing = new ObservedPropertySimplePU(false, this, 'isSelectProcessing');
         this.__isAllCancel = new ObservedPropertySimplePU(false, this, 'isAllCancel');
-        this.__scanDelay = new ObservedPropertySimplePU(false, this, 'scanDelay');
         this.__playTaskIdStr = new ObservedPropertySimplePU('', this, 'playTaskIdStr');
         this.__roomIsSelect = new ObservedPropertyObjectPU([], this, 'roomIsSelect');
         this.__isSelectRoomListService = new ObservedPropertyObjectPU([], this, 'isSelectRoomListService');
@@ -207,7 +206,6 @@ export class AVCastPicker extends ViewPU {
         this.declareWatch('isMenuShow', this.MenuStateChange);
         this.declareWatch('isSubMenuExpanded', this.MenuStateChange);
         this.declareWatch('roomListService', this.roomListChange);
-        this.declareWatch('scanDelay', this.scanDelayChange);
         this.declareWatch('playTaskIdStr', this.homeMusicPlayTaskIdChange);
         this.declareWatch('houseMusicIsSelect', this.selectHomeMusicSys);
         this.declareWatch('scanStatus', this.homeMusicScanStatusChange);
@@ -301,9 +299,6 @@ export class AVCastPicker extends ViewPU {
         }
         if (c11.isAllCancel !== undefined) {
             this.isAllCancel = c11.isAllCancel;
-        }
-        if (c11.scanDelay !== undefined) {
-            this.scanDelay = c11.scanDelay;
         }
         if (c11.playTaskIdStr !== undefined) {
             this.playTaskIdStr = c11.playTaskIdStr;
@@ -408,7 +403,6 @@ export class AVCastPicker extends ViewPU {
         this.__timeoutIds.purgeDependencyOnElmtId(a11);
         this.__isSelectProcessing.purgeDependencyOnElmtId(a11);
         this.__isAllCancel.purgeDependencyOnElmtId(a11);
-        this.__scanDelay.purgeDependencyOnElmtId(a11);
         this.__playTaskIdStr.purgeDependencyOnElmtId(a11);
         this.__roomIsSelect.purgeDependencyOnElmtId(a11);
         this.__isSelectRoomListService.purgeDependencyOnElmtId(a11);
@@ -459,7 +453,6 @@ export class AVCastPicker extends ViewPU {
         this.__timeoutIds.aboutToBeDeleted();
         this.__isSelectProcessing.aboutToBeDeleted();
         this.__isAllCancel.aboutToBeDeleted();
-        this.__scanDelay.aboutToBeDeleted();
         this.__playTaskIdStr.aboutToBeDeleted();
         this.__roomIsSelect.aboutToBeDeleted();
         this.__isSelectRoomListService.aboutToBeDeleted();
@@ -684,14 +677,6 @@ export class AVCastPicker extends ViewPU {
 
     set isAllCancel(newValue) {
         this.__isAllCancel.set(newValue);
-    }
-
-    get scanDelay() {
-        return this.__scanDelay.get();
-    }
-
-    set scanDelay(newValue) {
-        this.__scanDelay.set(newValue);
     }
 
     get playTaskIdStr() {
@@ -977,10 +962,8 @@ export class AVCastPicker extends ViewPU {
             this.clearTimer();
             this.setAllRoomSelectStatusPending();
             this.isAllCancel = true;
-            this.scanDelay = false;
             const v2 = setTimeout(() => {
-                this.scanDelay = true;
-            }, 13000);
+            }, 3000);
             if (typeof v2 === 'number') {
                 this.timeoutIds.push(v2);
             }
@@ -989,14 +972,8 @@ export class AVCastPicker extends ViewPU {
             }
         }
         else {
-            this.scanDelayChange();
-        }
-    }
-    scanDelayChange() {
-        if (this.scanStatus !== 0 && this.scanDelay) {
             this.roomSelectStatusPendingInit();
             this.isAllCancel = false;
-            this.scanDelay = false;
         }
     }
     roomMaxVolumeChange() {
