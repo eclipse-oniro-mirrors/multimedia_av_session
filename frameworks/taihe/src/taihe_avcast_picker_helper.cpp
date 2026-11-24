@@ -24,6 +24,8 @@
 #include "taihe_avsession_manager.h"
 #include "taihe_avcast_picker_helper.h"
 #include "taihe_utils.h"
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
 
 namespace ANI::AVSession {
 
@@ -34,6 +36,9 @@ std::map<std::string, std::pair<AVCastPickerHelperInnerImpl::OnEventHandlerType,
     AVCastPickerHelperInnerImpl::OffEventHandlerType>> AVCastPickerHelperInnerImpl::eventHandlers_ = {
     { "pickerStateChange", { OnPickerStateChangeInner, OffPickerStateChangeInner } },
 };
+
+std::mutex AVCastPickerHelperInnerImpl::instanceLock_;
+std::set<AVCastPickerHelperInnerImpl*> AVCastPickerHelperInnerImpl::instances_;
 
 AVCastPickerHelperInnerImpl::AVCastPickerHelperInnerImpl()
 {
@@ -68,9 +73,9 @@ int32_t AVCastPickerHelperInnerImpl::NewInstance(uintptr_t context, AVCastPicker
         uiContent = extensionContext->GetUIContent();
     }
     if (!uiContent) {
-        SLOGE("AVCastPickerHelperInnerImpl NewInstance failed : uiContent is nullptr");
+        SLOGE("AVCastPickerHelperInnerImpl NewInstance failed : picker ui content is nullptr");
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
-            "uiContent is nullptr");
+            "picker ui content is nullptr");
         return OHOS::AVSession::ERR_INVALID_PARAM;
     }
     out = make_holder<AVCastPickerHelperInnerImpl, AVCastPickerHelperInner>(uiContent);
@@ -85,6 +90,8 @@ AVCastPickerHelperInnerImpl::AVCastPickerHelperInnerImpl(OHOS::Ace::UIContent* u
     uiContent_ = uiContent;
     isValid_ = std::make_shared<std::atomic<bool>>(true);
     audioRoutingMngr_ = OHOS::AudioStandard::AudioRoutingManager::GetInstance();
+    std::lock_guard<std::mutex> instanceLockGuard(instanceLock_);
+    instances_.insert(this);
 }
 
 AVCastPickerHelperInnerImpl::~AVCastPickerHelperInnerImpl()
@@ -94,6 +101,8 @@ AVCastPickerHelperInnerImpl::~AVCastPickerHelperInnerImpl()
     if (isValid_) {
         isValid_->store(false);
     }
+    std::lock_guard<std::mutex> instanceLockGuard(instanceLock_);
+    instances_.erase(this);
 }
 
 static int32_t GetTaiheAVCastPickerOptions(const AVCastPickerOptions &in, TaiheAVCastPickerOptions &out)
@@ -142,28 +151,174 @@ void AVCastPickerHelperInnerImpl::SelectSync(optional_view<AVCastPickerOptions> 
     auto callback = std::make_shared<ModalUICallback>(uiContent_, pickerCallBack);
     if (callback == nullptr || uiContent_ == nullptr) {
         TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
-            "native uiContent_ is nullptr");
+            "native picker ui content is nullptr");
         return;
     }
-    AVCastPickerHelperInnerImpl *taiheAVCastPickerHelper = this;
-    OHOS::Ace::ModalUIExtensionCallbacks extensionCallback = {
-        .onRelease = ([callback](auto arg) { callback->OnRelease(arg); }),
-        .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
-        .onReceive = ([callback, taiheAVCastPickerHelper](auto arg) {
-            callback->OnReceive(arg);
-            taiheAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_DISAPPEARING);
-        }),
-        .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
-        .onRemoteReady = ([callback, taiheAVCastPickerHelper](auto arg) {
-            callback->OnRemoteReady(arg);
-            taiheAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_APPEARING);
-        }),
-        .onDestroy = ([callback]() { callback->OnDestroy(); }),
-    };
+    OHOS::Ace::ModalUIExtensionCallbacks extensionCallback = CreateExtensionCallback(callback, this);
     OHOS::Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
     int32_t sessionId = uiContent_->CreateModalUIExtension(request, extensionCallback, config);
     callback->SetSessionId(sessionId);
+}
+
+int32_t AVCastPickerHelperInnerImpl::SelectForIdSync(optional_view<AVCastPickerOptions> options)
+{
+    TaiheAVCastPickerOptions taiheAVCastPickerOptions;
+    if (options.has_value()) {
+        int32_t ret = GetTaiheAVCastPickerOptions(options.value(), taiheAVCastPickerOptions);
+        if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+                "SelectForIdSync get options failed");
+            return -1;
+        }
+    } else {
+        SLOGI("TaiheAVCastPickerOptions use default options");
+    }
+
+    OHOS::AAFwk::Want request;
+    std::string targetType = "sysPicker/mediaControl";
+    request.SetParam(ABILITY_WANT_PARAMS_UIEXTENSIONTARGETTYPE, targetType);
+    request.SetParam("isAVCastPickerHelper", true);
+    request.SetParam("AVCastPickerOptionsType", taiheAVCastPickerOptions.sessionType);
+    request.SetParam("AVCastPickerOptionsStyle", taiheAVCastPickerOptions.pickerStyle);
+    request.SetParam("AVCastPickerOptionsPositionX", taiheAVCastPickerOptions.menuPosition.x);
+    request.SetParam("AVCastPickerOptionsPositionY", taiheAVCastPickerOptions.menuPosition.y);
+    request.SetParam("AVCastPickerOptionsPositionW", taiheAVCastPickerOptions.menuPosition.width);
+    request.SetParam("AVCastPickerOptionsPositionH", taiheAVCastPickerOptions.menuPosition.height);
+    request.SetElementName(ABILITY_WANT_ELEMENT_NAME, "UIExtAbility");
+
+    PickerCallBack pickerCallBack;
+    auto callback = std::make_shared<ModalUICallback>(uiContent_, pickerCallBack);
+    if (callback == nullptr || uiContent_ == nullptr) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "native picker ui content is nullptr");
+        return -1;
+    }
+    OHOS::Ace::ModalUIExtensionCallbacks extensionCallback = CreateExtensionCallback(callback, this);
+    OHOS::Ace::ModalUIExtensionConfig config;
+    config.isProhibitBack = true;
+    int32_t sessionId = uiContent_->CreateModalUIExtension(request, extensionCallback, config);
+    callback->SetSessionId(sessionId);
+    return sessionId;
+}
+
+void AVCastPickerHelperInnerImpl::CloseSync(optional_view<int32_t> pickerId)
+{
+    if (pickerId.has_value()) {
+        int32_t ret = SendCloseData(pickerId.value());
+        if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+            TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[ret], "close failed");
+        }
+    } else {
+        SendCloseDataToAll();
+    }
+}
+
+OHOS::Ace::ModalUIExtensionCallbacks AVCastPickerHelperInnerImpl::CreateExtensionCallback(
+    const std::shared_ptr<ModalUICallback>& callback, AVCastPickerHelperInnerImpl* taihePicker)
+{
+    return {
+        .onRelease = ([callback, taihePicker](auto arg) {
+            callback->OnRelease(arg);
+            taihePicker->RemoveProxy(callback->GetSessionId());
+        }),
+        .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
+        .onReceive = ([callback, taihePicker](auto arg) {
+            callback->OnReceive(arg);
+            taihePicker->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_DISAPPEARING);
+            taihePicker->HandleEventForId(EVENT_PICKER_STATE_CHANGE_FOR_ID,
+                callback->GetSessionId(), STATE_DISAPPEARING);
+        }),
+        .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
+        .onRemoteReady = ([callback, taihePicker](auto arg) {
+            callback->OnRemoteReady(arg);
+            taihePicker->StoreProxy(callback->GetSessionId(), arg);
+            taihePicker->HandleEvent(EVENT_PICPKER_STATE_CHANGE, STATE_APPEARING);
+            taihePicker->HandleEventForId(EVENT_PICKER_STATE_CHANGE_FOR_ID,
+                callback->GetSessionId(), STATE_APPEARING);
+        }),
+        .onDestroy = ([callback, taihePicker]() {
+            callback->OnDestroy();
+            taihePicker->RemoveProxy(callback->GetSessionId());
+        }),
+    };
+}
+
+void AVCastPickerHelperInnerImpl::StoreProxy(int32_t sessionId,
+    const std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>& proxy)
+{
+    std::lock_guard<std::mutex> lockGuard(proxyLock_);
+    proxyMap_[sessionId] = proxy;
+    SLOGI("StoreProxy sessionId=%{public}d, map size=%{public}zu", sessionId, proxyMap_.size());
+}
+
+void AVCastPickerHelperInnerImpl::RemoveProxy(int32_t sessionId)
+{
+    std::lock_guard<std::mutex> lockGuard(proxyLock_);
+    auto it = proxyMap_.find(sessionId);
+    if (it != proxyMap_.end()) {
+        proxyMap_.erase(it);
+        SLOGI("RemoveProxy sessionId=%{public}d, map size=%{public}zu", sessionId, proxyMap_.size());
+    }
+}
+
+int32_t AVCastPickerHelperInnerImpl::SendCloseData(int32_t pickerId)
+{
+    std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy> proxy;
+    {
+        std::lock_guard<std::mutex> lockGuard(proxyLock_);
+        auto it = proxyMap_.find(pickerId);
+        if (it == proxyMap_.end() || it->second == nullptr) {
+            SLOGE("SendCloseData proxy not found for pickerId=%{public}d", pickerId);
+            return OHOS::AVSession::ERR_PICKER_NOT_EXIST;
+        }
+        proxy = it->second;
+    }
+    OHOS::AAFwk::WantParams params;
+    params.SetParam("closeByPickerApi", OHOS::AAFwk::Boolean::Box(true));
+    proxy->SendData(params);
+    SLOGI("SendCloseData pickerId=%{public}d", pickerId);
+    return OHOS::AVSession::AVSESSION_SUCCESS;
+}
+
+void AVCastPickerHelperInnerImpl::SendCloseDataToAll()
+{
+    std::vector<std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>> proxies;
+    {
+        std::lock_guard<std::mutex> lockGuard(proxyLock_);
+        for (auto& [id, proxy] : proxyMap_) {
+            if (proxy != nullptr) {
+                proxies.push_back(proxy);
+            }
+        }
+    }
+    SendCloseDataToProxies(proxies);
+    SLOGI("SendCloseDataToAll count=%{public}zu", proxies.size());
+}
+
+std::vector<std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>> AVCastPickerHelperInnerImpl::CollectAllProxies()
+{
+    std::vector<std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>> allProxies;
+    std::lock_guard<std::mutex> lockGuard(instanceLock_);
+    for (auto* inst : instances_) {
+        std::lock_guard<std::mutex> proxyLock(inst->proxyLock_);
+        for (auto& [id, proxy] : inst->proxyMap_) {
+            if (proxy != nullptr) {
+                allProxies.push_back(proxy);
+            }
+        }
+    }
+    return allProxies;
+}
+
+void AVCastPickerHelperInnerImpl::SendCloseDataToProxies(
+    const std::vector<std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy>>& proxies)
+{
+    for (auto& proxy : proxies) {
+        OHOS::AAFwk::WantParams params;
+        params.SetParam("closeByPickerApi", OHOS::AAFwk::Boolean::Box(true));
+        proxy->SendData(params);
+    }
 }
 
 void AVCastPickerHelperInnerImpl::ResetCommunicationDeviceSync()
@@ -196,6 +351,31 @@ void AVCastPickerHelperInnerImpl::OffPickerStateChange(optional_view<callback<vo
         cacheCallback = TaiheUtils::TypeCallback(callback.value());
     }
     OffEvent("pickerStateChange", cacheCallback, this);
+}
+
+void AVCastPickerHelperInnerImpl::OnPickerStateChangeForId(
+    callback_view<void(const AVCastPickerStateWithId&)> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback = TaiheUtils::TypeCallback(callback);
+    int32_t ret = AddCallback(EVENT_PICKER_STATE_CHANGE_FOR_ID, cacheCallback);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "add event callback failed");
+    }
+}
+
+void AVCastPickerHelperInnerImpl::OffPickerStateChangeForId(
+    optional_view<callback<void(const AVCastPickerStateWithId&)>> callback)
+{
+    std::shared_ptr<uintptr_t> cacheCallback;
+    if (callback.has_value()) {
+        cacheCallback = TaiheUtils::TypeCallback(callback.value());
+    }
+    int32_t ret = RemoveCallback(EVENT_PICKER_STATE_CHANGE_FOR_ID, cacheCallback);
+    if (ret != OHOS::AVSession::AVSESSION_SUCCESS) {
+        TaiheUtils::ThrowError(TaiheAVSessionManager::errcode_[OHOS::AVSession::ERR_INVALID_PARAM],
+            "remove event callback failed");
+    }
 }
 
 int32_t AVCastPickerHelperInnerImpl::OnEvent(const std::string& event, std::shared_ptr<uintptr_t> &callback,
@@ -315,6 +495,32 @@ void AVCastPickerHelperInnerImpl::HandleEvent(int32_t event, TaiheFuncExecute ex
     }
 }
 
+void AVCastPickerHelperInnerImpl::HandleEventForId(int32_t event, int32_t pickerId, uint32_t state)
+{
+    CHECK_RETURN_VOID(event == EVENT_PICKER_STATE_CHANGE_FOR_ID, "invalid event for HandleEventForId");
+    SLOGI("HandleEventForId event=%{public}d pickerId=%{public}d, state=%{public}u", event, pickerId, state);
+    AVCastPickerState stateTaihe = AVCastPickerState::key_t::STATE_DISAPPEARING;
+    if (state == STATE_DISAPPEARING) {
+        stateTaihe = AVCastPickerState::key_t::STATE_DISAPPEARING;
+    } else if (state == STATE_APPEARING) {
+        stateTaihe = AVCastPickerState::key_t::STATE_APPEARING;
+    } else {
+        SLOGE("Invalid state: %{public}u", state);
+        return;
+    }
+    AVCastPickerStateWithId data {
+        .id = pickerId,
+        .state = stateTaihe,
+    };
+    auto execute = [data](std::shared_ptr<uintptr_t> method) {
+        std::shared_ptr<taihe::callback<void(AVCastPickerStateWithId)>> cacheCallback =
+            std::reinterpret_pointer_cast<taihe::callback<void(AVCastPickerStateWithId)>>(method);
+        CHECK_RETURN_VOID(cacheCallback != nullptr, "cacheCallback is nullptr");
+        (*cacheCallback)(data);
+    };
+    HandleEvent(event, execute);
+}
+
 int32_t AVCastPickerHelperInnerImpl::AddCallback(int32_t event, std::shared_ptr<uintptr_t> &callback)
 {
     CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX,
@@ -382,10 +588,15 @@ void ModalUICallback::SetSessionId(int32_t sessionId)
     this->sessionId_ = sessionId;
 }
 
+int32_t ModalUICallback::GetSessionId() const
+{
+    return sessionId_;
+}
+
 void ModalUICallback::OnRelease(int32_t releaseCode)
 {
     SLOGI("ModalUICallback OnRelease enter. release code is %{public}d", releaseCode);
-    CHECK_RETURN_VOID(uiContent_ != nullptr, "uiContent_ is nullptr");
+    CHECK_RETURN_VOID(uiContent_ != nullptr, "picker ui content is nullptr");
     this->uiContent_->CloseModalUIExtension(this->sessionId_);
     pickerCallBack_.ready = true;
 }
@@ -405,7 +616,7 @@ void ModalUICallback::OnError(int32_t code, const std::string &name, const std::
 {
     SLOGI("ModalUICallback OnError enter. errorCode=%{public}d, name=%{public}s, message=%{public}s",
         code, name.c_str(), message.c_str());
-    CHECK_RETURN_VOID(uiContent_ != nullptr, "uiContent_ is nullptr");
+    CHECK_RETURN_VOID(uiContent_ != nullptr, "picker ui content is nullptr");
     if (!pickerCallBack_.ready) {
         this->uiContent_->CloseModalUIExtension(this->sessionId_);
         pickerCallBack_.ready = true;

@@ -715,19 +715,37 @@ struct AVCastPickerOptions {
   menuPosition: Optional<MenuPosition>;
 }
 
+struct AVCastPickerStateWithId {
+  id: i32;
+  state: AVCastPickerState;
+}
+
 interface AVCastPickerHelperInner {
   @gen_promise("select")
   SelectSync(options: Optional<AVCastPickerOptions>): void;
 
+  @gen_promise("selectForId")
+  SelectForIdSync(options: Optional<AVCastPickerOptions>): i32;
+
+  @gen_promise("close")
+  CloseSync(pickerId: Optional<i32>): void;
+
   OnPickerStateChange(callback: (data: AVCastPickerState) => void): void;
 
   OffPickerStateChange(callback: Optional<(data: AVCastPickerState) => void>): void;
+
+  OnPickerStateChangeForId(callback: (data: AVCastPickerStateWithId) => void): void;
+
+  OffPickerStateChangeForId(callback: Optional<(data: AVCastPickerStateWithId) => void>): void;
 
   @gen_promise("resetCommunicationDevice")
   ResetCommunicationDeviceSync(): void;
 }
 
 function CreateAVCastPickerHelperInnerSync(context: @sts_type("Context") Opaque): AVCastPickerHelperInner;
+
+@gen_promise("closeAllPicker")
+function CloseAllPickerSync(): void;
 
 @!sts_inject("""
 function businessError<T = void>(c: int, d?: string): BusinessError<T> {
@@ -753,12 +771,41 @@ class AVCastPickerHelper {
     return this.objectInner?.select(options);
   }
 
+  selectForId(options?: AVCastPickerOptions): Promise<int> | undefined {
+    if (this.objectInner === undefined) {
+      return new Promise<int>((resolve: (arg: int) => void, reject: (e: Error) => void): void => {
+        let err: BusinessError<int> = businessError<int>(-1, "AVCastPickerHelperInner is not initialized");
+        reject(err);
+      });
+    }
+    return this.objectInner?.selectForId(options);
+  }
+
+  close(pickerId?: int): Promise<void> | undefined {
+    if (this.objectInner === undefined) {
+      return undefined;
+    }
+    return this.objectInner?.close(pickerId);
+  }
+
+  static closeAll(): Promise<void> {
+    return closeAllPicker();
+  }
+
   onPickerStateChange(callback: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
       this.objectInner?.onPickerStateChange(callback as ((data: ohos_multimedia_avCastPickerParam.AVCastPickerState) => void));
   }
 
   offPickerStateChange(callback?: Callback<ohos_multimedia_avCastPickerParam.AVCastPickerState>) : void {
       this.objectInner?.offPickerStateChange(callback as ((data: ohos_multimedia_avCastPickerParam.AVCastPickerState) => void) | undefined);
+  }
+
+  onPickerStateChangeForId(callback: Callback<AVCastPickerStateWithId>) : void {
+      this.objectInner?.onPickerStateChangeForId(callback as ((data: AVCastPickerStateWithId) => void));
+  }
+
+  offPickerStateChangeForId(callback?: Callback<AVCastPickerStateWithId>) : void {
+      this.objectInner?.offPickerStateChangeForId(callback as ((data: AVCastPickerStateWithId) => void) | undefined);
   }
 
   resetCommunicationDevice(): Promise<void> | undefined {

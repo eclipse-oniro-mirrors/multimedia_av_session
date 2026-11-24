@@ -16,6 +16,9 @@
 #ifndef OHOS_NAPI_AVCAST_PICKER_HELPER_H
 #define OHOS_NAPI_AVCAST_PICKER_HELPER_H
 
+#include <map>
+#include <set>
+
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "avsession_log.h"
@@ -43,6 +46,7 @@ class ModalUICallback {
 public:
     explicit ModalUICallback(Ace::UIContent* uiContent, PickerCallBack& pickerCallBack);
     void SetSessionId(int32_t sessionId);
+    int32_t GetSessionId() const;
     void OnRelease(int32_t releaseCode);
     void OnResult(int32_t resultCode, const OHOS::AAFwk::Want& result);
     void OnReceive(const OHOS::AAFwk::WantParams& request);
@@ -51,7 +55,7 @@ public:
     void OnDestroy();
 
 private:
-    int32_t sessionId_ = 0;
+    int32_t sessionId_ = -1;
     Ace::UIContent* uiContent_;
     PickerCallBack pickerCallBack_;
 };
@@ -70,6 +74,7 @@ class NapiAVCastPickerHelper {
 public:
     enum {
         EVENT_PICPKER_STATE_CHANGE,
+        EVENT_PICKER_STATE_CHANGE_FOR_ID,
         EVENT_TYPE_MAX
     };
 
@@ -97,24 +102,43 @@ private:
         const std::shared_ptr<ModalUICallback>& callback, NapiAVCastPickerHelper* napiAVCastPickerHelper);
 
     static napi_value SelectAVPicker(napi_env env, napi_callback_info info);
+    static napi_value SelectAVPickerForId(napi_env env, napi_callback_info info);
+    static napi_value CloseAVPicker(napi_env env, napi_callback_info info);
+    static napi_value CloseAllAVPicker(napi_env env, napi_callback_info info);
     static napi_value ResetCommunicationDevice(napi_env env, napi_callback_info info);
+
+    static napi_value OnPickerStateChangeForId(napi_env env, napi_callback_info info);
+    static napi_value OffPickerStateChangeForId(napi_env env, napi_callback_info info);
+
+    int32_t CreatePickerInternal(const NapiAVCastPickerOptions& options);
+    void StoreProxy(int32_t sessionId, const std::shared_ptr<Ace::ModalUIExtensionProxy>& proxy);
+    void RemoveProxy(int32_t sessionId);
+    int32_t SendCloseData(int32_t pickerId);
+    void SendCloseDataToAll();
+    static std::vector<std::shared_ptr<Ace::ModalUIExtensionProxy>> CollectAllProxies();
+    static void SendCloseDataToProxies(const std::vector<std::shared_ptr<Ace::ModalUIExtensionProxy>>& proxies);
 
     static napi_status OnPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVPicker, napi_value callback);
     static napi_status OffPickerStateChange(napi_env env, NapiAVCastPickerHelper* napiAVPicker, napi_value callback);
 
     static std::map<std::string, std::pair<OnEventHandlerType, OffEventHandlerType>> eventHandlers_;
+    static std::mutex instanceLock_;
+    static std::set<NapiAVCastPickerHelper*> instances_;
 
     template<typename T>
     void HandleEvent(int32_t event, std::string callBackName, const T& param);
+    void HandleEventForId(int32_t event, int32_t pickerId, std::string callBackName, uint32_t state);
     
     std::mutex lock_;
     std::shared_ptr<NapiAsyncCallback> asyncCallback_;
     std::list<napi_ref> callbacks_[EVENT_TYPE_MAX] {};
     std::shared_ptr<std::atomic<bool>> isValid_;
 
+    std::mutex proxyLock_;
+    std::map<int32_t, std::shared_ptr<Ace::ModalUIExtensionProxy>> proxyMap_;
+
     Ace::UIContent *uiContent_;
     napi_ref wrapperRef_{ nullptr };
-    int sessionId_ = 0;
 
     AudioStandard::AudioRoutingManager *audioRoutingMngr_;
 

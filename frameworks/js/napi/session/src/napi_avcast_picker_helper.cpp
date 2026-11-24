@@ -17,6 +17,8 @@
 #include "avsession_trace.h"
 #include "napi_avsession_manager.h"
 #include "napi_avcast_picker_helper.h"
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
 
 namespace OHOS::AVSession {
 
@@ -29,27 +31,39 @@ std::map<std::string, std::pair<NapiAVCastPickerHelper::OnEventHandlerType,
     { "pickerStateChange", { OnPickerStateChange, OffPickerStateChange } },
 };
 
+std::mutex NapiAVCastPickerHelper::instanceLock_;
+std::set<NapiAVCastPickerHelper*> NapiAVCastPickerHelper::instances_;
+
 NapiAVCastPickerHelper::NapiAVCastPickerHelper(Ace::UIContent* uiContent)
 {
     SLOGI("construct");
     uiContent_ = uiContent;
     isValid_ = std::make_shared<std::atomic<bool>>(true);
     audioRoutingMngr_ = AudioStandard::AudioRoutingManager::GetInstance();
+    std::lock_guard<std::mutex> lockGuard(instanceLock_);
+    instances_.insert(this);
 }
 
 NapiAVCastPickerHelper::~NapiAVCastPickerHelper()
 {
     SLOGI("destroy.");
     *isValid_ = false;
+    std::lock_guard<std::mutex> lockGuard(instanceLock_);
+    instances_.erase(this);
 }
 
 napi_value NapiAVCastPickerHelper::Init(napi_env env, napi_value exports)
 {
     napi_property_descriptor descriptors[] = {
+        DECLARE_NAPI_STATIC_FUNCTION("closeAll", CloseAllAVPicker),
         DECLARE_NAPI_FUNCTION("select", SelectAVPicker),
+        DECLARE_NAPI_FUNCTION("selectForId", SelectAVPickerForId),
+        DECLARE_NAPI_FUNCTION("close", CloseAVPicker),
         DECLARE_NAPI_FUNCTION("resetCommunicationDevice", ResetCommunicationDevice),
         DECLARE_NAPI_FUNCTION("on", OnEvent),
         DECLARE_NAPI_FUNCTION("off", OffEvent),
+        DECLARE_NAPI_FUNCTION("onPickerStateChangeForId", OnPickerStateChangeForId),
+        DECLARE_NAPI_FUNCTION("offPickerStateChangeForId", OffPickerStateChangeForId),
     };
     auto propertyCount = sizeof(descriptors) / sizeof(napi_property_descriptor);
     napi_value constructor {};
@@ -214,22 +228,263 @@ napi_value NapiAVCastPickerHelper::SelectAVPicker(napi_env env, napi_callback_in
     
     auto executor = [context]() {
         auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
-        AAFwk::Want request;
-        BuildPickerRequest(context->napiAVCastPickerOptions, request);
-
-        PickerCallBack pickerCallBack;
-        auto callback = std::make_shared<ModalUICallback>(napiAVCastPickerHelper->uiContent_, pickerCallBack);
-        auto extensionCallback = CreateExtensionCallback(callback, napiAVCastPickerHelper);
-
-        Ace::ModalUIExtensionConfig config;
-        config.isProhibitBack = true;
-        CHECK_AND_RETURN_LOG(napiAVCastPickerHelper->uiContent_ != nullptr, "uiContent_ is destroyed");
-        napiAVCastPickerHelper->sessionId_ =
-            napiAVCastPickerHelper->uiContent_->CreateModalUIExtension(request, extensionCallback, config);
-        callback->SetSessionId(napiAVCastPickerHelper->sessionId_);
+        int32_t pickerId = napiAVCastPickerHelper->CreatePickerInternal(context->napiAVCastPickerOptions);
+        if (pickerId < 0) {
+            SLOGE("SelectAVPicker failed pickerId=%{public}d", pickerId);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
+            context->errMessage = "selectAVPicker failed: failed to create picker";
+        }
     };
     auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
     return NapiAsyncWork::Enqueue(env, context, "SelectAVPicker", executor, complete);
+}
+
+napi_value NapiAVCastPickerHelper::SelectAVPickerForId(napi_env env, napi_callback_info info)
+{
+    struct SelectForIdContext : public ContextBase {
+        NapiAVCastPickerOptions napiAVCastPickerOptions;
+        int32_t pickerId = -1;
+    };
+    auto context = std::make_shared<SelectForIdContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->napiAVCastPickerOptions);
+        }
+        CHECK_STATUS_RETURN_VOID(context, "get object failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_CAST_PICKER_HELPER_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
+        context->pickerId = napiAVCastPickerHelper->CreatePickerInternal(context->napiAVCastPickerOptions);
+        if (context->pickerId < 0) {
+            SLOGE("SelectAVPickerForId failed pickerId=%{public}d", context->pickerId);
+            context->status = napi_generic_failure;
+            context->errCode = NapiAVSessionManager::errcode_[ERR_INVALID_PARAM];
+            context->errMessage = "selectAVPickerForId failed: failed to create picker";
+        }
+    };
+    auto complete = [env, context](napi_value& output) {
+        NapiUtils::SetValue(env, context->pickerId, output);
+    };
+    return NapiAsyncWork::Enqueue(env, context, "SelectAVPickerForId", executor, complete);
+}
+
+napi_value NapiAVCastPickerHelper::CloseAVPicker(napi_env env, napi_callback_info info)
+{
+    struct CloseContext : public ContextBase {
+        bool hasPickerId = false;
+        int32_t pickerId = -1;
+    };
+    auto context = std::make_shared<CloseContext>();
+    auto inputParser = [env, context](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+                               "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            context->status = NapiUtils::GetValue(env, argv[ARGV_FIRST], context->pickerId);
+            CHECK_STATUS_RETURN_VOID(context, "get pickerId failed",
+                NapiAVSessionManager::errcode_[AVSESSION_ERROR]);
+            context->hasPickerId = true;
+        }
+    };
+    context->GetCbInfo(env, info, inputParser);
+    context->taskId = NAPI_CAST_PICKER_HELPER_TASK_ID;
+
+    auto executor = [context]() {
+        auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
+        if (context->hasPickerId) {
+            int32_t ret = napiAVCastPickerHelper->SendCloseData(context->pickerId);
+            if (ret != AVSESSION_SUCCESS) {
+                SLOGE("CloseAVPicker failed ret=%{public}d", ret);
+                context->status = napi_generic_failure;
+                context->errCode = NapiAVSessionManager::errcode_[ret];
+            }
+        } else {
+            napiAVCastPickerHelper->SendCloseDataToAll();
+        }
+    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "CloseAVPicker", executor, complete);
+}
+
+napi_value NapiAVCastPickerHelper::CloseAllAVPicker(napi_env env, napi_callback_info info)
+{
+    struct CloseAllContext : public ContextBase {};
+    auto context = std::make_shared<CloseAllContext>();
+    context->GetCbInfo(env, info);
+    context->taskId = NAPI_CAST_PICKER_HELPER_TASK_ID;
+
+    auto executor = [context]() {
+        auto allProxies = CollectAllProxies();
+        SendCloseDataToProxies(allProxies);
+        SLOGI("CloseAllAVPicker count=%{public}zu", allProxies.size());
+    };
+    auto complete = [env](napi_value& output) { output = NapiUtils::GetUndefinedValue(env); };
+    return NapiAsyncWork::Enqueue(env, context, "CloseAllAVPicker", executor, complete);
+}
+
+int32_t NapiAVCastPickerHelper::CreatePickerInternal(const NapiAVCastPickerOptions& options)
+{
+    AAFwk::Want request;
+    BuildPickerRequest(options, request);
+
+    PickerCallBack pickerCallBack;
+    auto callback = std::make_shared<ModalUICallback>(uiContent_, pickerCallBack);
+    auto extensionCallback = CreateExtensionCallback(callback, this);
+
+    Ace::ModalUIExtensionConfig config;
+    config.isProhibitBack = true;
+    CHECK_AND_RETURN_RET_LOG(uiContent_ != nullptr, -1, "picker ui content is nullptr");
+    int32_t sessionId = uiContent_->CreateModalUIExtension(request, extensionCallback, config);
+    callback->SetSessionId(sessionId);
+    return sessionId;
+}
+
+void NapiAVCastPickerHelper::StoreProxy(int32_t sessionId,
+    const std::shared_ptr<Ace::ModalUIExtensionProxy>& proxy)
+{
+    std::lock_guard<std::mutex> lockGuard(proxyLock_);
+    proxyMap_[sessionId] = proxy;
+    SLOGI("StoreProxy sessionId=%{public}d, map size=%{public}zu", sessionId, proxyMap_.size());
+}
+
+void NapiAVCastPickerHelper::RemoveProxy(int32_t sessionId)
+{
+    std::lock_guard<std::mutex> lockGuard(proxyLock_);
+    auto it = proxyMap_.find(sessionId);
+    if (it != proxyMap_.end()) {
+        proxyMap_.erase(it);
+        SLOGI("RemoveProxy sessionId=%{public}d, map size=%{public}zu", sessionId, proxyMap_.size());
+    }
+}
+
+int32_t NapiAVCastPickerHelper::SendCloseData(int32_t pickerId)
+{
+    std::shared_ptr<Ace::ModalUIExtensionProxy> proxy;
+    {
+        std::lock_guard<std::mutex> lockGuard(proxyLock_);
+        auto it = proxyMap_.find(pickerId);
+        if (it == proxyMap_.end() || it->second == nullptr) {
+            SLOGE("SendCloseData proxy not found for pickerId=%{public}d", pickerId);
+            return ERR_PICKER_NOT_EXIST;
+        }
+        proxy = it->second;
+    }
+    AAFwk::WantParams params;
+    params.SetParam("closeByPickerApi", AAFwk::Boolean::Box(true));
+    proxy->SendData(params);
+    SLOGI("SendCloseData pickerId=%{public}d", pickerId);
+    return AVSESSION_SUCCESS;
+}
+
+void NapiAVCastPickerHelper::SendCloseDataToAll()
+{
+    std::vector<std::shared_ptr<Ace::ModalUIExtensionProxy>> proxies;
+    {
+        std::lock_guard<std::mutex> lockGuard(proxyLock_);
+        for (auto& [id, proxy] : proxyMap_) {
+            if (proxy != nullptr) {
+                proxies.push_back(proxy);
+            }
+        }
+    }
+    SendCloseDataToProxies(proxies);
+    SLOGI("SendCloseDataToAll count=%{public}zu", proxies.size());
+}
+
+std::vector<std::shared_ptr<Ace::ModalUIExtensionProxy>> NapiAVCastPickerHelper::CollectAllProxies()
+{
+    std::vector<std::shared_ptr<Ace::ModalUIExtensionProxy>> allProxies;
+    std::lock_guard<std::mutex> lockGuard(instanceLock_);
+    for (auto* inst : instances_) {
+        std::lock_guard<std::mutex> proxyLock(inst->proxyLock_);
+        for (auto& [id, proxy] : inst->proxyMap_) {
+            if (proxy != nullptr) {
+                allProxies.push_back(proxy);
+            }
+        }
+    }
+    return allProxies;
+}
+
+void NapiAVCastPickerHelper::SendCloseDataToProxies(
+    const std::vector<std::shared_ptr<Ace::ModalUIExtensionProxy>>& proxies)
+{
+    for (auto& proxy : proxies) {
+        AAFwk::WantParams params;
+        params.SetParam("closeByPickerApi", AAFwk::Boolean::Box(true));
+        proxy->SendData(params);
+    }
+}
+
+napi_value NapiAVCastPickerHelper::OnPickerStateChangeForId(napi_env env, napi_callback_info info)
+{
+    struct OnForIdContext : public ContextBase {};
+    auto context = std::make_shared<OnForIdContext>();
+    napi_value callback {};
+    auto input = [&context, &callback, env](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ONE, "invalid argument number",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        napi_valuetype type = napi_undefined;
+        context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+        CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+            "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        callback = argv[ARGV_FIRST];
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
+    if (napiAVCastPickerHelper == nullptr) {
+        NapiUtils::ThrowError(env, "OnPickerStateChangeForId failed : napiAVCastPickerHelper is nullptr",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    napi_status ret = napiAVCastPickerHelper->AddCallback(env, EVENT_PICKER_STATE_CHANGE_FOR_ID, callback);
+    if (ret != napi_ok) {
+        NapiUtils::ThrowError(env, "add event callback failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    }
+    return NapiUtils::GetUndefinedValue(env);
+}
+
+napi_value NapiAVCastPickerHelper::OffPickerStateChangeForId(napi_env env, napi_callback_info info)
+{
+    struct OffForIdContext : public ContextBase {};
+    auto context = std::make_shared<OffForIdContext>();
+    napi_value callback = nullptr;
+    auto input = [&context, &callback, env](size_t argc, napi_value* argv) {
+        CHECK_ARGS_RETURN_VOID(context, argc == ARGC_ZERO || argc == ARGC_ONE,
+            "invalid argument number", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        if (argc == ARGC_ONE) {
+            napi_valuetype type = napi_undefined;
+            context->status = napi_typeof(env, argv[ARGV_FIRST], &type);
+            CHECK_ARGS_RETURN_VOID(context, (context->status == napi_ok) && (type == napi_function),
+                "callback type invalid", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+            callback = argv[ARGV_FIRST];
+        }
+    };
+    context->GetCbInfo(env, info, input, true);
+    if (context->status != napi_ok) {
+        NapiUtils::ThrowError(env, context->errMessage.c_str(), context->errCode);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    auto* napiAVCastPickerHelper = reinterpret_cast<NapiAVCastPickerHelper*>(context->native);
+    if (napiAVCastPickerHelper == nullptr) {
+        NapiUtils::ThrowError(env, "OffPickerStateChangeForId failed : napiAVCastPickerHelper is nullptr",
+            NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+        return NapiUtils::GetUndefinedValue(env);
+    }
+    napi_status ret = napiAVCastPickerHelper->RemoveCallback(env, EVENT_PICKER_STATE_CHANGE_FOR_ID, callback);
+    if (ret != napi_ok) {
+        NapiUtils::ThrowError(env, "remove event callback failed", NapiAVSessionManager::errcode_[ERR_INVALID_PARAM]);
+    }
+    return NapiUtils::GetUndefinedValue(env);
 }
 
 void NapiAVCastPickerHelper::BuildPickerRequest(const NapiAVCastPickerOptions& options, AAFwk::Want& request)
@@ -252,20 +507,33 @@ Ace::ModalUIExtensionCallbacks NapiAVCastPickerHelper::CreateExtensionCallback(
     static const std::string callBackName = "NapiAVCastPickerHelper::SelectAVPicker";
     auto isValid = napiAVCastPickerHelper->isValid_;
     return {
-        .onRelease = ([callback](auto arg) { callback->OnRelease(arg); }),
+        .onRelease = ([callback, napiAVCastPickerHelper, isValid](auto arg) {
+            callback->OnRelease(arg);
+            CHECK_AND_RETURN_LOG(isValid && *isValid, "NapiAVCastPickerHelper is destroyed");
+            napiAVCastPickerHelper->RemoveProxy(callback->GetSessionId());
+        }),
         .onResult = ([callback](auto arg1, auto arg2) { callback->OnResult(arg1, arg2); }),
         .onReceive = ([callback, napiAVCastPickerHelper, isValid](auto arg) {
             callback->OnReceive(arg);
             CHECK_AND_RETURN_LOG(isValid && *isValid, "NapiAVCastPickerHelper is destroyed");
             napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_DISAPPEARING);
+            napiAVCastPickerHelper->HandleEventForId(EVENT_PICKER_STATE_CHANGE_FOR_ID,
+                callback->GetSessionId(), callBackName, STATE_DISAPPEARING);
         }),
         .onError = ([callback](auto arg1, auto arg2, auto arg3) { callback->OnError(arg1, arg2, arg3); }),
         .onRemoteReady = ([callback, napiAVCastPickerHelper, isValid](auto arg) {
             callback->OnRemoteReady(arg);
             CHECK_AND_RETURN_LOG(isValid && *isValid, "NapiAVCastPickerHelper is destroyed");
+            napiAVCastPickerHelper->StoreProxy(callback->GetSessionId(), arg);
             napiAVCastPickerHelper->HandleEvent(EVENT_PICPKER_STATE_CHANGE, callBackName, STATE_APPEARING);
+            napiAVCastPickerHelper->HandleEventForId(EVENT_PICKER_STATE_CHANGE_FOR_ID,
+                callback->GetSessionId(), callBackName, STATE_APPEARING);
         }),
-        .onDestroy = ([callback]() { callback->OnDestroy(); }),
+        .onDestroy = ([callback, napiAVCastPickerHelper, isValid]() {
+            callback->OnDestroy();
+            CHECK_AND_RETURN_LOG(isValid && *isValid, "NapiAVCastPickerHelper is destroyed");
+            napiAVCastPickerHelper->RemoveProxy(callback->GetSessionId());
+        }),
     };
 }
 
@@ -345,11 +613,48 @@ void NapiAVCastPickerHelper::HandleEvent(int32_t event, std::string callBackName
     }
 }
 
+void NapiAVCastPickerHelper::HandleEventForId(int32_t event, int32_t pickerId,
+    std::string callBackName, uint32_t state)
+{
+    CHECK_AND_RETURN_LOG(event == EVENT_PICKER_STATE_CHANGE_FOR_ID,
+        "invalid event for HandleEventForId %{public}d", event);
+    std::lock_guard<std::mutex> lockGuard(lock_);
+    if (callbacks_[event].empty()) {
+        SLOGE("pickerNotRegister:%{public}d", event);
+        return;
+    }
+    for (auto ref = callbacks_[event].begin(); ref != callbacks_[event].end(); ++ref) {
+        asyncCallback_->CallWithFunc(*ref, isValid_,
+            [this, ref, event]() {
+                std::lock_guard<std::mutex> lockGuard(lock_);
+                if (callbacks_[event].empty()) {
+                    SLOGE("checkCallbackValid with empty list for event=%{public}d", event);
+                    return false;
+                }
+                bool hasFunc = false;
+                for (auto it = callbacks_[event].begin(); it != callbacks_[event].end(); ++it) {
+                    hasFunc = (ref == it ? true : hasFunc);
+                }
+                return hasFunc;
+            }, callBackName,
+            [pickerId, state](napi_env env, int& argc, napi_value* argv) {
+                argc = NapiUtils::ARGC_ONE;
+                napi_status status = napi_create_object(env, argv);
+                CHECK_RETURN_VOID((status == napi_ok) && (argv != nullptr), "create object failed");
+                napi_value property = nullptr;
+                NapiUtils::SetValue(env, pickerId, property);
+                napi_set_named_property(env, *argv, "id", property);
+                NapiUtils::SetValue(env, static_cast<int32_t>(state), property);
+                napi_set_named_property(env, *argv, "state", property);
+            });
+    }
+}
+
 napi_status NapiAVCastPickerHelper::AddCallback(napi_env env, int32_t event, napi_value callback)
 {
     SLOGI("Add callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
-    CHECK_AND_RETURN_RET_LOG(event == EVENT_PICPKER_STATE_CHANGE, napi_generic_failure, "has no event");
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     napi_ref ref = nullptr;
     CHECK_AND_RETURN_RET_LOG(napi_ok == NapiUtils::GetRefByCallback(env, callbacks_[event], callback, ref),
                              napi_generic_failure, "get callback reference failed");
@@ -374,7 +679,7 @@ napi_status NapiAVCastPickerHelper::RemoveCallback(napi_env env, int32_t event, 
 {
     SLOGI("Remove callback %{public}d", event);
     std::lock_guard<std::mutex> lockGuard(lock_);
-    CHECK_AND_RETURN_RET_LOG(event == EVENT_PICPKER_STATE_CHANGE, napi_generic_failure, "has no event");
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, napi_generic_failure, "has no event");
     if (callback == nullptr) {
         for (auto callbackRef = callbacks_[event].begin(); callbackRef != callbacks_[event].end(); ++callbackRef) {
             napi_status ret = napi_delete_reference(env, *callbackRef);
@@ -394,7 +699,7 @@ napi_status NapiAVCastPickerHelper::RemoveCallback(napi_env env, int32_t event, 
 bool NapiAVCastPickerHelper::IsCallbacksEmpty(int32_t event)
 {
     std::lock_guard<std::mutex> lockGuard(lock_);
-    CHECK_AND_RETURN_RET_LOG(event == EVENT_PICPKER_STATE_CHANGE, true, "has no event");
+    CHECK_AND_RETURN_RET_LOG(event >= 0 && event < EVENT_TYPE_MAX, true, "has no event");
     return callbacks_[event].empty();
 }
 
@@ -407,6 +712,11 @@ ModalUICallback::ModalUICallback(Ace::UIContent* uiContent, PickerCallBack& pick
 void ModalUICallback::SetSessionId(int32_t sessionId)
 {
     this->sessionId_ = sessionId;
+}
+
+int32_t ModalUICallback::GetSessionId() const
+{
+    return sessionId_;
 }
 
 void ModalUICallback::OnRelease(int32_t releaseCode)

@@ -94,6 +94,7 @@ std::map<int32_t, int32_t> TaiheAVSessionManager::errcode_ = {
     {OHOS::AVSession::ERR_INVALID_PARAM, 401},
     {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_ENABLE, 6600110},
     {OHOS::AVSession::ERR_DESKTOPLYRIC_NOT_SUPPORT, 6600111},
+    {OHOS::AVSession::ERR_PICKER_NOT_EXIST, 6600112},
     {OHOS::AVSession::ERR_CAPABILITY_NOT_SUPPORTED, 801},
     {OHOS::AVSession::ERR_SERVICE_NOT_RUNNING, 6700101},
 };
@@ -1745,9 +1746,17 @@ AVCastPickerHelperInner CreateAVCastPickerHelperInnerSync(uintptr_t context)
     }
     return output;
 }
+
+void CloseAllPickerSync()
+{
+    auto allProxies = AVCastPickerHelperInnerImpl::CollectAllProxies();
+    AVCastPickerHelperInnerImpl::SendCloseDataToProxies(allProxies);
+    SLOGI("CloseAllPickerSync count=%{public}zu", allProxies.size());
+}
 } // namespace ANI::AVSession
 
 TH_EXPORT_CPP_API_CreateAVCastPickerHelperInnerSync(ANI::AVSession::CreateAVCastPickerHelperInnerSync);
+TH_EXPORT_CPP_API_CloseAllPickerSync(ANI::AVSession::CloseAllPickerSync);
 TH_EXPORT_CPP_API_CreateAVSessionSync(ANI::AVSession::CreateAVSessionSync);
 TH_EXPORT_CPP_API_GetAVSessionSync(ANI::AVSession::GetAVSessionSync);
 TH_EXPORT_CPP_API_GetAllSessionDescriptorsSync(ANI::AVSession::GetAllSessionDescriptorsSync);
