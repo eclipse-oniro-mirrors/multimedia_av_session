@@ -1197,7 +1197,9 @@ static HWTEST_F(AVSessionServiceTestExt, ServiceStartStopCast001, TestSize.Level
     pcmCastSession->OnCastStateChange(0, deviceInfo, false, 0);
     pcmCastSession->OnCastStateChange(6, deviceInfo, true, 0);
     pcmCastSession->OnCastStateChange(1, deviceInfo, true, 0);
+    pcmCastSession->needHandleTimer_ = true;
     pcmCastSession->OnCastStateChange(3, deviceInfo, true, 0);
+    pcmCastSession->needHandleTimer_ = false;
 
     pcmCastSession->collaborationNeedNetworkId_.clear();
     pcmCastSession->DealCollaborationPublishState(5, deviceInfo);
@@ -2214,6 +2216,85 @@ static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionSubStartCast002, TestSize
     int32_t ret = pcmCastSession->SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
     pcmCastSession->DestroyTask();
     EXPECT_NE(ret, AVSESSION_SUCCESS);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionSubStartCast003
+ * @tc.desc: Test PcmCastSession::SubStartCast with valid outputDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionSubStartCast003, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    OutputDeviceInfo outputDeviceInfo;
+    DeviceInfo deviceInfo;
+    deviceInfo.deviceId_ = "testDeviceId";
+    deviceInfo.castCategory_ = AVCastCategory::CATEGORY_LOCAL;
+    outputDeviceInfo.deviceInfos_.push_back(deviceInfo);
+    std::pair<std::string, std::string> serviceNameStatePair;
+    SessionToken sessionToken;
+    sessionToken.sessionId = "hiplayDefault";
+    pcmCastSession->tempDeviceInfo_.hiPlayDeviceInfo_.castMode_ = HiPlayCastMode::APP_LEVEL;
+    int32_t ret = pcmCastSession->SubStartCast(outputDeviceInfo, serviceNameStatePair, sessionToken);
+    pcmCastSession->DestroyTask();
+    EXPECT_NE(ret, AVSESSION_SUCCESS);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionHandleTimerByCastState001
+ * @tc.desc: Test PcmCastSession::HandleTimerByCastState with speaker scence
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionHandleTimerByCastState001, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    pcmCastSession->castScence_ = PcmCastSession::SPEAKER_CAST;
+    pcmCastSession->scheduleTask_ = nullptr;
+    pcmCastSession->HandleTimerByCastState(static_cast<int32_t>(CastEngine::DeviceState::CONNECTED));
+    EXPECT_EQ(pcmCastSession->scheduleTask_, nullptr);
+    pcmCastSession->HandleTimerByCastStateForSpeaker(static_cast<int32_t>(CastEngine::DeviceState::STREAM));
+    EXPECT_NE(pcmCastSession->scheduleTask_, nullptr);
+    pcmCastSession->HandleTimerByCastStateForSpeaker(static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED));
+    EXPECT_EQ(pcmCastSession->scheduleTask_, nullptr);
+#endif
+    EXPECT_NE(g_AVSessionService, nullptr);
+}
+
+/**
+ * @tc.name: PcmCastSessionHandleTimerByCastState002
+ * @tc.desc: Test PcmCastSession::HandleTimerByCastState with speaker scence
+ * @tc.type: FUNC
+ * @tc.require: #I5Y4MZ
+ */
+static HWTEST_F(AVSessionServiceTestExt, PcmCastSessionHandleTimerByCastState002, TestSize.Level0)
+{
+    CHECK_AND_RETURN(g_AVSessionService != nullptr);
+#ifdef CASTPLUS_CAST_ENGINE_ENABLE
+    shared_ptr<PcmCastSession> pcmCastSession = std::make_shared<PcmCastSession>();
+    pcmCastSession->castScence_ = PcmCastSession::SCREEN_CAST;
+    pcmCastSession->scheduleTask_ = nullptr;
+    pcmCastSession->HandleTimerByCastState(static_cast<int32_t>(CastEngine::DeviceState::CONNECTED));
+    EXPECT_NE(pcmCastSession->scheduleTask_, nullptr);
+    pcmCastSession->HandleTimerByCastStateForScreen(static_cast<int32_t>(CastEngine::DeviceState::STREAM));
+    EXPECT_NE(pcmCastSession->scheduleTask_, nullptr);
+    pcmCastSession->HandleTimerByCastStateForScreen(static_cast<int32_t>(CastEngine::DeviceState::PLAYING));
+    EXPECT_NE(pcmCastSession->scheduleTask_, nullptr);
+    pcmCastSession->HandleTimerByCastStateForScreen(static_cast<int32_t>(CastEngine::DeviceState::DISCONNECTED));
+    EXPECT_EQ(pcmCastSession->scheduleTask_, nullptr);
+    pcmCastSession->HandleTimerByCastStateForScreen(static_cast<int32_t>(CastEngine::DeviceState::CONNECTING));
+    EXPECT_EQ(pcmCastSession->scheduleTask_, nullptr);
+    pcmCastSession->HandleTimerByCastStateForScreen(static_cast<int32_t>(CastEngine::DeviceState::STREAM));
+    EXPECT_EQ(pcmCastSession->scheduleTask_, nullptr);
 #endif
     EXPECT_NE(g_AVSessionService, nullptr);
 }

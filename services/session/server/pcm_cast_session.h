@@ -92,6 +92,8 @@ public:
     void SendModeChangeToCast(int32_t screenMode);
 
     void HandleTimerByCastState(int32_t castState);
+    void HandleTimerByCastStateForSpeaker(int32_t castState);
+    void HandleTimerByCastStateForScreen(int32_t castState);
 
     void UpdatePcmCastSession(const AVSessionDescriptor& descriptor);
 
@@ -119,7 +121,13 @@ private:
     std::string streamCastingSessionId_;
     std::string extraInfo_;
     std::atomic<bool> needStreamCasting_ = false;
-    bool needHandleTimer_ = false;
+    std::atomic<bool> needHandleTimer_{false};
+
+    enum CastScence {
+        SPEAKER_CAST = 0,
+        SCREEN_CAST = 1,
+    };
+    CastScence castScence_ = SPEAKER_CAST;
 
     const std::string COMMAND_TYPE = "command_type";
     const std::string CONNECT_TYPE = "connect_type";
@@ -236,6 +244,7 @@ private:
     void DealCollaborationPublishState(int32_t castState, DeviceInfo deviceInfo);
     void ReportSessionCast(int32_t castState, int32_t reasonCode);
     void HandleTimerTask(TimerState state);
+    void CreateTimer();
     bool IsAppLevelWithoutSession();
     const std::string PCM_CAST_SESSION = "PCMCast";
     int32_t noReasonCode_ = 0;
