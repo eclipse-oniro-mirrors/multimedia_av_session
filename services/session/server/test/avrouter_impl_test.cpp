@@ -2012,7 +2012,7 @@ static HWTEST_F(AVRouterImplTest, Init001, TestSize.Level0)
     EXPECT_TRUE(router->providerManagerMap_.empty());
     SLOGI("Init001 end");
 }
-#endif
+
 /**
 * @tc.name: Release001
 * @tc.desc: release router with hwProvider_ nullptr returns false
@@ -2196,5 +2196,6 @@ static HWTEST_F(AVRouterImplTest, ReleaseCurrentCastSession002, TestSize.Level0)
     EXPECT_EQ(0, AVSESSION_SUCCESS);
     SLOGI("ReleaseCurrentCastSession002 end");
 }
+#endif
 } //AVSession
 } //OHOS
