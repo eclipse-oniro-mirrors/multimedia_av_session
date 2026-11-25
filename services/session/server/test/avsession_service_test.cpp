@@ -5183,8 +5183,8 @@ static HWTEST_F(AVSessionServiceTest, SuspendManagerRegister001, TestSize.Level0
     SLOGD("SuspendManagerRegister001 begin!");
     avservice_->migrateStubFuncHandle_ = nullptr;
     avservice_->OnStop();
-    constexpr int32_t RES_SCHED_SA_ID = 1901;
-    avservice_->OnAddSystemAbility(RES_SCHED_SA_ID, "LOCAL");
+    constexpr int32_t resSchedSaId = 1901;
+    avservice_->OnAddSystemAbility(resSchedSaId, "LOCAL");
     avservice_->OnStop();
     SLOGD("SuspendManagerRegister001 end!");
 }

@@ -185,6 +185,8 @@ public:
 
     void HandleSuspendStateChange(SuspendState state);
 
+    void ResetFreezeAccounting();
+
     void NotifyFrozenDuration(int64_t freezeTimestampMs, int64_t freezeDurationMs);
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;

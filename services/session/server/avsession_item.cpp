@@ -866,10 +866,7 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
             changedStateMask = playbackState_.GetChangedStateMask(recordFilter, state);
         }
         CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
-        freezeStartTimestamp_ = 0;
-        freezeStartWallTimestamp_ = 0;
-        accumulatedFrozenTime_ = 0;
-        playbackState_.SetExtras(MergeFreezeExtras(playbackState_.GetExtras(), 0, 0));
+        ResetFreezeAccounting();
     }
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
@@ -928,6 +925,14 @@ static int64_t GetWallTimeMillis()
 {
     auto now = std::chrono::system_clock::now().time_since_epoch();
     return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+}
+
+void AVSessionItem::ResetFreezeAccounting()
+{
+    freezeStartTimestamp_ = 0;
+    freezeStartWallTimestamp_ = 0;
+    accumulatedFrozenTime_ = 0;
+    playbackState_.SetExtras(MergeFreezeExtras(playbackState_.GetExtras(), 0, 0));
 }
 
 void AVSessionItem::HandleSuspendStateChange(SuspendState state)

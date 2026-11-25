@@ -1935,6 +1935,30 @@ public:
     AVPlaybackState lastPlaybackState_;
 };
 
+static int64_t SteadyNowMs()
+{
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+}
+
+static int64_t ReadExtrasLongParam(const std::shared_ptr<AAFwk::WantParams>& extras, const std::string& key)
+{
+    if (extras == nullptr) {
+        return -1;
+    }
+    auto value = AAFwk::ILong::Query(extras->GetParam(key));
+    if (value == nullptr) {
+        return -1;
+    }
+    return AAFwk::Long::Unbox(value);
+}
+
+static int64_t ReadFreezeParam(const std::shared_ptr<AVControllerCallbackCapture>& callback,
+    const std::string& key)
+{
+    return ReadExtrasLongParam(callback->lastPlaybackState_.GetExtras(), key);
+}
+
 /**
  * @tc.name: AVSessionItem_NotifyFrozenDuration_001
  * @tc.desc: Test NotifyFrozenDuration carries the duration in extras to controllers
@@ -1984,33 +2008,9 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_NotifyFrozenDuration_001, TestSize.Lev
     stateOnlyFilter.set(AVPlaybackState::PLAYBACK_KEY_STATE);
     ret = g_AVControllerItem->SetPlaybackFilter(stateOnlyFilter);
     EXPECT_EQ(ret, AVSESSION_SUCCESS);
-    g_AVSessionItem->NotifyFrozenDuration(0, freezeTimestampMs, freezeDurationMs);
+    g_AVSessionItem->NotifyFrozenDuration(0, freezeDurationMs);
     EXPECT_EQ(callback->playbackStateChangeCount_, 0);
     SLOGD("AVSessionItem_NotifyFrozenDuration_001 end!");
-}
-
-static int64_t SteadyNowMs()
-{
-    auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-}
-
-static int64_t ReadExtrasLongParam(const std::shared_ptr<AAFwk::WantParams>& extras, const std::string& key)
-{
-    if (extras == nullptr) {
-        return -1;
-    }
-    auto value = AAFwk::ILong::Query(extras->GetParam(key));
-    if (value == nullptr) {
-        return -1;
-    }
-    return AAFwk::Long::Unbox(value);
-}
-
-static int64_t ReadFreezeParam(const std::shared_ptr<AVControllerCallbackCapture>& callback,
-    const std::string& key)
-{
-    return ReadExtrasLongParam(callback->lastPlaybackState_.GetExtras(), key);
 }
 
 /**
@@ -2118,8 +2118,41 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_001, TestSize.Level0)
     EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeTimestamp"), 0);
     EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeDuration"), 0);
 
+    g_AVSessionItem->freezeStartTimestamp_ = 0;
+    g_AVSessionItem->freezeStartWallTimestamp_ = 0;
+    g_AVSessionItem->accumulatedFrozenTime_ = 0;
+    SLOGD("AVSessionItem_FreezeClear_001 end!");
+}
+
+/**
+ * @tc.name: AVSessionItem_FreezeClear_002
+ * @tc.desc: A freeze push carries the cached playback state fields as well, and
+ *           app-provided extras properties coexist with the reset freeze keys.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_002, TestSize.Level0)
+{
+    SLOGD("AVSessionItem_FreezeClear_002 begin!");
+    ASSERT_NE(g_AVSessionItem, nullptr);
+    ASSERT_NE(g_AVControllerItem, nullptr);
+    g_AVSessionItem->isDestroyed_ = false;
+    g_AVSessionItem->accumulatedFrozenTime_ = 0;
+    g_AVSessionItem->freezeStartTimestamp_ = 0;
+    g_AVSessionItem->freezeStartWallTimestamp_ = 0;
+
+    auto callback = std::make_shared<AVControllerCallbackCapture>();
+    ASSERT_NE(callback, nullptr);
+    g_AVControllerItem->RegisterAVControllerCallback(callback);
+    AVPlaybackState::PlaybackStateMaskType extrasFilter;
+    extrasFilter.set(AVPlaybackState::PLAYBACK_KEY_EXTRAS);
+    g_AVControllerItem->SetPlaybackFilter(extrasFilter);
+    g_AVSessionItem->AddController(g_AVControllerItem->GetPid(), g_AVControllerItem);
+
     /* a freeze push carries the cached playback state fields as well, not extras only
      * (visible to subscribers with an all-bits playback filter) */
+    AVPlaybackState state;
+    state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    g_AVSessionItem->SetAVPlaybackState(state);
     AVPlaybackState::PlaybackStateMaskType allFilter;
     allFilter.set();
     EXPECT_EQ(g_AVControllerItem->SetPlaybackFilter(allFilter), AVSESSION_SUCCESS);
@@ -2136,6 +2169,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_001, TestSize.Level0)
     appExtras->SetParam("appKey", AAFwk::Integer::Box(7));
     stateWithExtras.SetExtras(appExtras);
     EXPECT_EQ(g_AVSessionItem->SetAVPlaybackState(stateWithExtras), AVSESSION_SUCCESS);
+    AVPlaybackState storedState;
     EXPECT_EQ(g_AVSessionItem->GetAVPlaybackState(storedState), AVSESSION_SUCCESS);
     auto appValue = AAFwk::IInteger::Query(storedState.GetExtras()->GetParam("appKey"));
     ASSERT_NE(appValue, nullptr);
@@ -2146,7 +2180,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_001, TestSize.Level0)
     g_AVSessionItem->freezeStartTimestamp_ = 0;
     g_AVSessionItem->freezeStartWallTimestamp_ = 0;
     g_AVSessionItem->accumulatedFrozenTime_ = 0;
-    SLOGD("AVSessionItem_FreezeClear_001 end!");
+    SLOGD("AVSessionItem_FreezeClear_002 end!");
 }
 
 /**
@@ -2259,6 +2293,8 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeGuard_001, TestSize.Level0)
 
     AVPlaybackState storedState;
     EXPECT_EQ(g_AVSessionItem->GetAVPlaybackState(storedState), AVSESSION_SUCCESS);
+    const int64_t timestampBefore = ReadExtrasLongParam(storedState.GetExtras(), "freezeTimestamp");
+    const int64_t durationBefore = ReadExtrasLongParam(storedState.GetExtras(), "freezeDuration");
 
     /* an unknown suspend state is ignored */
     g_AVSessionItem->HandleSuspendStateChange(static_cast<SuspendState>(99));
@@ -2273,8 +2309,8 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeGuard_001, TestSize.Level0)
     g_AVSessionItem->NotifyFrozenDuration(100, -1);
     EXPECT_EQ(callback->playbackStateChangeCount_, 0);
     EXPECT_EQ(g_AVSessionItem->GetAVPlaybackState(storedState), AVSESSION_SUCCESS);
-    EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeTimestamp"), 0);
-    EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeDuration"), 0);
+    EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeTimestamp"), timestampBefore);
+    EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeDuration"), durationBefore);
 
     /* events on a destroyed session are ignored */
     g_AVSessionItem->isDestroyed_ = true;
