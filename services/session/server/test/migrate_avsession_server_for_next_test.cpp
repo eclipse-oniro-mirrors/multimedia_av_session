@@ -43,6 +43,26 @@ static std::shared_ptr<AVSessionService> g_AVSessionService {nullptr};
 static OHOS::sptr<AVSessionItem> g_AVSessionItem {nullptr};
 static OHOS::sptr<AVControllerItem> g_AVControllerItem {nullptr};
 
+static void ResetMigrateServerState()
+{
+    if (g_MigrateAVSessionServer == nullptr) {
+        return;
+    }
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(false);
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->isSoftbusConnecting_.store(false);
+    g_MigrateAVSessionServer->lastPlaybackState_.store(-1);
+    g_MigrateAVSessionServer->sessionIdCache_ = "";
+    g_MigrateAVSessionServer->preSessionId_ = "";
+    g_MigrateAVSessionServer->pendingSessionInfo_ = "";
+    g_MigrateAVSessionServer->lastSessionId_ = "";
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_MigrateAVSessionServer->migrateControllerLock_);
+        g_MigrateAVSessionServer->playerIdToControllerMap_.clear();
+        g_MigrateAVSessionServer->playerIdToControllerCallbackMap_.clear();
+    }
+}
+
 class MigrateAVSessionServerForNextTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -78,11 +98,13 @@ void MigrateAVSessionServerForNextTest::TearDownTestCase()
 void MigrateAVSessionServerForNextTest::SetUp()
 {
     SLOGI("MigrateAVSessionServerForNextTest SetUp");
+    ResetMigrateServerState();
 }
 
 void MigrateAVSessionServerForNextTest::TearDown()
 {
     SLOGI("MigrateAVSessionServerForNextTest TearDown");
+    ResetMigrateServerState();
 }
 
 /**
@@ -892,6 +914,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, CheckPostSessionInfo002, Test
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo001, TestSize.Level0)
 {
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(false);
     g_MigrateAVSessionServer->isNeedByRemote.store(true);
     g_MigrateAVSessionServer->sessionIdCache_ = "";
     EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo("session_A"), true);
@@ -906,6 +929,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo001, Test
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo002, TestSize.Level0)
 {
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(false);
     g_MigrateAVSessionServer->isNeedByRemote.store(false);
     g_MigrateAVSessionServer->sessionIdCache_ = "";
     EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo("session_A"), true);
@@ -920,6 +944,7 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo002, Test
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo003, TestSize.Level0)
 {
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(false);
     g_MigrateAVSessionServer->isNeedByRemote.store(false);
     g_MigrateAVSessionServer->sessionIdCache_ = "cached_session";
     EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo("new_session"), false);
@@ -933,9 +958,25 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo003, Test
  */
 static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo004, TestSize.Level0)
 {
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(false);
     g_MigrateAVSessionServer->isNeedByRemote.store(false);
     g_MigrateAVSessionServer->sessionIdCache_ = "";
     EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo(""), false);
+}
+
+/**
+ * @tc.name: CheckSyncSessionInfo005
+ * @tc.desc: test CheckSyncSessionInfo when hasLongPauseNotified is true and sessionId is empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo005, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(true);
+    g_MigrateAVSessionServer->sessionIdCache_ = "";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo(""), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->sessionIdCache_.empty(), true);
 }
 
 /**
@@ -1051,6 +1092,29 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateF
     SoftbusSessionUtils::AddIntToJson(jsonValue, AVSESSION_PROXY_CURRENT_VERSION, AVSESSION_PROXY_VERSION);
     SoftbusSessionUtils::AddIntToJson(jsonValue, MEDIACONTROL_NEED_STATE_TIMEOUT_MS, 10000);
     g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    cJSON_Delete(jsonValue);
+}
+
+/**
+ * @tc.name: ProcessMediaControlNeedStateFromNextV1Pending001
+ * @tc.desc: test ProcessMediaControlNeedStateFromNext V1 branch flushes pending session info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, ProcessMediaControlNeedStateFromNextV1Pending001,
+    TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->pendingSessionInfo_ = "pending";
+    g_MigrateAVSessionServer->preSessionId_ = "pre";
+    g_MigrateAVSessionServer->lastSessionId_ = "";
+    cJSON* jsonValue = SoftbusSessionUtils::GetNewCJSONObject();
+    ASSERT_NE(jsonValue, nullptr);
+    SoftbusSessionUtils::AddBoolToJson(jsonValue, NEED_STATE, true);
+    g_MigrateAVSessionServer->ProcessMediaControlNeedStateFromNext(jsonValue);
+    EXPECT_EQ(g_MigrateAVSessionServer->isNeedByRemote.load(), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->pendingSessionInfo_.empty(), true);
+    EXPECT_EQ(g_MigrateAVSessionServer->sessionIdCache_, "pre");
     cJSON_Delete(jsonValue);
 }
 

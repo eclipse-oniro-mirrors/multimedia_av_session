@@ -44,6 +44,24 @@ static char g_testSessionTag[] = "test";
 static char g_testAnotherBundleName[] = "testAnother.ohos.avsession";
 static char g_testAnotherAbilityName[] = "testAnother.ability";
 
+static void ResetMigrateServerStateForFuzz()
+{
+    if (migrateServer_ == nullptr) {
+        return;
+    }
+    migrateServer_->hasLongPauseNotified_.store(false);
+    migrateServer_->isNeedByRemote.store(false);
+    migrateServer_->isSoftbusConnecting_.store(false);
+    migrateServer_->lastPlaybackState_.store(-1);
+    migrateServer_->sessionIdCache_ = "";
+    migrateServer_->preSessionId_ = "";
+    migrateServer_->pendingSessionInfo_ = "";
+    migrateServer_->lastSessionId_ = "";
+    std::lock_guard<std::recursive_mutex> lock(migrateServer_->migrateControllerLock_);
+    migrateServer_->playerIdToControllerMap_.clear();
+    migrateServer_->playerIdToControllerCallbackMap_.clear();
+}
+
 template<class T>
 T GetData()
 {
@@ -513,6 +531,8 @@ void ProcessMediaControlNeedStateFromNextExt()
     }
     cJSON_AddBoolToObject(json, NEED_STATE, true);
     migrateServer_->isNeedByRemote.store(false);
+    migrateServer_->pendingSessionInfo_ = "pending_test";
+    migrateServer_->preSessionId_ = GenerateString(GetData<uint32_t>() % MAX_PRE_SESSION_ID_LEN);
     migrateServer_->ProcessMediaControlNeedStateFromNext(json);
     cJSON_Delete(json);
 
@@ -624,6 +644,7 @@ void CheckSyncSessionInfoFuzzTest()
     bool needState = GetData<bool>();
     std::string inputSession = GenerateString(GetData<uint32_t>() % 32);
     migrateServer_->isNeedByRemote.store(needState);
+    migrateServer_->hasLongPauseNotified_.store(GetData<bool>());
     migrateServer_->CheckSyncSessionInfo(inputSession);
 }
 
@@ -699,6 +720,7 @@ void MigrateAVSessionFuzzerTest(const uint8_t* rawData, size_t size)
     if (migrateServer_ == nullptr) {
         return;
     }
+    ResetMigrateServerStateForFuzz();
     sptr<AVSessionService> avservice_ = new AVSessionService(OHOS::AVSESSION_SERVICE_ID);
     if (!avservice_) {
         return;

@@ -113,9 +113,9 @@ void MigrateAVSessionServer::OnConnectProxy(const std::string &deviceId)
     if (migrateMode_ == MIGRATE_MODE_NEXT) {
         SLOGI("connect process as next behavior.");
         CheckPostClean();
+        SendProtocolVersionToNext();
         LocalFrontSessionArrive(lastSessionId_);
         RegisterAudioCallbackAndTrigger();
-        SendProtocolVersionToNext();
         return;
     }
     ObserveControllerChanged(deviceId);
