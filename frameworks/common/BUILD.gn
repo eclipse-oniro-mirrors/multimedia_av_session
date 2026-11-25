@@ -64,6 +64,7 @@ ohos_shared_library("avsession_common") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "image_framework:image_native",
+    "samgr:samgr_proxy",
   ]
 
   if (castplus_cast_engine_enable) {
