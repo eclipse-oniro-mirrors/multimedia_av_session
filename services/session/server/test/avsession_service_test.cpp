@@ -5096,3 +5096,77 @@ static HWTEST_F(AVSessionServiceTest, ParseExtraInfoForAudioZone006, TestSize.Le
     SLOGD("ParseExtraInfoForAudioZone006 end!");
 }
 #endif
+
+/**
+* @tc.name: CreateSession001
+* @tc.desc: create session with explicit userId, verify GetUserId returns the same value
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(AVSessionServiceTest, CreateSession001, TestSize.Level1)
+{
+    SLOGD("CreateSession001 begin!");
+    avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem;
+    int32_t userId = 100;
+    int32_t result = avservice_->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_AUDIO, false, elementName, avsessionItem, userId);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_TRUE(avsessionItem != nullptr);
+    EXPECT_EQ(avsessionItem->GetUserId(), userId);
+    EXPECT_EQ(avsessionItem->GetDescriptor().userId_, userId);
+    avsessionItem->Destroy();
+    SLOGD("CreateSession001 end!");
+}
+
+/**
+* @tc.name: CreateSession002
+* @tc.desc: create session with non-active userId, verify GetUserId falls back to current user
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(AVSessionServiceTest, CreateSession002, TestSize.Level1)
+{
+    SLOGD("CreateSession002 begin!");
+    avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem;
+    int32_t userId = 101;
+    int32_t result = avservice_->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_VIDEO, false, elementName, avsessionItem, userId);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_TRUE(avsessionItem != nullptr);
+    EXPECT_EQ(avsessionItem->GetUserId(), avservice_->GetUsersManager().GetCurrentUserId());
+    EXPECT_EQ(avsessionItem->GetDescriptor().userId_, avservice_->GetUsersManager().GetCurrentUserId());
+    avsessionItem->Destroy();
+    SLOGD("CreateSession002 end!");
+}
+
+/**
+* @tc.name: CreateSession003
+* @tc.desc: create session with userId <= 0, verify GetUserId falls back to current user
+* @tc.type: FUNC
+* @tc.require:
+*/
+static HWTEST_F(AVSessionServiceTest, CreateSession003, TestSize.Level1)
+{
+    SLOGD("CreateSession003 begin!");
+    avservice_->ClearSessionForClientDiedNoLock(getpid(), false);
+    OHOS::AppExecFwk::ElementName elementName;
+    elementName.SetBundleName(g_testAnotherBundleName);
+    elementName.SetAbilityName(g_testAnotherAbilityName);
+    OHOS::sptr<AVSessionItem> avsessionItem;
+    int32_t result = avservice_->CreateSessionInner(g_testSessionTag,
+        AVSession::SESSION_TYPE_AUDIO, false, elementName, avsessionItem, -1);
+    EXPECT_EQ(result, AVSESSION_SUCCESS);
+    EXPECT_TRUE(avsessionItem != nullptr);
+    EXPECT_EQ(avsessionItem->GetUserId(), avservice_->GetUsersManager().GetCurrentUserId());
+    EXPECT_EQ(avsessionItem->GetDescriptor().userId_, avservice_->GetUsersManager().GetCurrentUserId());
+    avsessionItem->Destroy();
+    SLOGD("CreateSession003 end!");
+}
