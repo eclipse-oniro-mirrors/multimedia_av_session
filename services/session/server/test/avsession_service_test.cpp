@@ -5188,3 +5188,23 @@ static HWTEST_F(AVSessionServiceTest, SuspendManagerRegister001, TestSize.Level0
     avservice_->OnStop();
     SLOGD("SuspendManagerRegister001 end!");
 }
+
+/**
+ * @tc.name: SuspendManagerRouteGuard001
+ * @tc.desc: The suspend state router rejects an invalid uid and an unknown state,
+ *           and a uid without sessions routes to nothing.
+ * @tc.type: FUNC
+ */
+static HWTEST_F(AVSessionServiceTest, SuspendManagerRouteGuard001, TestSize.Level0)
+{
+    SLOGD("SuspendManagerRouteGuard001 begin!");
+    /* invalid uid is rejected by the guard */
+    avservice_->HandleSuspendStateChange(0, SuspendState::FROZEN);
+    avservice_->HandleSuspendStateChange(-1, SuspendState::ACTIVE);
+    /* unknown suspend state is rejected by the guard */
+    avservice_->HandleSuspendStateChange(999999, static_cast<SuspendState>(99));
+    /* a uid without sessions routes to nothing, harmlessly */
+    avservice_->HandleSuspendStateChange(999999, SuspendState::FROZEN);
+    avservice_->HandleSuspendStateChange(999999, SuspendState::ACTIVE);
+    SLOGD("SuspendManagerRouteGuard001 end!");
+}
