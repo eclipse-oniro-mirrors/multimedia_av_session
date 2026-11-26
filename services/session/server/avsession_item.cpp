@@ -100,8 +100,8 @@ static std::shared_ptr<AAFwk::WantParams> MergeFreezeExtras(const std::shared_pt
 {
     auto extras = std::make_shared<AAFwk::WantParams>(base == nullptr ? AAFwk::WantParams() : *base);
     CHECK_AND_RETURN_RET_LOG(extras != nullptr, nullptr, "no memory for freeze extras");
-    extras->SetParam(FREEZE_TIMESTAMP_EXTRAS_KEY, AAFwk::Long::Box(static_cast<long>(freezeTimestampMs)));
-    extras->SetParam(FREEZE_DURATION_EXTRAS_KEY, AAFwk::Long::Box(static_cast<long>(freezeDurationMs)));
+    extras->SetParam(FREEZE_TIMESTAMP_EXTRAS_KEY, AAFwk::Long::Box64(freezeTimestampMs));
+    extras->SetParam(FREEZE_DURATION_EXTRAS_KEY, AAFwk::Long::Box64(freezeDurationMs));
     return extras;
 }
 

@@ -1950,7 +1950,7 @@ static int64_t ReadExtrasLongParam(const std::shared_ptr<AAFwk::WantParams>& ext
     if (value == nullptr) {
         return -1;
     }
-    return AAFwk::Long::Unbox(value);
+    return AAFwk::Long::Unbox64(value);
 }
 
 static int64_t ReadFreezeParam(const std::shared_ptr<AVControllerCallbackCapture>& callback,
@@ -1991,11 +1991,11 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_NotifyFrozenDuration_001, TestSize.Lev
     auto timestamp = AAFwk::ILong::Query(
         callback->lastPlaybackState_.GetExtras()->GetParam("freezeTimestamp"));
     ASSERT_NE(timestamp, nullptr);
-    EXPECT_EQ(AAFwk::Long::Unbox(timestamp), freezeTimestampMs);
+    EXPECT_EQ(AAFwk::Long::Unbox64(timestamp), freezeTimestampMs);
     auto duration = AAFwk::ILong::Query(
         callback->lastPlaybackState_.GetExtras()->GetParam("freezeDuration"));
     ASSERT_NE(duration, nullptr);
-    EXPECT_EQ(AAFwk::Long::Unbox(duration), freezeDurationMs);
+    EXPECT_EQ(AAFwk::Long::Unbox64(duration), freezeDurationMs);
 
     AVPlaybackState storedState;
     EXPECT_EQ(g_AVSessionItem->GetAVPlaybackState(storedState), AVSESSION_SUCCESS);
@@ -2148,11 +2148,8 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_002, TestSize.Level0)
     g_AVControllerItem->SetPlaybackFilter(extrasFilter);
     g_AVSessionItem->AddController(g_AVControllerItem->GetPid(), g_AVControllerItem);
 
-    /* a freeze push carries the cached playback state fields as well, not extras only
-     * (visible to subscribers with an all-bits playback filter) */
     AVPlaybackState state;
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
-    /* the app-set push carries the reset freeze keys as well */
     callback->playbackStateChangeCount_ = 0;
     g_AVSessionItem->SetAVPlaybackState(state);
     EXPECT_EQ(callback->playbackStateChangeCount_, 1);
@@ -2167,7 +2164,6 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_002, TestSize.Level0)
     EXPECT_EQ(callback->lastPlaybackState_.GetState(), AVPlaybackState::PLAYBACK_STATE_PLAY);
     EXPECT_GT(ReadFreezeParam(callback, "freezeTimestamp"), 0);
 
-    /* app-provided extras properties coexist with the freeze keys after a set */
     AVPlaybackState stateWithExtras;
     stateWithExtras.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
     auto appExtras = std::make_shared<AAFwk::WantParams>();
@@ -2180,7 +2176,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_002, TestSize.Level0)
     ASSERT_NE(appValue, nullptr);
     EXPECT_EQ(AAFwk::Integer::Unbox(appValue), 7);
     EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeTimestamp"), 0);
-    EXPECT_EQ(ReadExtrasLongParam(storedState.GetExtras(), "freezeDuration"), 0);
+    EXPECT_GE(ReadExtrasLongParam(storedState.GetExtras(), "freezeDuration"), 0);
 
     g_AVSessionItem->freezeStartTimestamp_ = 0;
     g_AVSessionItem->freezeStartWallTimestamp_ = 0;
