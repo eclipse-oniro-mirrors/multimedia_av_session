@@ -5175,36 +5175,43 @@ static HWTEST_F(AVSessionServiceTest, CreateSession003, TestSize.Level1)
  * @tc.name: SuspendManagerRegister001
  * @tc.desc: Test suspend manager register flow: OnStop before init skips the
  *           unregister block, OnAddSystemAbility(1901) triggers InitSuspendManager
- *           (observer creation and register retries), OnStop after init unregisters.
+ *           (observer creation and register retries), OnStop after init unregisters,
+ *           and the cycle leaves the sessions intact.
  * @tc.type: FUNC
  */
 static HWTEST_F(AVSessionServiceTest, SuspendManagerRegister001, TestSize.Level0)
 {
     SLOGD("SuspendManagerRegister001 begin!");
+    const size_t sessionsBefore = avservice_->GetUsersManager().GetContainerFromAll().GetAllSessions().size();
     avservice_->migrateStubFuncHandle_ = nullptr;
     avservice_->OnStop();
     constexpr int32_t resSchedSaId = 1901;
     avservice_->OnAddSystemAbility(resSchedSaId, "LOCAL");
     avservice_->OnStop();
+    /* the register/unregister cycle leaves the sessions intact */
+    EXPECT_EQ(avservice_->GetUsersManager().GetContainerFromAll().GetAllSessions().size(), sessionsBefore);
     SLOGD("SuspendManagerRegister001 end!");
 }
 
 /**
  * @tc.name: SuspendManagerRouteGuard001
  * @tc.desc: The suspend state router rejects an invalid uid and an unknown state,
- *           and a uid without sessions routes to nothing.
+ *           and a uid without sessions routes to nothing, without side effects.
  * @tc.type: FUNC
  */
 static HWTEST_F(AVSessionServiceTest, SuspendManagerRouteGuard001, TestSize.Level0)
 {
     SLOGD("SuspendManagerRouteGuard001 begin!");
+    const size_t sessionsBefore = avservice_->GetUsersManager().GetContainerFromAll().GetAllSessions().size();
     /* invalid uid is rejected by the guard */
     avservice_->HandleSuspendStateChange(0, SuspendState::FROZEN);
     avservice_->HandleSuspendStateChange(-1, SuspendState::ACTIVE);
     /* unknown suspend state is rejected by the guard */
     avservice_->HandleSuspendStateChange(999999, static_cast<SuspendState>(99));
-    /* a uid without sessions routes to nothing, harmlessly */
+    /* a uid without sessions routes to nothing */
     avservice_->HandleSuspendStateChange(999999, SuspendState::FROZEN);
     avservice_->HandleSuspendStateChange(999999, SuspendState::ACTIVE);
+    /* guard-rejected routing has no side effect on the sessions */
+    EXPECT_EQ(avservice_->GetUsersManager().GetContainerFromAll().GetAllSessions().size(), sessionsBefore);
     SLOGD("SuspendManagerRouteGuard001 end!");
 }

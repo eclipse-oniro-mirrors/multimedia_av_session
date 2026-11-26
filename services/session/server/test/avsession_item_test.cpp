@@ -2152,7 +2152,12 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeClear_002, TestSize.Level0)
      * (visible to subscribers with an all-bits playback filter) */
     AVPlaybackState state;
     state.SetState(AVPlaybackState::PLAYBACK_STATE_PLAY);
+    /* the app-set push carries the reset freeze keys as well */
+    callback->playbackStateChangeCount_ = 0;
     g_AVSessionItem->SetAVPlaybackState(state);
+    EXPECT_EQ(callback->playbackStateChangeCount_, 1);
+    EXPECT_EQ(ReadFreezeParam(callback, "freezeTimestamp"), 0);
+    EXPECT_EQ(ReadFreezeParam(callback, "freezeDuration"), 0);
     AVPlaybackState::PlaybackStateMaskType allFilter;
     allFilter.set();
     EXPECT_EQ(g_AVControllerItem->SetPlaybackFilter(allFilter), AVSESSION_SUCCESS);

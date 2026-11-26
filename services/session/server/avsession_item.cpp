@@ -860,13 +860,14 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
 {
     AVPlaybackState::PlaybackStateMaskType recordFilter = GetControlItemsPlaybackFilter();
     AVPlaybackState::PlaybackStateMaskType changedStateMask;
+    AVPlaybackState pushState;
     {
         std::lock_guard lockGuard(avsessionItemLock_);
         if (recordFilter.any()) {
             changedStateMask = playbackState_.GetChangedStateMask(recordFilter, state);
         }
         CHECK_AND_RETURN_RET_LOG(playbackState_.CopyFrom(state), AVSESSION_ERROR, "AVPlaybackState set error");
-        ResetFreezeAccounting();
+        pushState = ResetFreezeAccounting(state);
     }
     if (HasAvQueueInfo() && serviceCallbackForAddAVQueueInfo_) {
         serviceCallbackForAddAVQueueInfo_(*this);
@@ -876,11 +877,9 @@ int32_t AVSessionItem::SetAVPlaybackState(const AVPlaybackState& state)
         std::lock_guard controllerLockGuard(controllersLock_);
         SLOGD("send HandlePlaybackStateChange in postTask with state %{public}d and controller size %{public}d",
             state.GetState(), static_cast<int>(controllers_.size()));
-        if (controllers_.size() > 0) {
-            for (const auto& [pid, controller] : controllers_) {
-                if (controller != nullptr) {
-                    controller->HandlePlaybackStateChange(state, changedStateMask);
-                }
+        for (const auto& [pid, controller] : controllers_) {
+            if (controller != nullptr) {
+                controller->HandlePlaybackStateChange(pushState, changedStateMask);
             }
         }
     }
@@ -927,12 +926,15 @@ static int64_t GetWallTimeMillis()
     return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
 }
 
-void AVSessionItem::ResetFreezeAccounting()
+AVPlaybackState AVSessionItem::ResetFreezeAccounting(const AVPlaybackState& state)
 {
     freezeStartTimestamp_ = 0;
     freezeStartWallTimestamp_ = 0;
     accumulatedFrozenTime_ = 0;
     playbackState_.SetExtras(MergeFreezeExtras(playbackState_.GetExtras(), 0, 0));
+    AVPlaybackState pushState = state;
+    pushState.SetExtras(playbackState_.GetExtras());
+    return pushState;
 }
 
 void AVSessionItem::HandleSuspendStateChange(SuspendState state)
