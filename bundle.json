@@ -66,6 +66,7 @@
           "samgr",
           "distributed_notification_service",
           "relational_store",
+          "resource_schedule_service",
           "runtime_core",
           "window_manager",
           "background_task_mgr",

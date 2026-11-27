@@ -48,6 +48,9 @@ namespace OHOS::AVSession {
 class AVControllerItem;
 class RemoteSessionSink;
 class RemoteSessionSource;
+
+enum class SuspendState : int32_t { ACTIVE, FROZEN };
+
 class AVSessionItem : public AVSessionStub {
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 class CssListener : public IAVRouterListener {
@@ -179,6 +182,12 @@ public:
     AVSessionDescriptor GetDescriptor();
 
     AVPlaybackState::PlaybackStateMaskType GetControlItemsPlaybackFilter();
+
+    void HandleSuspendStateChange(SuspendState state);
+
+    AVPlaybackState ResetFreezeAccounting(const AVPlaybackState& state);
+
+    void NotifyFrozenDuration(int64_t freezeTimestampMs, int64_t freezeDurationMs);
 
     int32_t SetAVPlaybackState(const AVPlaybackState& state) override;
 
@@ -585,6 +594,9 @@ private:
     friend class AVSessionDumper;
     int64_t playingTime_ = 0;
     std::string lyricTitle_ = "";
+    int64_t freezeStartTimestamp_ = 0;
+    int64_t freezeStartWallTimestamp_ = 0;
+    int64_t accumulatedFrozenTime_ = 0;
     int32_t appIndex_ = 0;
 
     std::shared_ptr<RemoteSessionSource> remoteSource_;

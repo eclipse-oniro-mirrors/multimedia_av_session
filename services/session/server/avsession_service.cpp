@@ -38,6 +38,10 @@
 #include "accesstoken_kit.h"
 #include "permission_checker.h"
 #include "system_ability_definition.h"
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "suspend_manager_base_client.h"
+#include "suspend_state_observer_base_stub.h"
+#endif
 #include "params_config_operator.h"
 #include "ability_connect_helper.h"
 #include "account_manager_adapter.h"
@@ -81,6 +85,7 @@ static const std::string AVSESSION_DYNAMIC_INSIGHT_LIBRARY_PATH = std::string("l
     
 static const int32_t COLLABORATION_SA_ID = 70633;
 static const int32_t ANCO_BROKER_SA_ID = 66849;
+static const int32_t RES_SCHED_SA_ID = 1901;
 static const int32_t AVSESSION_CONTINUE = 1;
 #ifdef CASTPLUS_CAST_ENGINE_ENABLE
 static const int32_t AFTER_SCREEN_ON_TREE = 2;
@@ -136,6 +141,40 @@ const std::map<int32_t, int32_t> cmdToOffsetMap_ = {
     {AVControlCommand::SESSION_CMD_SET_LOOP_MODE, 1},
     {AVControlCommand::SESSION_CMD_TOGGLE_FAVORITE, 0}
 };
+
+#ifdef EFFICIENCY_MANAGER_ENABLE
+// LCOV_EXCL_START
+class SuspendStateObserverImpl : public OHOS::ResourceSchedule::SuspendStateObserverBaseStub {
+public:
+    explicit SuspendStateObserverImpl(AVSessionService& service) : service_(service) {}
+    ~SuspendStateObserverImpl() override = default;
+
+    ErrCode OnActive(const std::vector<int32_t>& pidList, int32_t uid) override
+    {
+        SLOGD("suspend state active, uid %{public}d pidCount %{public}zu", uid, pidList.size());
+        service_.HandleSuspendStateChange(uid, SuspendState::ACTIVE);
+        return ERR_OK;
+    }
+
+    ErrCode OnDoze(const std::vector<int32_t>& pidList, int32_t uid) override
+    {
+        SLOGD("OnDoze uid %{public}d pidCount %{public}zu, no action", uid, pidList.size());
+        return ERR_OK;
+    }
+
+    ErrCode OnFrozen(const std::vector<int32_t>& pidList, int32_t uid) override
+    {
+        SLOGD("suspend state frozen, uid %{public}d pidCount %{public}zu", uid, pidList.size());
+        service_.HandleSuspendStateChange(uid, SuspendState::FROZEN);
+        return ERR_OK;
+    }
+private:
+    AVSessionService& service_;
+};
+// LCOV_EXCL_STOP
+
+static sptr<OHOS::ResourceSchedule::ISuspendStateObserverBase> g_suspendObserver;
+#endif
 
 class NotificationSubscriber : public Notification::NotificationLocalLiveViewSubscriber {
     void OnConnected() {}
@@ -219,6 +258,7 @@ void AVSessionService::OnStartProcess()
     AddSystemAbilityListener(SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     AddSystemAbilityListener(ANCO_BROKER_SA_ID);
+    AddSystemAbilityListener(RES_SCHED_SA_ID);
 
     HISYSEVENT_REGITER;
     STORAGE_EVENT_INIT;
@@ -292,6 +332,14 @@ void AVSessionService::OnStop()
     NotifyProcessStatus(false);
     UnSubscribeCommonEvent();
     BundleStatusAdapter::ReleaseInstance();
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    if (g_suspendObserver != nullptr) {
+        ErrCode ret = OHOS::ResourceSchedule::SuspendManagerBaseClient::GetInstance()
+            .UnregisterSuspendObserver(g_suspendObserver);
+        SLOGI("UnregisterSuspendObserver ret %{public}d", ret);
+        g_suspendObserver = nullptr;
+    }
+#endif
 }
 
 EventSubscriber::EventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo, AVSessionService *ptr)
@@ -751,6 +799,9 @@ void AVSessionService::OnAddSystemAbility(int32_t systemAbilityId, const std::st
             SLOGI("audio broker sa start %{public}d", isAudioBrokerStart_);
             break;
         }
+        case RES_SCHED_SA_ID:
+            InitSuspendManager();
+            break;
         default:
             SLOGE("undefined system ability %{public}d", systemAbilityId);
     }
@@ -1237,6 +1288,44 @@ void AVSessionService::InitAMS()
         SLOGD("uid = %{public}d, state = %{public}d", uid, state);
         HandleAppStateChange(uid, state);
     });
+}
+
+void AVSessionService::InitSuspendManager()
+{
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    SLOGI("InitSuspendManager in");
+    if (g_suspendObserver == nullptr) {
+        g_suspendObserver = new (std::nothrow) SuspendStateObserverImpl(*this);
+        CHECK_AND_RETURN_LOG(g_suspendObserver != nullptr, "create suspend state observer failed");
+    }
+    int32_t retryCount = 0;
+    while (retryCount < suspendRegisterRetryCountMax) {
+        ErrCode ret = OHOS::ResourceSchedule::SuspendManagerBaseClient::GetInstance()
+            .RegisterSuspendObserver(g_suspendObserver);
+        if (ret == ERR_OK) {
+            SLOGI("RegisterSuspendObserver success");
+            return;
+        }
+        retryCount++;
+        SLOGW("RegisterSuspendObserver failed ret %{public}d, retry count %{public}d", ret, retryCount);
+        std::this_thread::sleep_for(std::chrono::milliseconds(suspendRegisterRetryIntervalTime));
+    }
+    SLOGE("RegisterSuspendObserver failed after %{public}d retries", suspendRegisterRetryCountMax);
+#endif
+}
+
+void AVSessionService::HandleSuspendStateChange(int32_t uid, SuspendState state)
+{
+    CHECK_AND_RETURN_LOG(uid > 0, "invalid uid %{public}d", uid);
+    CHECK_AND_RETURN_LOG(state == SuspendState::FROZEN || state == SuspendState::ACTIVE,
+        "uid %{public}d suspend state %{public}d, no action", uid, static_cast<int32_t>(state));
+    SLOGI("uid %{public}d suspend state %{public}d", uid, static_cast<int32_t>(state));
+    for (auto& session : GetUsersManager().GetContainerFromAll().GetAllSessions()) {
+        CHECK_AND_CONTINUE(session != nullptr);
+        if (session->GetUid() == uid) {
+            session->HandleSuspendStateChange(state);
+        }
+    }
 }
 
 #ifdef DEVICE_MANAGER_ENABLE
