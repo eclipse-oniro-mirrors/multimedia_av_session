@@ -239,7 +239,7 @@ private:
     bool CheckSyncSessionInfo(const std::string& sessionId);
     void SendOrCacheSessionInfo(bool needSync, std::string msg);
     void PostSyncFocusSessionInfo(std::string msg);
-    void FlushPendingSessionInfo();
+    void SendPendingSessionInfoToRemote();
     bool CheckPostMetaData(const AVMetaData& data);
     bool CheckPostMediaImage(std::vector<uint8_t>& imgBuffer);
     bool CheckPostPlaybackState(const AVPlaybackState& state);

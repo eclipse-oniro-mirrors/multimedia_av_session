@@ -544,7 +544,7 @@ void MigrateAVSessionServer::PostSyncFocusSessionInfo(std::string msg)
         "SYNC_FOCUS_SESSION_INFO");
 }
 
-void MigrateAVSessionServer::FlushPendingSessionInfo()
+void MigrateAVSessionServer::SendPendingSessionInfoToRemote()
 {
     std::string msg;
     {
@@ -557,7 +557,7 @@ void MigrateAVSessionServer::FlushPendingSessionInfo()
         sessionIdCache_ = preSessionId_;
     }
     PostSyncFocusSessionInfo(std::move(msg));
-    SLOGI("FlushPendingSessionInfo send pending session info");
+    SLOGI("SendPendingSessionInfoToRemote send pending session info");
 }
 
 void MigrateAVSessionServer::SendOrCacheSessionInfo(bool needSync, std::string msg)
@@ -740,7 +740,7 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
             bool expected = false;
             if (isNeedByRemote.compare_exchange_strong(expected, true)) {
                 SLOGI("isNeed refresh data");
-                FlushPendingSessionInfo();
+                SendPendingSessionInfoToRemote();
                 LocalFrontSessionArrive(lastSessionId_);
                 TriggerAudioCallback();
             }
@@ -759,7 +759,7 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
     }
     bool expected = false;
     if (isNeedByRemote.compare_exchange_strong(expected, true)) {
-        FlushPendingSessionInfo();
+        SendPendingSessionInfoToRemote();
         LocalFrontSessionArrive(lastSessionId_);
         TriggerAudioCallback();
     }
