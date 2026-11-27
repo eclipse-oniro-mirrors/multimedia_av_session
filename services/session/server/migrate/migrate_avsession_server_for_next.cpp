@@ -518,6 +518,11 @@ bool MigrateAVSessionServer::CheckPostSessionInfo(const std::string& sessionId)
 bool MigrateAVSessionServer::CheckSyncSessionInfo(const std::string& sessionId)
 {
     std::lock_guard lockGuard(cacheJsonLock_);
+    if (hasLongPauseNotified_.load() && sessionId.empty()) {
+        SLOGI("long pause and session leave, sync directly");
+        sessionIdCache_ = sessionId;
+        return true;
+    }
     if (!isNeedByRemote.load()) {
         if (!sessionIdCache_.empty() || sessionId.empty()) {
             return false;
@@ -537,6 +542,22 @@ void MigrateAVSessionServer::PostSyncFocusSessionInfo(std::string msg)
             }
         },
         "SYNC_FOCUS_SESSION_INFO");
+}
+
+void MigrateAVSessionServer::SendPendingSessionInfoToRemote()
+{
+    std::string msg;
+    {
+        std::lock_guard lockGuard(cacheJsonLock_);
+        if (pendingSessionInfo_.empty()) {
+            return;
+        }
+        msg = std::move(pendingSessionInfo_);
+        pendingSessionInfo_.clear();
+        sessionIdCache_ = preSessionId_;
+    }
+    PostSyncFocusSessionInfo(std::move(msg));
+    SLOGI("SendPendingSessionInfoToRemote send pending session info");
 }
 
 void MigrateAVSessionServer::SendOrCacheSessionInfo(bool needSync, std::string msg)
@@ -719,6 +740,7 @@ void MigrateAVSessionServer::ProcessMediaControlNeedStateFromNext(cJSON* command
             bool expected = false;
             if (isNeedByRemote.compare_exchange_strong(expected, true)) {
                 SLOGI("isNeed refresh data");
+                SendPendingSessionInfoToRemote();
                 LocalFrontSessionArrive(lastSessionId_);
                 TriggerAudioCallback();
             }
@@ -737,21 +759,7 @@ void MigrateAVSessionServer::ProcessMediaControlTimerRequest(cJSON* commandJsonV
     }
     bool expected = false;
     if (isNeedByRemote.compare_exchange_strong(expected, true)) {
-        std::string msg;
-        bool hasPending = false;
-        {
-            std::lock_guard lockGuard(cacheJsonLock_);
-            if (!pendingSessionInfo_.empty()) {
-                msg = std::move(pendingSessionInfo_);
-                pendingSessionInfo_.clear();
-                sessionIdCache_ = preSessionId_;
-                hasPending = true;
-            }
-        }
-        if (hasPending) {
-            PostSyncFocusSessionInfo(std::move(msg));
-            SLOGI("ProcessMediaControlTimerRequest send pending session info");
-        }
+        SendPendingSessionInfoToRemote();
         LocalFrontSessionArrive(lastSessionId_);
         TriggerAudioCallback();
     }
