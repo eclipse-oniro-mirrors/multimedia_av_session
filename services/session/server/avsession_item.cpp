@@ -914,10 +914,14 @@ int32_t AVSessionItem::GetAVPlaybackState(AVPlaybackState& state)
 }
 // LCOV_EXCL_STOP
 
-static int64_t GetSteadyTimeMillis()
+static int64_t GetBootTimeMillis()
 {
-    auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+    struct timespec times {};
+    CHECK_AND_RETURN_RET_LOG(clock_gettime(CLOCK_BOOTTIME, &times) != -1, 0,
+        "clock_gettime CLOCK_BOOTTIME failed");
+    constexpr int64_t secondToMillisecond = 1 * 1000;
+    constexpr int64_t nanosecondToMillisecond = 1 * 1000 * 1000;
+    return times.tv_sec * secondToMillisecond + times.tv_nsec / nanosecondToMillisecond;
 }
 
 static int64_t GetWallTimeMillis()
@@ -945,12 +949,12 @@ void AVSessionItem::HandleSuspendStateChange(SuspendState state)
     CHECK_AND_RETURN_LOG(!isDestroyed_.load(), "session destroyed, sessionId %{public}s",
         AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
     if (state == SuspendState::FROZEN) {
-        freezeStartTimestamp_ = GetSteadyTimeMillis();
+        freezeStartTimestamp_ = GetBootTimeMillis();
         freezeStartWallTimestamp_ = GetWallTimeMillis();
     } else {
         CHECK_AND_RETURN_LOG(freezeStartTimestamp_ > 0, "session active without freeze timing, sessionId %{public}s",
             AVSessionUtils::GetAnonySessionId(GetSessionId()).c_str());
-        accumulatedFrozenTime_ += GetSteadyTimeMillis() - freezeStartTimestamp_;
+        accumulatedFrozenTime_ += GetBootTimeMillis() - freezeStartTimestamp_;
         freezeStartWallTimestamp_ = 0;
     }
     NotifyFrozenDuration(freezeStartWallTimestamp_, accumulatedFrozenTime_);
