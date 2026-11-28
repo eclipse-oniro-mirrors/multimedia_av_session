@@ -974,9 +974,24 @@ static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo005, Test
 {
     g_MigrateAVSessionServer->isNeedByRemote.store(false);
     g_MigrateAVSessionServer->hasLongPauseNotified_.store(true);
-    g_MigrateAVSessionServer->sessionIdCache_ = "";
+    g_MigrateAVSessionServer->sessionIdCache_ = "cached";
     EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo(""), true);
     EXPECT_EQ(g_MigrateAVSessionServer->sessionIdCache_.empty(), true);
+}
+
+/**
+ * @tc.name: CheckSyncSessionInfo006
+ * @tc.desc: test CheckSyncSessionInfo when hasLongPauseNotified is true but sessionId is not empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+static HWTEST_F(MigrateAVSessionServerForNextTest, CheckSyncSessionInfo006, TestSize.Level0)
+{
+    g_MigrateAVSessionServer->isNeedByRemote.store(false);
+    g_MigrateAVSessionServer->hasLongPauseNotified_.store(true);
+    g_MigrateAVSessionServer->sessionIdCache_ = "cached";
+    EXPECT_EQ(g_MigrateAVSessionServer->CheckSyncSessionInfo("session_A"), false);
+    EXPECT_EQ(g_MigrateAVSessionServer->sessionIdCache_, "cached");
 }
 
 /**
