@@ -1935,10 +1935,14 @@ public:
     AVPlaybackState lastPlaybackState_;
 };
 
-static int64_t SteadyNowMs()
+static int64_t BootNowMs()
 {
-    auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+    struct timespec times {};
+    CHECK_AND_RETURN_RET_LOG(clock_gettime(CLOCK_BOOTTIME, &times) != -1, 0,
+        "clock_gettime CLOCK_BOOTTIME failed");
+    constexpr int64_t secondToMillisecond = 1 * 1000;
+    constexpr int64_t nanosecondToMillisecond = 1 * 1000 * 1000;
+    return times.tv_sec * secondToMillisecond + times.tv_nsec / nanosecondToMillisecond;
 }
 
 static int64_t ReadExtrasLongParam(const std::shared_ptr<AAFwk::WantParams>& extras, const std::string& key)
@@ -2039,7 +2043,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeAccumulation_001, TestSize.Level
 
     /* first unfreeze: F = base 50 + frozen interval 100, freezeTimestamp cleared to 0 */
     g_AVSessionItem->accumulatedFrozenTime_ = 50;
-    g_AVSessionItem->freezeStartTimestamp_ = SteadyNowMs() - 100;
+    g_AVSessionItem->freezeStartTimestamp_ = BootNowMs() - 100;
     g_AVSessionItem->freezeStartWallTimestamp_ = 1700000000000;
     callback->playbackStateChangeCount_ = 0;
     g_AVSessionItem->HandleSuspendStateChange(SuspendState::ACTIVE);
@@ -2048,7 +2052,7 @@ HWTEST_F(AVsessionItemTest, AVSessionItem_FreezeAccumulation_001, TestSize.Level
     EXPECT_EQ(ReadFreezeParam(callback, "freezeTimestamp"), 0);
 
     /* second freeze cycle: A updated by the freeze, F keeps accumulating */
-    g_AVSessionItem->freezeStartTimestamp_ = SteadyNowMs() - 50;
+    g_AVSessionItem->freezeStartTimestamp_ = BootNowMs() - 50;
     g_AVSessionItem->freezeStartWallTimestamp_ = 1700000005000;
     g_AVSessionItem->HandleSuspendStateChange(SuspendState::ACTIVE);
     EXPECT_EQ(callback->playbackStateChangeCount_, 2);
